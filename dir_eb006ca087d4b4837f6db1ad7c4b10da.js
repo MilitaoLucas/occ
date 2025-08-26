@@ -1,7 +1,9 @@
 var dir_eb006ca087d4b4837f6db1ad7c4b10da =
 [
+    [ "adaptive_grid.h", "adaptive__grid_8h.html", "adaptive__grid_8h" ],
     [ "basis_g94.h", "basis__g94_8h.html", "basis__g94_8h" ],
     [ "cifparser.h", "cifparser_8h.html", "cifparser_8h" ],
+    [ "cifwriter.h", "cifwriter_8h.html", "cifwriter_8h" ],
     [ "conversion.h", "conversion_8h.html", "conversion_8h" ],
     [ "core_json.h", "core__json_8h.html", "core__json_8h" ],
     [ "crystal_json.h", "crystal__json_8h.html", "crystal__json_8h" ],
@@ -15,6 +17,7 @@ var dir_eb006ca087d4b4837f6db1ad7c4b10da =
     [ "gaussian_input_file.h", "gaussian__input__file_8h.html", "gaussian__input__file_8h" ],
     [ "gmf.h", "gmf_8h.html", "gmf_8h" ],
     [ "grid_settings.h", "grid__settings_8h.html", "grid__settings_8h" ],
+    [ "isosurface_json.h", "isosurface__json_8h.html", "isosurface__json_8h" ],
     [ "json_basis.h", "json__basis_8h.html", "json__basis_8h" ],
     [ "kmcpp.h", "kmcpp_8h.html", "kmcpp_8h" ],
     [ "load_geometry.h", "load__geometry_8h.html", "load__geometry_8h" ],
@@ -23,8 +26,10 @@ var dir_eb006ca087d4b4837f6db1ad7c4b10da =
     [ "occ_input.h", "occ__input_8h.html", "occ__input_8h" ],
     [ "orca_json.h", "orca__json_8h.html", "orca__json_8h" ],
     [ "pc.h", "pc_8h.html", "pc_8h" ],
+    [ "periodic_grid.h", "periodic__grid_8h.html", "periodic__grid_8h" ],
     [ "ply.h", "ply_8h.html", "ply_8h" ],
     [ "qcschema.h", "qcschema_8h.html", "qcschema_8h" ],
+    [ "shelxfile.h", "shelxfile_8h.html", "shelxfile_8h" ],
     [ "solvent_json.h", "solvent__json_8h.html", "solvent__json_8h" ],
     [ "tinyply.h", "tinyply_8h.html", "tinyply_8h" ],
     [ "wavefunction_json.h", "wavefunction__json_8h.html", "wavefunction__json_8h" ],

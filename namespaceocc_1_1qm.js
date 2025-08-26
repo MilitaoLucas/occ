@@ -1,5 +1,8 @@
 var namespaceocc_1_1qm =
 [
+    [ "basis_sets", "namespaceocc_1_1qm_1_1basis__sets.html", [
+      [ "build_sto3g_shells", "namespaceocc_1_1qm_1_1basis__sets.html#a594b7f996c8bc21e03baf9e4afc43cf8", null ]
+    ] ],
     [ "block", "namespaceocc_1_1qm_1_1block.html", [
       [ "a", "namespaceocc_1_1qm_1_1block.html#a77b7eaa8cb876bdc0422781cede06ab9", null ],
       [ "a", "namespaceocc_1_1qm_1_1block.html#aaeb6a90fa71378bfae1e55d253756ad3", null ],
@@ -16,6 +19,7 @@ var namespaceocc_1_1qm =
     ] ],
     [ "cint", "namespaceocc_1_1qm_1_1cint.html", "namespaceocc_1_1qm_1_1cint" ],
     [ "guess", "namespaceocc_1_1qm_1_1guess.html", [
+      [ "compute_sap_matrix", "namespaceocc_1_1qm_1_1guess.html#ae393d4cd0e43b1f54b1747ec4698f19a", null ],
       [ "minimal_basis_nao", "namespaceocc_1_1qm_1_1guess.html#acb0a9b7918ce5f813b34eb9e6ac97ecb", null ],
       [ "minimal_basis_occupation_vector", "namespaceocc_1_1qm_1_1guess.html#a4ade54494fd9364e06b8f76af7095ba8", null ]
     ] ],
@@ -35,28 +39,41 @@ var namespaceocc_1_1qm =
       [ "weighted_density_matrix_unrestricted", "namespaceocc_1_1qm_1_1orb.html#ac8948cbaf474d356077e062efb6c6dd8", null ]
     ] ],
     [ "AOBasis", "classocc_1_1qm_1_1AOBasis.html", "classocc_1_1qm_1_1AOBasis" ],
+    [ "CanonicalOrthogonalizer", "classocc_1_1qm_1_1CanonicalOrthogonalizer.html", "classocc_1_1qm_1_1CanonicalOrthogonalizer" ],
     [ "CDIIS", "classocc_1_1qm_1_1CDIIS.html", "classocc_1_1qm_1_1CDIIS" ],
     [ "EDIIS", "classocc_1_1qm_1_1EDIIS.html", "classocc_1_1qm_1_1EDIIS" ],
     [ "Energy", "structocc_1_1qm_1_1Energy.html", "structocc_1_1qm_1_1Energy" ],
     [ "GradientEvaluator", "classocc_1_1qm_1_1GradientEvaluator.html", "classocc_1_1qm_1_1GradientEvaluator" ],
     [ "HartreeFock", "classocc_1_1qm_1_1HartreeFock.html", "classocc_1_1qm_1_1HartreeFock" ],
+    [ "HessianEvaluator", "classocc_1_1qm_1_1HessianEvaluator.html", "classocc_1_1qm_1_1HessianEvaluator" ],
+    [ "IndexRange", "structocc_1_1qm_1_1IndexRange.html", "structocc_1_1qm_1_1IndexRange" ],
     [ "IntegralEngine", "classocc_1_1qm_1_1IntegralEngine.html", "classocc_1_1qm_1_1IntegralEngine" ],
     [ "IntegralEngineDF", "classocc_1_1qm_1_1IntegralEngineDF.html", "classocc_1_1qm_1_1IntegralEngineDF" ],
     [ "JKPair", "structocc_1_1qm_1_1JKPair.html", "structocc_1_1qm_1_1JKPair" ],
     [ "JKTriple", "structocc_1_1qm_1_1JKTriple.html", "structocc_1_1qm_1_1JKTriple" ],
+    [ "MOIntegralEngine", "classocc_1_1qm_1_1MOIntegralEngine.html", "classocc_1_1qm_1_1MOIntegralEngine" ],
     [ "MolecularOrbitals", "structocc_1_1qm_1_1MolecularOrbitals.html", "structocc_1_1qm_1_1MolecularOrbitals" ],
+    [ "MP2", "classocc_1_1qm_1_1MP2.html", "classocc_1_1qm_1_1MP2" ],
+    [ "MP2Components", "structocc_1_1qm_1_1MP2Components.html", "structocc_1_1qm_1_1MP2Components" ],
+    [ "MP2OrbitalInfo", "structocc_1_1qm_1_1MP2OrbitalInfo.html", "structocc_1_1qm_1_1MP2OrbitalInfo" ],
+    [ "MP2OrbitalSpec", "structocc_1_1qm_1_1MP2OrbitalSpec.html", "structocc_1_1qm_1_1MP2OrbitalSpec" ],
     [ "Oniom", "structocc_1_1qm_1_1Oniom.html", "structocc_1_1qm_1_1Oniom" ],
     [ "OrbitalSmearing", "structocc_1_1qm_1_1OrbitalSmearing.html", "structocc_1_1qm_1_1OrbitalSmearing" ],
+    [ "PointChargeCorrectedProcedure", "classocc_1_1qm_1_1PointChargeCorrectedProcedure.html", "classocc_1_1qm_1_1PointChargeCorrectedProcedure" ],
+    [ "PostHFMethod", "classocc_1_1qm_1_1PostHFMethod.html", "classocc_1_1qm_1_1PostHFMethod" ],
     [ "SCF", "structocc_1_1qm_1_1SCF.html", "structocc_1_1qm_1_1SCF" ],
     [ "SCFContext", "structocc_1_1qm_1_1SCFContext.html", "structocc_1_1qm_1_1SCFContext" ],
     [ "SCFConvergenceSettings", "structocc_1_1qm_1_1SCFConvergenceSettings.html", "structocc_1_1qm_1_1SCFConvergenceSettings" ],
     [ "SCFMethodBase", "classocc_1_1qm_1_1SCFMethodBase.html", "classocc_1_1qm_1_1SCFMethodBase" ],
     [ "Shell", "structocc_1_1qm_1_1Shell.html", "structocc_1_1qm_1_1Shell" ],
     [ "Wavefunction", "structocc_1_1qm_1_1Wavefunction.html", "structocc_1_1qm_1_1Wavefunction" ],
+    [ "WolfSumCorrectedProcedure", "classocc_1_1qm_1_1WolfSumCorrectedProcedure.html", "classocc_1_1qm_1_1WolfSumCorrectedProcedure" ],
     [ "SCFMethod", "conceptocc_1_1qm_1_1SCFMethod.html", null ],
     [ "DensityFittingMethod", "conceptocc_1_1qm_1_1DensityFittingMethod.html", null ],
     [ "PointChargeMethod", "conceptocc_1_1qm_1_1PointChargeMethod.html", null ],
+    [ "HessianMatrix", "namespaceocc_1_1qm.html#aa8bb245cfcce8ea42381f7dc22329952", null ],
     [ "PointChargeList", "namespaceocc_1_1qm.html#a0c56c4d6028bbf6ac60ba72a0c4c70eb", null ],
+    [ "Tensor4D", "namespaceocc_1_1qm.html#aaede53ed6341f3101ea1f4c5cae9b4b9", null ],
     [ "SpinorbitalKind", "namespaceocc_1_1qm.html#af7593c3db0168047bf727de310e0eeb4", [
       [ "Restricted", "namespaceocc_1_1qm.html#af7593c3db0168047bf727de310e0eeb4a7eb505a798e7bd90ce15f4467154e837", null ],
       [ "Unrestricted", "namespaceocc_1_1qm.html#af7593c3db0168047bf727de310e0eeb4a637317163a8a9d4712705b6bb0ae5799", null ],

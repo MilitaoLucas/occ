@@ -14,10 +14,11 @@ var namespaceocc_1_1gto =
     [ "cartesian_subshell_ordering", "namespaceocc_1_1gto.html#a7c9915aae60f0ba43d290a88a9527a77", null ],
     [ "cartesian_to_spherical_transformation_matrix", "namespaceocc_1_1gto.html#ab69d436a61ddde3e394ea649a2f18991", null ],
     [ "component_label", "namespaceocc_1_1gto.html#a4768ef6e01b8fafebd65893c364067d8", null ],
-    [ "evaluate_basis", "namespaceocc_1_1gto.html#aecbc35e7986707d814d5f309baed7142", null ],
-    [ "evaluate_basis", "namespaceocc_1_1gto.html#ab095e06b21b929c59b79d8dc12944570", null ],
-    [ "evaluate_decay_cutoff", "namespaceocc_1_1gto.html#aa7372855434b49ec8477d66411fe35b9", null ],
-    [ "iterate_over_shell", "namespaceocc_1_1gto.html#a3ef2d30b82e02565d58a55a33da880f8", null ],
+    [ "evaluate_basis", "namespaceocc_1_1gto.html#a0e2894f71da8c56b99c0c034a08b256b", null ],
+    [ "evaluate_basis", "namespaceocc_1_1gto.html#ad4f50c6d822bd559d14740a8088767de", null ],
+    [ "evaluate_decay_cutoff", "namespaceocc_1_1gto.html#ada1a8c40ed0770fef9ff7d274f7d0468", null ],
+    [ "iterate_over_shell", "namespaceocc_1_1gto.html#a9ea8be0c1f04965d56919cda12400520", null ],
+    [ "iterate_over_shell_pair", "namespaceocc_1_1gto.html#ae2be263bd8cd95f3b917833c80726c7a", null ],
     [ "num_subshells", "namespaceocc_1_1gto.html#a724938450948b41d035c2112d20f0e88", null ],
     [ "shell_component_labels", "namespaceocc_1_1gto.html#ae0f4c6fdf0ed23a01156d3948805699b", null ],
     [ "shell_index_cartesian", "namespaceocc_1_1gto.html#ac81fa206815622f494788230b8362747", null ],
@@ -30,5 +31,7 @@ var namespaceocc_1_1gto =
     [ "spherical_gaussian_rotation_matrices", "namespaceocc_1_1gto.html#ac91eb2f1d2bcd07b7baa701b8ac17215", null ],
     [ "spherical_subshell_ordering", "namespaceocc_1_1gto.html#ab96a977721a38f84b5ba6be10551012c", null ],
     [ "spherical_to_cartesian_transformation_matrix", "namespaceocc_1_1gto.html#a98e12baac9f4da4bf30071d6a36bfe56", null ],
+    [ "transform_density_matrix_cartesian_to_spherical", "namespaceocc_1_1gto.html#a5ed432407e6a7c6287cacd55ab4179cd", null ],
+    [ "transform_density_matrix_spherical_to_cartesian", "namespaceocc_1_1gto.html#a4e1cd59ef016c4de76bfe0341950de21", null ],
     [ "shell_labels", "namespaceocc_1_1gto.html#a3e9459ef5bda25033e9c3fd20e143d15", null ]
 ];
