@@ -153,8 +153,23 @@ var annotated_dup =
         [ "DMAConfig", "structocc_1_1driver_1_1DMAConfig.html", "structocc_1_1driver_1_1DMAConfig" ],
         [ "DMADriver", "classocc_1_1driver_1_1DMADriver.html", "classocc_1_1driver_1_1DMADriver" ],
         [ "DummyCrystalGrowthCalculator", "classocc_1_1driver_1_1DummyCrystalGrowthCalculator.html", "classocc_1_1driver_1_1DummyCrystalGrowthCalculator" ],
+        [ "MethodSpec", "structocc_1_1driver_1_1MethodSpec.html", "structocc_1_1driver_1_1MethodSpec" ],
         [ "VibrationalAnalysisConfig", "structocc_1_1driver_1_1VibrationalAnalysisConfig.html", "structocc_1_1driver_1_1VibrationalAnalysisConfig" ],
         [ "XTBCrystalGrowthCalculator", "classocc_1_1driver_1_1XTBCrystalGrowthCalculator.html", "classocc_1_1driver_1_1XTBCrystalGrowthCalculator" ]
+      ] ],
+      [ "elastic_fit", "namespaceocc_1_1elastic__fit.html", [
+        [ "ElasticFitter", "classocc_1_1elastic__fit_1_1ElasticFitter.html", "classocc_1_1elastic__fit_1_1ElasticFitter" ],
+        [ "FittingResults", "structocc_1_1elastic__fit_1_1FittingResults.html", "structocc_1_1elastic__fit_1_1FittingResults" ],
+        [ "FittingSettings", "structocc_1_1elastic__fit_1_1FittingSettings.html", "structocc_1_1elastic__fit_1_1FittingSettings" ],
+        [ "LJ", "structocc_1_1elastic__fit_1_1LJ.html", "structocc_1_1elastic__fit_1_1LJ" ],
+        [ "LJ_A", "structocc_1_1elastic__fit_1_1LJ__A.html", "structocc_1_1elastic__fit_1_1LJ__A" ],
+        [ "LJ_AWrapper", "classocc_1_1elastic__fit_1_1LJ__AWrapper.html", "classocc_1_1elastic__fit_1_1LJ__AWrapper" ],
+        [ "LJWrapper", "classocc_1_1elastic__fit_1_1LJWrapper.html", "classocc_1_1elastic__fit_1_1LJWrapper" ],
+        [ "MonkhorstPack", "structocc_1_1elastic__fit_1_1MonkhorstPack.html", "structocc_1_1elastic__fit_1_1MonkhorstPack" ],
+        [ "Morse", "structocc_1_1elastic__fit_1_1Morse.html", "structocc_1_1elastic__fit_1_1Morse" ],
+        [ "MorseWrapper", "classocc_1_1elastic__fit_1_1MorseWrapper.html", "classocc_1_1elastic__fit_1_1MorseWrapper" ],
+        [ "PES", "classocc_1_1elastic__fit_1_1PES.html", "classocc_1_1elastic__fit_1_1PES" ],
+        [ "PotentialBase", "classocc_1_1elastic__fit_1_1PotentialBase.html", "classocc_1_1elastic__fit_1_1PotentialBase" ]
       ] ],
       [ "geometry", "namespaceocc_1_1geometry.html", [
         [ "mc", "namespaceocc_1_1geometry_1_1mc.html", [
@@ -184,6 +199,8 @@ var annotated_dup =
       [ "interaction", "namespaceocc_1_1interaction.html", [
         [ "polarization_partitioning", "namespaceocc_1_1interaction_1_1polarization__partitioning.html", [
           [ "AtomContribution", "structocc_1_1interaction_1_1polarization__partitioning_1_1AtomContribution.html", "structocc_1_1interaction_1_1polarization__partitioning_1_1AtomContribution" ],
+          [ "CouplingTerm", "structocc_1_1interaction_1_1polarization__partitioning_1_1CouplingTerm.html", "structocc_1_1interaction_1_1polarization__partitioning_1_1CouplingTerm" ],
+          [ "MoleculeCouplingResults", "structocc_1_1interaction_1_1polarization__partitioning_1_1MoleculeCouplingResults.html", "structocc_1_1interaction_1_1polarization__partitioning_1_1MoleculeCouplingResults" ],
           [ "PairContribution", "structocc_1_1interaction_1_1polarization__partitioning_1_1PairContribution.html", "structocc_1_1interaction_1_1polarization__partitioning_1_1PairContribution" ]
         ] ],
         [ "transform", "namespaceocc_1_1interaction_1_1transform.html", [
@@ -195,6 +212,7 @@ var annotated_dup =
         [ "CEModelInteraction", "structocc_1_1interaction_1_1CEModelInteraction.html", "structocc_1_1interaction_1_1CEModelInteraction" ],
         [ "CEMonomerCalculationParameters", "structocc_1_1interaction_1_1CEMonomerCalculationParameters.html", "structocc_1_1interaction_1_1CEMonomerCalculationParameters" ],
         [ "CEParameterizedModel", "structocc_1_1interaction_1_1CEParameterizedModel.html", "structocc_1_1interaction_1_1CEParameterizedModel" ],
+        [ "ElatResults", "structocc_1_1interaction_1_1ElatResults.html", "structocc_1_1interaction_1_1ElatResults" ],
         [ "EnergyModelBase", "classocc_1_1interaction_1_1EnergyModelBase.html", "classocc_1_1interaction_1_1EnergyModelBase" ],
         [ "ExternalEnergyModel", "classocc_1_1interaction_1_1ExternalEnergyModel.html", "classocc_1_1interaction_1_1ExternalEnergyModel" ],
         [ "ExternalEnergyOptions", "structocc_1_1interaction_1_1ExternalEnergyOptions.html", "structocc_1_1interaction_1_1ExternalEnergyOptions" ],
@@ -206,6 +224,8 @@ var annotated_dup =
         [ "PairEnergy", "structocc_1_1interaction_1_1PairEnergy.html", "structocc_1_1interaction_1_1PairEnergy" ],
         [ "PairEnergyStore", "classocc_1_1interaction_1_1PairEnergyStore.html", "classocc_1_1interaction_1_1PairEnergyStore" ],
         [ "PairEnergyStoreBase", "classocc_1_1interaction_1_1PairEnergyStoreBase.html", "classocc_1_1interaction_1_1PairEnergyStoreBase" ],
+        [ "WolfCouplingResult", "structocc_1_1interaction_1_1WolfCouplingResult.html", "structocc_1_1interaction_1_1WolfCouplingResult" ],
+        [ "WolfCouplingTerm", "structocc_1_1interaction_1_1WolfCouplingTerm.html", "structocc_1_1interaction_1_1WolfCouplingTerm" ],
         [ "WolfParameters", "structocc_1_1interaction_1_1WolfParameters.html", "structocc_1_1interaction_1_1WolfParameters" ],
         [ "WolfSum", "classocc_1_1interaction_1_1WolfSum.html", "classocc_1_1interaction_1_1WolfSum" ],
         [ "XTBEnergyModel", "classocc_1_1interaction_1_1XTBEnergyModel.html", "classocc_1_1interaction_1_1XTBEnergyModel" ]
@@ -335,16 +355,8 @@ var annotated_dup =
         [ "EspFunctor", "structocc_1_1main_1_1EspFunctor.html", "structocc_1_1main_1_1EspFunctor" ],
         [ "FacetEnergies", "structocc_1_1main_1_1FacetEnergies.html", "structocc_1_1main_1_1FacetEnergies" ],
         [ "IsosurfaceConfig", "structocc_1_1main_1_1IsosurfaceConfig.html", "structocc_1_1main_1_1IsosurfaceConfig" ],
-        [ "LJ", "structocc_1_1main_1_1LJ.html", "structocc_1_1main_1_1LJ" ],
-        [ "LJ_A", "structocc_1_1main_1_1LJ__A.html", "structocc_1_1main_1_1LJ__A" ],
-        [ "LJ_AWrapper", "classocc_1_1main_1_1LJ__AWrapper.html", "classocc_1_1main_1_1LJ__AWrapper" ],
-        [ "LJWrapper", "classocc_1_1main_1_1LJWrapper.html", "classocc_1_1main_1_1LJWrapper" ],
-        [ "Morse", "structocc_1_1main_1_1Morse.html", "structocc_1_1main_1_1Morse" ],
-        [ "MorseWrapper", "classocc_1_1main_1_1MorseWrapper.html", "classocc_1_1main_1_1MorseWrapper" ],
         [ "MultiplicityValidator", "structocc_1_1main_1_1MultiplicityValidator.html", "structocc_1_1main_1_1MultiplicityValidator" ],
         [ "OccPairInput", "structocc_1_1main_1_1OccPairInput.html", "structocc_1_1main_1_1OccPairInput" ],
-        [ "PES", "classocc_1_1main_1_1PES.html", "classocc_1_1main_1_1PES" ],
-        [ "PotentialBase", "classocc_1_1main_1_1PotentialBase.html", "classocc_1_1main_1_1PotentialBase" ],
         [ "PromolDensityFunctor", "structocc_1_1main_1_1PromolDensityFunctor.html", "structocc_1_1main_1_1PromolDensityFunctor" ],
         [ "SpinorbitalKindValidator", "structocc_1_1main_1_1SpinorbitalKindValidator.html", "structocc_1_1main_1_1SpinorbitalKindValidator" ],
         [ "SurfaceCutsConfig", "structocc_1_1main_1_1SurfaceCutsConfig.html", "structocc_1_1main_1_1SurfaceCutsConfig" ],

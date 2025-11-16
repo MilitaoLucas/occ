@@ -126,14 +126,15 @@ var searchData=
   ['qcschemabond_123',['QCSchemaBond',['../structocc_1_1io_1_1QCSchemaBond.html',1,'occ::io']]],
   ['qcschemainput_124',['QCSchemaInput',['../structocc_1_1io_1_1QCSchemaInput.html',1,'occ::io']]],
   ['qcschemamodel_125',['QCSchemaModel',['../structocc_1_1io_1_1QCSchemaModel.html',1,'occ::io']]],
-  ['qcschemareader_126',['qcschemareader',['../classocc_1_1io_1_1QCSchemaReader.html',1,'occ::io::QCSchemaReader'],['../classocc_1_1io_1_1QCSchemaReader.html#a0318b1dfa27584a486469de810ea5ad2',1,'occ::io::QCSchemaReader::QCSchemaReader(const std::string &amp;)'],['../classocc_1_1io_1_1QCSchemaReader.html#a37fcb8e26bd66d26681dcf48e9abc05a',1,'occ::io::QCSchemaReader::QCSchemaReader(std::istream &amp;)']]],
+  ['qcschemareader_126',['qcschemareader',['../classocc_1_1io_1_1QCSchemaReader.html#a37fcb8e26bd66d26681dcf48e9abc05a',1,'occ::io::QCSchemaReader::QCSchemaReader(std::istream &amp;)'],['../classocc_1_1io_1_1QCSchemaReader.html#a0318b1dfa27584a486469de810ea5ad2',1,'occ::io::QCSchemaReader::QCSchemaReader(const std::string &amp;)'],['../classocc_1_1io_1_1QCSchemaReader.html',1,'occ::io::QCSchemaReader']]],
   ['qcschematopology_127',['QCSchemaTopology',['../structocc_1_1io_1_1QCSchemaTopology.html',1,'occ::io']]],
   ['qm_20module_128',['QM Module',['../md__2home_2runner_2work_2occ_2occ_2docs_2js-wasm-bindings.html#autotoc_md13',1,'']]],
-  ['quadrature_2eh_129',['quadrature.h',['../quadrature_8h.html',1,'']]],
-  ['quadrupole_130',['quadrupole',['../structocc_1_1core_1_1Multipole.html#ad9926f94e904e9de454786d60e36f4a8',1,'occ::core::Multipole::quadrupole() const'],['../structocc_1_1core_1_1Multipole.html#adf1de0d6cb980103be5a0caa764fda9d',1,'occ::core::Multipole::Quadrupole'],['../namespaceocc_1_1qm_1_1cint.html#a59f3bdb46313b38dcfcfe45c8c45d1bfa4a00b7f9940a3aba263c61a41def14bd',1,'occ::qm::cint::quadrupole']]],
-  ['quasirandom_2eh_131',['quasirandom.h',['../quasirandom_8h.html',1,'']]],
-  ['quasirandom_5fkgf_132',['quasirandom_kgf',['../namespaceocc_1_1core.html#abeb0483db6e31121318847e734ed6cf5',1,'occ::core']]],
-  ['quickhull_133',['quickhull',['../namespacequickhull.html',1,'quickhull'],['../classquickhull_1_1QuickHull.html',1,'quickhull::QuickHull&lt; FloatType &gt;']]],
-  ['quickhull_2eh_134',['quickhull.h',['../quickhull_8h.html',1,'']]],
-  ['quickhull_3a_3amathutils_135',['mathutils',['../namespacequickhull_1_1mathutils.html',1,'quickhull']]]
+  ['qr_129',['QR',['../namespaceocc_1_1elastic__fit.html#ac3e8c91ec2f8e6a091ce339e4f700e97a66c35cd8077f7e1db5faefbc048a646a',1,'occ::elastic_fit']]],
+  ['quadrature_2eh_130',['quadrature.h',['../quadrature_8h.html',1,'']]],
+  ['quadrupole_131',['quadrupole',['../structocc_1_1core_1_1Multipole.html#adf1de0d6cb980103be5a0caa764fda9d',1,'occ::core::Multipole::Quadrupole'],['../structocc_1_1core_1_1Multipole.html#ad9926f94e904e9de454786d60e36f4a8',1,'occ::core::Multipole::quadrupole() const'],['../namespaceocc_1_1qm_1_1cint.html#a59f3bdb46313b38dcfcfe45c8c45d1bfa4a00b7f9940a3aba263c61a41def14bd',1,'occ::qm::cint::quadrupole']]],
+  ['quasirandom_2eh_132',['quasirandom.h',['../quasirandom_8h.html',1,'']]],
+  ['quasirandom_5fkgf_133',['quasirandom_kgf',['../namespaceocc_1_1core.html#abeb0483db6e31121318847e734ed6cf5',1,'occ::core']]],
+  ['quickhull_134',['quickhull',['../classquickhull_1_1QuickHull.html',1,'quickhull::QuickHull&lt; FloatType &gt;'],['../namespacequickhull.html',1,'quickhull']]],
+  ['quickhull_2eh_135',['quickhull.h',['../quickhull_8h.html',1,'']]],
+  ['quickhull_3a_3amathutils_136',['mathutils',['../namespacequickhull_1_1mathutils.html',1,'quickhull']]]
 ];
