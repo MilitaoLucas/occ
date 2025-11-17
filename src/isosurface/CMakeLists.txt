@@ -1,4 +1,4 @@
-add_library(occ_isosurface
+add_library(occ_isosurface STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/curvature.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/deformation_density.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/eeq_esp.cpp"
@@ -17,7 +17,7 @@ add_library(occ_isosurface
 )
 
 target_link_libraries(occ_isosurface
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_qm
     occ_dft
@@ -28,8 +28,8 @@ target_link_libraries(occ_isosurface
     Threads::Threads
     unordered_dense::unordered_dense
 )
-target_include_directories(occ_isosurface PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_isosurface PUBLIC
+    ${OCC_INCLUDE_DIR}
 )
 
 target_compile_features(occ_isosurface PUBLIC cxx_std_20)

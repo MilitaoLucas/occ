@@ -1,4 +1,4 @@
-add_library(occ_io
+add_library(occ_io STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/basis_g94.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifparser.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifwriter.cpp"
@@ -35,7 +35,7 @@ add_library(occ_io
 )
 
 target_link_libraries(occ_io
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_crystal
     occ_isosurface
@@ -44,8 +44,8 @@ target_link_libraries(occ_io
     gemmi::gemmi
     nlohmann_json::nlohmann_json
 )
-target_include_directories(occ_io PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_io PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

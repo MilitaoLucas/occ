@@ -1,4 +1,4 @@
-add_library(occ_geometry
+add_library(occ_geometry STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/icosphere_mesh.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/index_cache.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/marching_cubes.cpp"
@@ -11,11 +11,11 @@ add_library(occ_geometry
 )
 
 target_link_libraries(occ_geometry
-    PUBLIC 
+    PUBLIC
     occ_core
 )
-target_include_directories(occ_geometry PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_geometry PUBLIC
+    ${OCC_INCLUDE_DIR}
 )
 
 target_compile_features(occ_geometry PUBLIC cxx_std_20)

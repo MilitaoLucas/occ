@@ -1,4 +1,4 @@
-add_library(occ_interaction
+add_library(occ_interaction STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/ce_energy_model.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/coulomb.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/disp.cpp"
@@ -18,7 +18,7 @@ add_library(occ_interaction
 )
 
 target_link_libraries(occ_interaction
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_crystal
     occ_qm
@@ -26,8 +26,8 @@ target_link_libraries(occ_interaction
     occ_xdm
     occ_xtb
 )
-target_include_directories(occ_interaction PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_interaction PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

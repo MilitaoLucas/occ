@@ -1,4 +1,4 @@
-add_library(occ_elastic_fit
+add_library(occ_elastic_fit STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/monkhorst_pack.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/potentials.cpp"
@@ -7,14 +7,14 @@ add_library(occ_elastic_fit
 )
 
 target_link_libraries(occ_elastic_fit
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_crystal
     occ_io
 )
 
-target_include_directories(occ_elastic_fit PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_elastic_fit PUBLIC
+    ${OCC_INCLUDE_DIR}
 )
 
 target_compile_features(occ_elastic_fit PUBLIC cxx_std_20)

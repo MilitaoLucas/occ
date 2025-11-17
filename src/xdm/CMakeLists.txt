@@ -1,4 +1,4 @@
-add_library(occ_xdm
+add_library(occ_xdm STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/becke_hole.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm_parameters.cpp"
@@ -6,13 +6,13 @@ add_library(occ_xdm
 )
 
 target_link_libraries(occ_xdm
-    PUBLIC 
+    PUBLIC
     occ_qm
     occ_dft
     occ_slater
 )
-target_include_directories(occ_xdm PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_xdm PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

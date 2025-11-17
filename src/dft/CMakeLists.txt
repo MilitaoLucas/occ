@@ -1,4 +1,4 @@
-add_library(occ_dft
+add_library(occ_dft STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/dft.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dft_kernels.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dft_gradient_kernels.cpp"
@@ -19,14 +19,14 @@ add_library(occ_dft
 )
 
 target_link_libraries(occ_dft
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_qm
     occ_io
     Libxc::xc
 )
-target_include_directories(occ_dft PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_dft PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

@@ -153,13 +153,13 @@ CPMAddPackage(
 
 # Apply the flags to the target after it's created
 if(TARGET cint)
-    target_compile_options(cint PRIVATE 
+    target_compile_options(cint PRIVATE
         -Wno-implicit-function-declaration
         -Wno-deprecated-non-prototype
     )
 endif()
 
-add_library(libcint::libcint INTERFACE IMPORTED GLOBAL) 
+add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
 target_link_libraries(libcint::libcint INTERFACE cint)
 target_include_directories(
     libcint::libcint INTERFACE
@@ -169,16 +169,19 @@ target_include_directories(
 )
 
 if(NOT "${USE_SYSTEM_LIBXC}")
+if (${WITH_PYTHON_BINDINGS} OR ${BUILD_FPIC})
+    set(LIBXC_FPIC ON)
+endif ()
 CPMAddPackage(
     NAME Libxc
     URL "https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.gz"
     OPTIONS
         "BUILD_TESTING OFF"
         "ENABLE_XHOST ${ENABLE_HOST_OPT}"
-        "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"
+        "BUILD_FPIC ${LIBXC_FPIC}"
         "CMAKE_POLICY_VERSION_MINIMUM 3.5"
 )
-add_library(Libxc::xc INTERFACE IMPORTED GLOBAL) 
+add_library(Libxc::xc INTERFACE IMPORTED GLOBAL)
 target_link_libraries(Libxc::xc INTERFACE xc)
 target_include_directories(
     Libxc::xc INTERFACE

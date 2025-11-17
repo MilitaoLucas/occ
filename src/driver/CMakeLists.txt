@@ -1,4 +1,4 @@
-add_library(occ_driver
+add_library(occ_driver STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/geometry_optimization.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal_growth.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/single_point.cpp"
@@ -8,7 +8,7 @@ add_library(occ_driver
 )
 
 target_link_libraries(occ_driver
-    PUBLIC 
+    PUBLIC
     occ_io
     occ_interaction
     occ_xtb
@@ -20,8 +20,8 @@ target_link_libraries(occ_driver
     occ_cg
     occ_opt
 )
-target_include_directories(occ_driver PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_driver PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

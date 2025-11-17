@@ -1,4 +1,4 @@
-add_library(occ_main
+add_library(occ_main SHARED
     "${CMAKE_CURRENT_SOURCE_DIR}/cli_validators.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal_surface_energy.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/monomer_wavefunctions.cpp"
@@ -22,7 +22,7 @@ add_library(occ_main
 )
 
 target_link_libraries(occ_main
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_xtb
     occ_qm
@@ -43,14 +43,14 @@ target_link_libraries(occ_main
     occ_elastic_fit
     CLI11::CLI11
 )
-target_include_directories(occ_main PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_main PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
 target_compile_features(occ_main PUBLIC cxx_std_20)
 
-add_executable(xdm EXCLUDE_FROM_ALL 
+add_executable(xdm EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm.cpp")
 target_link_libraries(xdm
     PUBLIC
@@ -84,7 +84,7 @@ set_target_properties(make_radial_interpolators
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-add_executable(occ-mlx EXCLUDE_FROM_ALL 
+add_executable(occ-mlx EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/mlx.cpp")
 target_link_libraries(occ-mlx
     PUBLIC
@@ -93,14 +93,65 @@ target_link_libraries(occ-mlx
 )
 target_compile_features(occ-mlx PUBLIC cxx_std_20)
 
-add_executable(make_atomic_pair_potentials EXCLUDE_FROM_ALL 
+add_executable(make_atomic_pair_potentials EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/make_atomic_pair_potentials.cpp")
-target_link_libraries(make_atomic_pair_potentials 
+target_link_libraries(make_atomic_pair_potentials
     PUBLIC
     occ_main
 )
 target_compile_features(make_atomic_pair_potentials PUBLIC cxx_std_20)
-set_target_properties(make_atomic_pair_potentials 
+set_target_properties(make_atomic_pair_potentials
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+if (WITH_LIBOCC)
+    if (BUILD_SHARED_LIBS)
+        add_library(libocc SHARED $<TARGET_OBJECTS:occ_main>)
+    else ()
+        add_library(libocc STATIC $<TARGET_OBJECTS:occ_main>)
+    endif ()
+
+    install(DIRECTORY ${OCC_INCLUDE_DIR} DESTINATION include)
+    target_include_directories(libocc PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    )
+    set_target_properties(libocc PROPERTIES
+        PREFIX ""
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    )
+    install(TARGETS libocc
+        EXPORT occTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        PRIVATE_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+    include(CMakePackageConfigHelpers)
+
+    configure_package_config_file(
+        ${CMAKE_SOURCE_DIR}/cmake/occ-config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/occ-config.cmake
+        INSTALL_DESTINATION cmake/occ
+    )
+
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/occConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/occConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/occConfigVersion.cmake
+        DESTINATION cmake/occ
+    )
+
+    install(EXPORT occTargets
+        FILE occTargets.cmake
+        NAMESPACE occ::
+        DESTINATION lib/cmake/occ
+    )
+
+endif ()

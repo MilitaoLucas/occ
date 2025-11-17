@@ -1,4 +1,4 @@
-add_library(occ_cg
+add_library(occ_cg STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/distance_partition.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/interaction_mapper.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/neighbor_atoms.cpp"
@@ -11,7 +11,7 @@ add_library(occ_cg
 )
 
 target_link_libraries(occ_cg
-    PUBLIC 
+    PUBLIC
     occ_io
     occ_xtb
     occ_dft
@@ -19,8 +19,8 @@ target_link_libraries(occ_cg
     occ_interaction
     occ_crystal
 )
-target_include_directories(occ_cg PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_cg PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 

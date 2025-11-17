@@ -1,4 +1,4 @@
-add_library(occ_opt
+add_library(occ_opt STATIC
     angle_coordinate.cpp
     berny_optimizer.cpp
     bond_coordinate.cpp
@@ -8,7 +8,7 @@ add_library(occ_opt
     pseudoinverse.cpp
 )
 
-target_include_directories(occ_opt PUBLIC 
+target_include_directories(occ_opt PUBLIC
     ${OCC_INCLUDE_DIR}
 )
 

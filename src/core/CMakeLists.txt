@@ -1,4 +1,4 @@
-add_library(occ_core
+add_library(occ_core STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/combinations.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/conditioning_orthogonalizer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/data_directory.cpp"
@@ -56,8 +56,8 @@ if(NOT ENABLE_HOST_OPT)
 endif()
 
 target_link_libraries(occ_core
-    PUBLIC 
-    Eigen3::Eigen 
+    PUBLIC
+    Eigen3::Eigen
     fmt::fmt
     LBFGSpp::LBFGSpp
     scn::scn
@@ -66,8 +66,8 @@ target_link_libraries(occ_core
     unordered_dense::unordered_dense
     _subprocess
 )
-target_include_directories(occ_core PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_core PUBLIC
+    ${OCC_INCLUDE_DIR}
 )
 
 target_compile_features(occ_core PUBLIC cxx_std_20)

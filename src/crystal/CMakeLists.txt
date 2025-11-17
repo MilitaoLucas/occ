@@ -1,4 +1,4 @@
-add_library(occ_crystal
+add_library(occ_crystal STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/asymmetric_unit.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dimer_labeller.cpp"
@@ -15,12 +15,12 @@ add_library(occ_crystal
 )
 
 target_link_libraries(occ_crystal
-    PUBLIC 
+    PUBLIC
     occ_core
     gemmi::gemmi
 )
-target_include_directories(occ_crystal PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_crystal PUBLIC
+    ${OCC_INCLUDE_DIR}
 )
 
 target_compile_features(occ_crystal PUBLIC cxx_std_20)

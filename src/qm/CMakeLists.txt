@@ -1,4 +1,4 @@
-add_library(occ_qm
+add_library(occ_qm STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/cdiis.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/chelpg.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cint_interface.cpp"
@@ -39,8 +39,8 @@ target_link_libraries(occ_qm
     libcint::libcint
     libecpint_static
 )
-target_include_directories(occ_qm PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_qm PUBLIC
+    ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
