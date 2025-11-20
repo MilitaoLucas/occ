@@ -236,6 +236,7 @@ void Wavefunction::save(FchkWriter &fchk) {
   // nuclear charges
   occ::IVec nums = atomic_numbers();
   occ::Vec atomic_prop = nuclear_charges(nums);
+  fchk.set_vector("Atomic numbers", nums);
   fchk.set_vector("Nuclear charges", atomic_prop);
   fchk.set_vector("Current cartesian coordinates", positions());
   fchk.set_vector("Int Atom Types", occ::IVec::Zero(nums.rows()));
