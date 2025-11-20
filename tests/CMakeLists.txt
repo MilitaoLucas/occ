@@ -7,13 +7,23 @@ CPMAddPackage(
 list(APPEND CMAKE_MODULE_PATH "${catch_SOURCE_DIR}/extras")
 include(CTest)
 include(Catch)
+#link_libraries(
+#        fmt::fmt
+#        Eigen3::Eigen
+#        nlohmann_json::nlohmann_json
+#        unordered_dense::unordered_dense
+#        gau2grid_static
+#        spdlog::spdlog
+#        TBB::tbb
+#)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(core_tests "${CMAKE_CURRENT_SOURCE_DIR}/core_tests.cpp")
-target_link_libraries(core_tests PRIVATE occ_core Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(core_tests PRIVATE occ_core occ_qm Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(core_tests)
 
 add_executable(crystal_tests "${CMAKE_CURRENT_SOURCE_DIR}/crystal_tests.cpp")
-target_link_libraries(crystal_tests occ_crystal Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(crystal_tests occ_crystal gemmi::gemmi occ_qm Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(crystal_tests)
 
 add_executable(dft_tests "${CMAKE_CURRENT_SOURCE_DIR}/dft_tests.cpp")
@@ -37,7 +47,7 @@ target_link_libraries(geometry_tests PRIVATE occ_geometry occ_io Catch2::Catch2W
 catch_discover_tests(geometry_tests)
 
 add_executable(gto_tests "${CMAKE_CURRENT_SOURCE_DIR}/gto_tests.cpp")
-target_link_libraries(gto_tests PRIVATE occ_gto occ_dft Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(gto_tests PRIVATE occ_gto occ_dft occ_qm Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(gto_tests)
 
 add_executable(io_tests "${CMAKE_CURRENT_SOURCE_DIR}/io_tests.cpp")
@@ -89,11 +99,11 @@ target_link_libraries(solvent_tests PRIVATE occ_solvent occ_io Catch2::Catch2Wit
 catch_discover_tests(solvent_tests)
 
 add_executable(xdm_tests "${CMAKE_CURRENT_SOURCE_DIR}/xdm_tests.cpp")
-target_link_libraries(xdm_tests PRIVATE occ_xdm Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(xdm_tests PRIVATE occ_xdm occ_qm Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(xdm_tests)
 
 add_executable(xtb_tests "${CMAKE_CURRENT_SOURCE_DIR}/xtb_tests.cpp")
-target_link_libraries(xtb_tests PRIVATE occ_xtb Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(xtb_tests PRIVATE occ_xtb occ_qm Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(xtb_tests)
 
 add_executable(cg_tests "${CMAKE_CURRENT_SOURCE_DIR}/cg_tests.cpp")
@@ -105,9 +115,9 @@ target_link_libraries(dma_tests PRIVATE occ_dma occ_io Catch2::Catch2WithMain Th
 catch_discover_tests(dma_tests)
 
 add_executable(volume_calculator_tests "${CMAKE_CURRENT_SOURCE_DIR}/volume_calculator_tests.cpp")
-target_link_libraries(volume_calculator_tests PRIVATE occ_isosurface occ_main occ_io occ_crystal Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(volume_calculator_tests PRIVATE occ_isosurface occ_main occ_io occ_crystal occ_opt Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(volume_calculator_tests)
 
 add_executable(opt_tests "${CMAKE_CURRENT_SOURCE_DIR}/opt_tests.cpp")
-target_link_libraries(opt_tests PRIVATE occ_opt nlohmann_json::nlohmann_json Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(opt_tests PRIVATE occ_opt occ_qm nlohmann_json::nlohmann_json Catch2::Catch2WithMain Threads::Threads)
 catch_discover_tests(opt_tests)

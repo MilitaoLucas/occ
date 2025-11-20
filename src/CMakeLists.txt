@@ -56,9 +56,9 @@ target_include_directories(_occpy PRIVATE
 target_compile_definitions(_occpy PRIVATE VERSION_INFO=${PROJECT_VERSION})
 target_compile_features(_occpy PUBLIC cxx_std_20)
 target_link_libraries(_occpy PUBLIC
-    occ_main
-    occ_opt
-    occ_descriptors
+    occ_main_static
+    occ_opt_static
+    occ_descriptors_static
 )
 
 install(TARGETS _occpy LIBRARY DESTINATION occpy)
@@ -97,16 +97,16 @@ target_compile_options(occjs PRIVATE -fexceptions -pthread)
 
 # Link against the core OCC libraries
 target_link_libraries(occjs PUBLIC
-    occ_core
-    occ_qm
-    occ_gto
-    occ_io
-    occ_dft
-    occ_dma
-    occ_driver
-    occ_isosurface
-    occ_opt
-    occ_descriptors
+    occ_core_static
+    occ_qm_static
+    occ_gto_static
+    occ_io_static
+    occ_dft_static
+    occ_dma_static
+    occ_driver_static
+    occ_isosurface_static
+    occ_opt_static
+    occ_descriptors_static
 )
 
 # Emscripten-specific linker flags for JavaScript bindings
@@ -125,7 +125,7 @@ target_compile_features(occ.wasm PUBLIC cxx_std_20)
 target_compile_options(occ.wasm PRIVATE -O3 -DNDEBUG -fexceptions -pthread)
 
 target_link_libraries(occ.wasm PUBLIC
-    occ_main
+    occ_main_static
 )
 
 # Emscripten-specific linker flags for CLI executable (matching occjs for performance)

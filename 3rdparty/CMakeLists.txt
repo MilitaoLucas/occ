@@ -9,6 +9,7 @@ CPMAddPackage(
     VERSION "11.1.0"
     GIT_TAG "11.1.0"
 )
+
 CPMAddPackage(
     NAME spdlog
     GITHUB_REPOSITORY "gabime/spdlog"
@@ -83,7 +84,6 @@ CPMAddPackage(
     DOWNLOAD_ONLY YES  # Eigen CMakelists.txt not intended for library use
 )
 
-    include(CMakePrintHelpers)
 # Add the Eigen library target to link against
 if("${eigen3_ADDED}")
     add_library(Eigen3::Eigen INTERFACE IMPORTED GLOBAL)

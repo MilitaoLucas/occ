@@ -1,4 +1,4 @@
-add_library(occ_dft STATIC
+add_library(occ_dft_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/dft.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dft_kernels.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dft_gradient_kernels.cpp"
@@ -18,17 +18,26 @@ add_library(occ_dft STATIC
     ${OCC_DFT_INCLUDE_FILES}
 )
 
-target_link_libraries(occ_dft
-    PUBLIC
-    occ_core
-    occ_qm
-    occ_io
-    Libxc::xc
-)
-target_include_directories(occ_dft PUBLIC
+target_include_directories(occ_dft_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
-
-target_compile_features(occ_dft PUBLIC cxx_std_20)
+target_link_libraries(occ_dft_static PUBLIC
+    occ_core_static
+    occ_qm_static
+    occ_io_static
+    Libxc::xc
+)
+target_compile_features(occ_dft_static PUBLIC cxx_std_20)
+if (BUILD_SHARED_LIBS)
+    add_library(occ_dft SHARED $<TARGET_OBJECTS:occ_dft_static>)
+    target_link_libraries(occ_dft PUBLIC
+        occ_core_static
+        occ_qm_static
+        occ_io_static
+        Libxc::xc
+    )
+else ()
+    add_library(occ_dft ALIAS occ_dft_static)
+endif ()
 

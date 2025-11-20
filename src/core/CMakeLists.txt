@@ -1,4 +1,4 @@
-add_library(occ_core STATIC
+add_library(occ_core_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/combinations.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/conditioning_orthogonalizer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/data_directory.cpp"
@@ -33,29 +33,29 @@ add_library(occ_core STATIC
 )
 
 if("${USE_SYSTEM_BLAS}")
-    target_link_libraries(occ_core
+    target_link_libraries(occ_core_static
 	PUBLIC
 	${BLAS_LIBRARIES})
-    target_compile_definitions(occ_core PUBLIC EIGEN_USE_BLAS)
+    target_compile_definitions(occ_core_static PUBLIC EIGEN_USE_BLAS)
 endif()
 
 if("${USE_OPENMP}")
-target_link_libraries(occ_core
+target_link_libraries(occ_core_static
     PUBLIC
     OpenMP::OpenMP_CXX
 )
 endif()
 
-target_link_libraries(occ_core
+target_link_libraries(occ_core_static
     PUBLIC
     TBB::tbb
 )
 
 if(NOT ENABLE_HOST_OPT)
-    target_compile_definitions(occ_core PUBLIC OCC_DISABLE_SIMD)
+    target_compile_definitions(occ_core_static PUBLIC OCC_DISABLE_SIMD)
 endif()
 
-target_link_libraries(occ_core
+target_link_libraries(occ_core_static
     PUBLIC
     Eigen3::Eigen
     fmt::fmt
@@ -66,9 +66,27 @@ target_link_libraries(occ_core
     unordered_dense::unordered_dense
     _subprocess
 )
-target_include_directories(occ_core PUBLIC
+target_include_directories(occ_core_static PUBLIC
     ${OCC_INCLUDE_DIR}
 )
 
-target_compile_features(occ_core PUBLIC cxx_std_20)
+target_compile_features(occ_core_static PUBLIC cxx_std_20)
 
+if (BUILD_SHARED_LIBS)
+    add_library(occ_core SHARED $<TARGET_OBJECTS:occ_core_static>)
+    target_link_libraries(occ_core PUBLIC
+        $<$<BOOL:${USE_SYSTEM_BLAS}>:${BLAS_LIBRARIES}>
+        $<$<BOOL:${USE_OPENMP}>:OpenMP::OpenMP_CXX>
+        TBB::tbb
+        Eigen3::Eigen
+        fmt::fmt
+        LBFGSpp::LBFGSpp
+        scn::scn
+        spdlog::spdlog
+        Threads::Threads
+        unordered_dense::unordered_dense
+        _subprocess
+    )
+else ()
+    add_library(occ_core ALIAS occ_core_static)
+endif ()

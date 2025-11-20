@@ -1,18 +1,18 @@
-add_library(occ_xtb STATIC
+add_library(occ_xtb_static STATIC
     STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/xtb_wrapper.cpp"
     ${OCC_XTB_INCLUDE_FILES}
 )
 
-target_link_libraries(occ_xtb
+target_link_libraries(occ_xtb_static
     PUBLIC
-    occ_core
-    occ_crystal
-    occ_qm
-    occ_dft
+    occ_core_static
+    occ_crystal_static
+    occ_qm_static
+    occ_dft_static
 )
 
-target_include_directories(occ_xtb PUBLIC
+target_include_directories(occ_xtb_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
@@ -21,6 +21,7 @@ target_include_directories(occ_xtb PUBLIC
 
 if("${WITH_TBLITE}")
 # need this to get the fortran libraries populated
+message(WARNING "TBLITE")
 enable_language(Fortran)
 CPMAddPackage(
     NAME TBLite
@@ -40,10 +41,10 @@ add_library(occ_tblite
 
 target_link_libraries(occ_tblite
     PUBLIC
-    occ_core
-    occ_crystal
-    occ_qm
-    occ_dft
+    occ_core_static
+    occ_crystal_static
+    occ_qm_static
+    occ_dft_static
     TBLite::TBLite
 )
 message(STATUS "TBLite found: ${TBLITE_FOUND}")
@@ -58,5 +59,23 @@ target_include_directories(occ_tblite PUBLIC
 target_compile_features(occ_tblite PUBLIC cxx_std_20)
 target_compile_definitions(occ_tblite PUBLIC OCC_HAVE_TBLITE)
 
-target_link_libraries(occ_xtb PUBLIC occ_tblite)
+target_link_libraries(occ_xtb_static PUBLIC occ_tblite)
 endif()
+if (BUILD_SHARED_LIBS)
+    add_library(occ_xtb SHARED $<TARGET_OBJECTS:occ_xtb_static>)
+    target_link_libraries(occ_xtb PUBLIC
+        occ_core_static
+        occ_crystal_static
+        occ_qm_static
+        occ_dft_static
+    )
+
+    target_include_directories(occ_xtb PUBLIC
+        ${OCC_INCLUDE_DIR}
+        ${GEMMI_INCLUDE_DIR}
+    )
+    target_sources(occ_xtb PUBLIC ${OCC_XTB_INCLUDE_FILES})
+
+else ()
+    add_library(occ_xtb STATIC $<TARGET_OBJECTS:occ_xtb_static>)
+endif ()

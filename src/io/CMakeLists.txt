@@ -1,4 +1,4 @@
-add_library(occ_io STATIC
+add_library(occ_io_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/basis_g94.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifparser.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifwriter.cpp"
@@ -33,9 +33,7 @@ add_library(occ_io STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/xyz.cpp"
     ${OCC_IO_INCLUDE_FILES}
 )
-
-target_link_libraries(occ_io
-    PUBLIC
+set(occ_io_libs
     occ_core
     occ_crystal
     occ_isosurface
@@ -44,9 +42,21 @@ target_link_libraries(occ_io
     gemmi::gemmi
     nlohmann_json::nlohmann_json
 )
-target_include_directories(occ_io PUBLIC
+target_link_libraries(occ_io_static
+    PUBLIC
+    ${occ_io_libs}
+)
+target_include_directories(occ_io_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
-target_compile_features(occ_io PUBLIC cxx_std_20)
+
+target_compile_features(occ_io_static PUBLIC cxx_std_20)
+if (BUILD_SHARED_LIBS)
+    add_library(occ_io SHARED $<TARGET_OBJECTS:occ_io_static>)
+    target_link_libraries(occ_io PUBLIC ${occ_io_libs})
+else ()
+    add_library(occ_io ALIAS occ_io_static)
+endif ()
+

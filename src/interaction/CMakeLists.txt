@@ -1,4 +1,4 @@
-add_library(occ_interaction STATIC
+add_library(occ_interaction_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/ce_energy_model.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/coulomb.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/disp.cpp"
@@ -17,18 +17,34 @@ add_library(occ_interaction STATIC
     ${OCC_INTERACTION_INCLUDE_FILES}
 )
 
-target_link_libraries(occ_interaction
+target_link_libraries(occ_interaction_static
     PUBLIC
-    occ_core
-    occ_crystal
-    occ_qm
-    occ_io
-    occ_xdm
-    occ_xtb
+    occ_core_static
+    occ_crystal_static
+    occ_qm_static
+    occ_xdm_static
+    occ_xtb_static
 )
-target_include_directories(occ_interaction PUBLIC
+target_include_directories(occ_interaction_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
-target_compile_features(occ_interaction PUBLIC cxx_std_20)
+target_compile_features(occ_interaction_static PUBLIC cxx_std_20)
+if (BUILD_SHARED_LIBS)
+    add_library(occ_interaction SHARED $<TARGET_OBJECTS:occ_interaction_static>)
+    target_link_libraries(occ_interaction
+        PUBLIC
+        occ_core_static
+        occ_crystal_static
+        occ_qm_static
+        occ_xdm_static
+        occ_xtb_static
+    )
+    target_include_directories(occ_interaction PUBLIC
+        ${OCC_INCLUDE_DIR}
+        ${GEMMI_INCLUDE_DIR}
+    )
+else ()
+    add_library(occ_interaction ALIAS occ_interaction_static)
+endif ()

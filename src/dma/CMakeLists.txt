@@ -1,4 +1,4 @@
-add_library(occ_dma STATIC
+add_library(occ_dma_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/add_qlm.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/binomial.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dma.cpp"
@@ -11,10 +11,16 @@ add_library(occ_dma STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/solid_harmonics.cpp"
 )
 
-target_link_libraries(occ_dma
+target_link_libraries(occ_dma_static
     PUBLIC
-    occ_core
-    occ_gto
-    occ_qm
-    occ_dft
+    occ_core_static
+    occ_gto_static
+    occ_qm_static
+    occ_dft_static
+    libcint::libcint
 )
+if (BUILD_SHARED_LIBS)
+    add_library(occ_dma SHARED $<TARGET_OBJECTS:occ_dma_static>)
+else ()
+    add_library(occ_dma ALIAS occ_dma_static)
+endif ()

@@ -1,20 +1,31 @@
-add_library(occ_xdm STATIC
+add_library(occ_xdm_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/becke_hole.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm_parameters.cpp"
     ${OCC_XDM_INCLUDE_FILES}
 )
 
-target_link_libraries(occ_xdm
+target_link_libraries(occ_xdm_static
     PUBLIC
-    occ_qm
-    occ_dft
-    occ_slater
+    occ_dft_static
+    occ_slater_static
+    occ_qm_static
 )
-target_include_directories(occ_xdm PUBLIC
+target_include_directories(occ_xdm_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
-target_compile_features(occ_xdm PUBLIC cxx_std_20)
+target_compile_features(occ_xdm_static PUBLIC cxx_std_20)
 
+if (BUILD_SHARED_LIBS)
+    add_library(occ_xdm SHARED $<TARGET_OBJECTS:occ_xdm_static>)
+    target_link_libraries(occ_xdm PUBLIC
+        occ_dft_static
+        occ_slater_static
+        occ_qm_static
+    )
+    target_compile_features(occ_xdm PUBLIC cxx_std_20)
+else ()
+    add_library(occ_xdm ALIAS occ_xdm_static)
+endif ()

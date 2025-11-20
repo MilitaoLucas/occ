@@ -1,4 +1,4 @@
-add_library(occ_qm STATIC
+add_library(occ_qm_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/cdiis.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/chelpg.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cint_interface.cpp"
@@ -29,22 +29,45 @@ add_library(occ_qm STATIC
     ${OCC_QM_INCLUDE_FILES}
 )
 
-target_link_libraries(occ_qm
-    PUBLIC
-    occ_core
-    occ_io
-    occ_gto
-    occ_disp
-    occ_xdm
+target_link_libraries(occ_qm_static PUBLIC
+    occ_core_static
+    occ_io_static
+    occ_gto_static
+    occ_disp_static
+    occ_xdm_static
     libcint::libcint
     libecpint_static
 )
-target_include_directories(occ_qm PUBLIC
+target_include_directories(occ_qm_static PUBLIC
     ${OCC_INCLUDE_DIR}
     ${GEMMI_INCLUDE_DIR}
 )
 
-target_compile_definitions(occ_qm PUBLIC HAVE_ECPINT=1)
+target_compile_definitions(occ_qm_static PUBLIC HAVE_ECPINT=1)
 
-target_compile_features(occ_qm PUBLIC cxx_std_20)
+target_compile_features(occ_qm_static PUBLIC cxx_std_20)
+if (BUILD_SHARED_LIBS)
+    add_library(occ_qm SHARED $<TARGET_OBJECTS:occ_qm_static>)
+    target_link_libraries(occ_qm PUBLIC
+        occ_core_static
+        occ_io_static
+        occ_gto_static
+        occ_disp_static
+        occ_xdm_static
+        libcint::libcint
+        libecpint_static
+    )
+    target_include_directories(occ_qm PUBLIC
+        ${OCC_INCLUDE_DIR}
+        ${GEMMI_INCLUDE_DIR}
+    )
+    target_compile_definitions(occ_qm PUBLIC HAVE_ECPINT=1)
+
+    target_include_directories(occ_qm PUBLIC
+        ${OCC_INCLUDE_DIR}
+        ${GEMMI_INCLUDE_DIR}
+    )
+else ()
+    add_library(occ_qm ALIAS occ_qm_static)
+endif ()
 

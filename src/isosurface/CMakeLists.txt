@@ -1,4 +1,4 @@
-add_library(occ_isosurface STATIC
+add_library(occ_isosurface_static STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/curvature.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/deformation_density.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/eeq_esp.cpp"
@@ -15,22 +15,26 @@ add_library(occ_isosurface STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/volume_calculator.cpp"
     ${OCC_ISOSURFACE_INCLUDE_FILES}
 )
-
-target_link_libraries(occ_isosurface
-    PUBLIC
+target_link_libraries(occ_isosurface_static PUBLIC
     occ_core
-    occ_qm
-    occ_dft
-    occ_crystal
-    occ_slater
+    occ_qm_static
+    occ_dft_static
+    occ_crystal_static
+    occ_slater_static
     occ_geometry
-    occ_gto
+    occ_gto_static
     Threads::Threads
     unordered_dense::unordered_dense
 )
-target_include_directories(occ_isosurface PUBLIC
+
+target_include_directories(occ_isosurface_static PUBLIC
     ${OCC_INCLUDE_DIR}
 )
 
-target_compile_features(occ_isosurface PUBLIC cxx_std_20)
+target_compile_features(occ_isosurface_static PUBLIC cxx_std_20)
 
+if (BUILD_SHARED_LIBS)
+    add_library(occ_isosurface SHARED $<TARGET_OBJECTS:occ_isosurface_static>)
+else ()
+    add_library(occ_isosurface ALIAS occ_isosurface_static)
+endif ()
