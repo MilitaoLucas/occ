@@ -1,10 +1,14 @@
 CPMAddPackage(
+    NAME Ccache.cmake
+    GITHUB_REPOSITORY TheLartians/Ccache.cmake
+    VERSION 1.2.5
+)
+CPMAddPackage(
     NAME fmt
     GITHUB_REPOSITORY "fmtlib/fmt"
     VERSION "11.1.0"
     GIT_TAG "11.1.0"
 )
-
 CPMAddPackage(
     NAME spdlog
     GITHUB_REPOSITORY "gabime/spdlog"
@@ -79,10 +83,12 @@ CPMAddPackage(
     DOWNLOAD_ONLY YES  # Eigen CMakelists.txt not intended for library use
 )
 
+    include(CMakePrintHelpers)
 # Add the Eigen library target to link against
 if("${eigen3_ADDED}")
     add_library(Eigen3::Eigen INTERFACE IMPORTED GLOBAL)
     target_include_directories(Eigen3::Eigen INTERFACE "${eigen3_SOURCE_DIR}")
+    set(eigen3_SOURCE_DIR ${eigen3_SOURCE_DIR} PARENT_SCOPE)
 endif()
 
 endif()
@@ -169,7 +175,7 @@ target_include_directories(
 )
 
 if(NOT "${USE_SYSTEM_LIBXC}")
-if (${WITH_PYTHON_BINDINGS} OR ${BUILD_FPIC})
+if ("${WITH_PYTHON_BINDINGS}" OR "${BUILD_FPIC}" OR "${BUILD_LIBOCC}")
     set(LIBXC_FPIC ON)
 endif ()
 CPMAddPackage(

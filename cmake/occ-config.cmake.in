@@ -2,6 +2,34 @@
 
 include(CMakeFindDependencyMacro)
 
+# Handle Eigen dependency
+if(@USE_SYSTEM_EIGEN@)
+    # Using system Eigen - find it
+    if(NOT TARGET Eigen3::Eigen)
+        find_dependency(Eigen3 CONFIG REQUIRED)
+    endif()
+endif()
+
+if(@USE_SYSTEM_TBB@)
+    if(NOT TARGET TBB::tbb)
+        find_dependency(TBB CONFIG REQUIRED)
+    endif()
+endif()
+
+# Include the targets file
 include("${CMAKE_CURRENT_LIST_DIR}/occTargets.cmake")
 
-check_required_components(libocc)
+# Set variables for compatibility
+set(occ_LIBRARIES occ::libocc)
+set(occ_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include")
+
+# Check that all required components are available
+check_required_components(occ)
+
+# Provide usage information
+if(NOT occ_FIND_QUIETLY)
+    message(STATUS "Found occ: @CMAKE_INSTALL_PREFIX@")
+    message(STATUS "  Version: @PROJECT_VERSION@")
+    message(STATUS "  Libraries: occ::libocc")
+    message(STATUS "  Include dirs: ${occ_INCLUDE_DIRS}")
+endif()
