@@ -86,6 +86,7 @@ struct Wavefunction {
     c -= basis.total_ecp_electrons();
     return c;
   }
+  Vec nuclear_charges() const { return  nuclear_charges(atomic_numbers());}
   Vec nuclear_charges(const IVec& nums) const {
     Vec atomic_prop = nums.cast<double>();
     if (basis.have_ecps()) {

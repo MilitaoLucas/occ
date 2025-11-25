@@ -1,7 +1,8 @@
+#include <algorithm>
 #include <fmt/ostream.h>
 #include <occ/core/util.h>
 #include <occ/io/fchkwriter.h>
-
+#include <iostream>
 namespace occ::io {
 
 namespace impl {
@@ -198,7 +199,6 @@ void FchkVectorWriter::operator()(const std::vector<bool> &values) {
     fmt::print(destination, "\n");
 }
 } // namespace impl
-
 void FchkWriter::set_basis(const occ::qm::AOBasis &basis) {
   int largest_contraction{0};
   int l_max = 0;
@@ -247,7 +247,6 @@ FchkWriter::FchkWriter(const std::string &filename)
     : m_owned_destination(filename), m_dest(m_owned_destination) {}
 
 FchkWriter::FchkWriter(std::ostream &stream) : m_dest(stream) {}
-
 void FchkWriter::write() {
   fmt::print(m_dest, "{:<72s}\n", m_title);
   fmt::print(m_dest, "{:10s} {:<30s} {:>30s}\n",

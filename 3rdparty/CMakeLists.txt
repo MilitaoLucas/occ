@@ -133,7 +133,7 @@ else()
     set(LIBCINT_REPOSITORY "peterspackman/libcint")
 endif()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(LIBCINT_BUILD_TYPE "CMAKE_BUILD_TYPE Release")
 endif ()
 
