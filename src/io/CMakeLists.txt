@@ -46,6 +46,9 @@ target_link_libraries(occ_io
     occ_isosurface
     occ_solvent
     occ_qm
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
 target_include_directories(occ_io PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>

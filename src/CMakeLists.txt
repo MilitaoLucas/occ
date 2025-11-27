@@ -59,6 +59,9 @@ target_link_libraries(_occpy PUBLIC
     occ_main
     occ_opt
     occ_descriptors
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
 
 install(TARGETS _occpy LIBRARY DESTINATION occpy)

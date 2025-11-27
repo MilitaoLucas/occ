@@ -8,7 +8,7 @@ add_library(occ_driver
 )
 
 target_link_libraries(occ_driver
-    PUBLIC 
+    PUBLIC
     occ_io
     occ_interaction
     occ_xtb
@@ -19,10 +19,13 @@ target_link_libraries(occ_driver
     occ_crystal
     occ_cg
     occ_opt
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
-target_include_directories(occ_driver PUBLIC 
+target_include_directories(occ_driver PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include> 
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 

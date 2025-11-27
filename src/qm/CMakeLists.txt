@@ -36,6 +36,7 @@ target_link_libraries(occ_qm
     occ_gto
     occ_disp
     occ_xdm
+    PRIVATE
     libcint::libcint
     libecpint_static
 )
