@@ -12,19 +12,16 @@ add_library(_subprocess
 )
 
 target_link_libraries(_subprocess
-    PUBLIC 
+    PUBLIC
     Threads::Threads
 )
 
 target_compile_features(_subprocess PUBLIC cxx_std_20)
 
-set(OCC_3RDPARTY_SUBPROCESS_INCLUDE_DIR
-    "${OCC_INCLUDE_DIR}/occ/3rdparty/subprocess/"
-)
-
-target_include_directories(_subprocess 
-    PUBLIC 
-    ${OCC_3RDPARTY_SUBPROCESS_INCLUDE_DIR}
+target_include_directories(_subprocess
+    PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}/occ/3rdparty/subprocess/>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/occ/3rdparty/subprocess/>
 )
 
 if("${MSVC}")

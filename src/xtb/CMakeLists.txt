@@ -13,7 +13,8 @@ target_link_libraries(occ_xtb
 )
 
 target_include_directories(occ_xtb PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 
@@ -50,7 +51,8 @@ message(STATUS "TBLite found: ${TBLITE_FOUND}")
 message(STATUS "TBLite paths: ${TBLITE_LIBRARY}")
 
 target_include_directories(occ_tblite PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
     ${TBLITE_INCLUDE_DIR}
 )

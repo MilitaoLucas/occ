@@ -31,21 +31,25 @@ add_library(occ_io
     "${CMAKE_CURRENT_SOURCE_DIR}/tinyply.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/wavefunction_json.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/xyz.cpp"
-    ${OCC_IO_INCLUDE_FILES}
 )
 
 target_link_libraries(occ_io
-    PUBLIC 
+    PUBLIC
+    gemmi::gemmi
+    nlohmann_json::nlohmann_json
+)
+
+target_link_libraries(occ_io
+    PUBLIC
     occ_core
     occ_crystal
     occ_isosurface
     occ_solvent
     occ_qm
-    gemmi::gemmi
-    nlohmann_json::nlohmann_json
 )
-target_include_directories(occ_io PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_io PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 

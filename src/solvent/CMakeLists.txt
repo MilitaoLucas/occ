@@ -14,7 +14,8 @@ target_link_libraries(occ_solvent
     occ_dft
 )
 target_include_directories(occ_solvent PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
 )
 
 target_compile_features(occ_solvent PUBLIC cxx_std_20)

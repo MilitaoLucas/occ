@@ -143,16 +143,13 @@ add_library(libecpint_static
 
 target_compile_features(libecpint_static PUBLIC cxx_std_11)
 
-set(OCC_3RDPARTY_LIBECPINT_INCLUDE_DIR
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
 target_include_directories(libecpint_static
-    PUBLIC 
-    ${OCC_3RDPARTY_LIBECPINT_INCLUDE_DIR}
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/occ/3rdparty/libecpint>
 )
 
 target_include_directories(libecpint_static
     PRIVATE
-    ${OCC_3RDPARTY_LIBECPINT_INCLUDE_DIR}/libecpint
+    ${CMAKE_CURRENT_SOURCE_DIR}/libecpint
 )

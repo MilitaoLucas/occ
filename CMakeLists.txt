@@ -148,3 +148,4 @@ configure_file(
 )
 
 include(Packing)
+add_subdirectory(libocc)

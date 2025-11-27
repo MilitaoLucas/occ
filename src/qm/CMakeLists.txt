@@ -39,8 +39,9 @@ target_link_libraries(occ_qm
     libcint::libcint
     libecpint_static
 )
-target_include_directories(occ_qm PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_qm PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 

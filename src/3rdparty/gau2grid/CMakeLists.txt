@@ -9,13 +9,10 @@ add_library(gau2grid_static
     "${CMAKE_CURRENT_SOURCE_DIR}/gau2grid_transform.c"
 )
 
-set(OCC_3RDPARTY_GAU2GRID_INCLUDE_DIR
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
 target_include_directories(gau2grid_static
-    PUBLIC 
-    ${OCC_3RDPARTY_GAU2GRID_INCLUDE_DIR}
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/occ/3rdparty/gau2grid>
 )
 
 if("${GG_NO_PRAGMA}")

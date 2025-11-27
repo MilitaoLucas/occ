@@ -27,7 +27,8 @@ target_link_libraries(occ_interaction
     occ_xtb
 )
 target_include_directories(occ_interaction PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 

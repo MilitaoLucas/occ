@@ -6,13 +6,14 @@ add_library(occ_gto
 )
 
 target_link_libraries(occ_gto
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_qm
     gau2grid_static
 )
-target_include_directories(occ_gto PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_gto PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 

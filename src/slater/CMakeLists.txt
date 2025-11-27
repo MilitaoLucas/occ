@@ -7,13 +7,15 @@ add_library(occ_slater
 )
 
 target_link_libraries(occ_slater
-    PUBLIC 
+    PUBLIC
     occ_core
+    PRIVATE
     nlohmann_json::nlohmann_json
 )
 
-target_include_directories(occ_slater PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_slater PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(occ_slater PUBLIC cxx_std_20)

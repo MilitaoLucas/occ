@@ -153,13 +153,13 @@ CPMAddPackage(
 
 # Apply the flags to the target after it's created
 if(TARGET cint)
-    target_compile_options(cint PRIVATE 
+    target_compile_options(cint PRIVATE
         -Wno-implicit-function-declaration
         -Wno-deprecated-non-prototype
     )
 endif()
 
-add_library(libcint::libcint INTERFACE IMPORTED GLOBAL) 
+add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
 target_link_libraries(libcint::libcint INTERFACE cint)
 target_include_directories(
     libcint::libcint INTERFACE
@@ -178,7 +178,7 @@ CPMAddPackage(
         "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"
         "CMAKE_POLICY_VERSION_MINIMUM 3.5"
 )
-add_library(Libxc::xc INTERFACE IMPORTED GLOBAL) 
+add_library(Libxc::xc INTERFACE IMPORTED GLOBAL)
 target_link_libraries(Libxc::xc INTERFACE xc)
 target_include_directories(
     Libxc::xc INTERFACE
