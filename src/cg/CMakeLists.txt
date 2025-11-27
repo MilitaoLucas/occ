@@ -20,7 +20,8 @@ target_link_libraries(occ_cg
     occ_crystal
 )
 target_include_directories(occ_cg PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 

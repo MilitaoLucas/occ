@@ -4,13 +4,14 @@ add_library(occ_disp
 )
 
 target_link_libraries(occ_disp
-    PUBLIC 
+    PUBLIC
     occ_core
     dftd4::dftd4
 )
 
-target_include_directories(occ_disp PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_disp PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(occ_disp PUBLIC cxx_std_20)

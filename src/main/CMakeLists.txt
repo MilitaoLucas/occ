@@ -44,7 +44,8 @@ target_link_libraries(occ_main
     CLI11::CLI11
 )
 target_include_directories(occ_main PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 

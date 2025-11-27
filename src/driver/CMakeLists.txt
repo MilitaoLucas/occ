@@ -21,7 +21,8 @@ target_link_libraries(occ_driver
     occ_opt
 )
 target_include_directories(occ_driver PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 

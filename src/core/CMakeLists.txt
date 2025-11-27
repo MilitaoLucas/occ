@@ -29,7 +29,6 @@ add_library(occ_core
     "${CMAKE_CURRENT_SOURCE_DIR}/table.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/timings.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/vibration.cpp"
-    ${OCC_CORE_INCLUDE_FILES}
 )
 
 if("${USE_SYSTEM_BLAS}")
@@ -54,10 +53,9 @@ target_link_libraries(occ_core
 if(NOT ENABLE_HOST_OPT)
     target_compile_definitions(occ_core PUBLIC OCC_DISABLE_SIMD)
 endif()
-
 target_link_libraries(occ_core
-    PUBLIC 
-    Eigen3::Eigen 
+    PUBLIC
+    Eigen3::Eigen
     fmt::fmt
     LBFGSpp::LBFGSpp
     scn::scn
@@ -66,8 +64,9 @@ target_link_libraries(occ_core
     unordered_dense::unordered_dense
     _subprocess
 )
-target_include_directories(occ_core PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_core PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(occ_core PUBLIC cxx_std_20)

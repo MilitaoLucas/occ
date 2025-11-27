@@ -12,7 +12,8 @@ target_link_libraries(occ_xdm
     occ_slater
 )
 target_include_directories(occ_xdm PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include> 
     ${GEMMI_INCLUDE_DIR}
 )
 

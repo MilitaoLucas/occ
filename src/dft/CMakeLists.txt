@@ -19,14 +19,15 @@ add_library(occ_dft
 )
 
 target_link_libraries(occ_dft
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_qm
     occ_io
     Libxc::xc
 )
-target_include_directories(occ_dft PUBLIC 
-    ${OCC_INCLUDE_DIR} 
+target_include_directories(occ_dft PUBLIC
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 

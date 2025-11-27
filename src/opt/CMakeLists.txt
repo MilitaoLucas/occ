@@ -9,7 +9,8 @@ add_library(occ_opt
 )
 
 target_include_directories(occ_opt PUBLIC 
-    ${OCC_INCLUDE_DIR}
+    $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(occ_opt PUBLIC occ_core fmt::fmt Eigen3::Eigen)
