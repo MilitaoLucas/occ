@@ -140,7 +140,7 @@ if (WITH_LIBOCC)
     else ()
         add_library(libocc STATIC $<TARGET_OBJECTS:occ_main>)
     endif ()
-    target_link_libraries(libocc PRIVATE
+    set(OCC_TARGETS
         occ_core
         occ_xtb
         occ_qm
@@ -159,8 +159,15 @@ if (WITH_LIBOCC)
         occ_descriptors
         occ_cg
         occ_elastic_fit
+    )
+    target_link_libraries(libocc PRIVATE
+        ${OCC_TARGETS}
         CLI11::CLI11
     )
+    foreach(TARGET_NAME ${OCC_TARGETS})
+        string(REGEX REPLACE "^occ_" "" SHORT_NAME ${TARGET_NAME})
+        add_library(occ::${SHORT_NAME} ALIAS ${TARGET_NAME}_static)
+    endforeach()
     # ============================= lib include installs =============================
     function(install_lib_srcs lib)
         set(oneValueArgs INAME ITDIR)
