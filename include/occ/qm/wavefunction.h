@@ -86,6 +86,7 @@ struct Wavefunction {
     c -= basis.total_ecp_electrons();
     return c;
   }
+  Vec nuclear_charges() const { return  nuclear_charges(atomic_numbers());}
   inline int n_alpha() const { return mo.n_alpha; }
   inline int n_beta() const { return mo.n_beta; }
   bool is_restricted() const { return mo.kind == SpinorbitalKind::Restricted; }
