@@ -27,6 +27,9 @@ target_link_libraries(occ_isosurface
     occ_gto
     Threads::Threads
     unordered_dense::unordered_dense
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
 target_include_directories(occ_isosurface PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>

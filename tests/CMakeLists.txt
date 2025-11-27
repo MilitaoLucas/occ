@@ -3,6 +3,7 @@ CPMAddPackage(
     GITHUB_REPOSITORY "catchorg/Catch2"
     GIT_TAG v3.5.2
 )
+link_libraries(libcint::libcint libecpint_static)
 
 list(APPEND CMAKE_MODULE_PATH "${catch_SOURCE_DIR}/extras")
 include(CTest)
@@ -33,7 +34,7 @@ target_link_libraries(disp_tests PRIVATE occ_disp Catch2::Catch2WithMain Threads
 catch_discover_tests(disp_tests)
 
 add_executable(geometry_tests "${CMAKE_CURRENT_SOURCE_DIR}/geometry_tests.cpp")
-target_link_libraries(geometry_tests PRIVATE occ_geometry occ_io Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(geometry_tests PRIVATE occ_geometry occ_io Catch2::Catch2WithMain libcint::libcint Threads::Threads)
 catch_discover_tests(geometry_tests)
 
 add_executable(gto_tests "${CMAKE_CURRENT_SOURCE_DIR}/gto_tests.cpp")

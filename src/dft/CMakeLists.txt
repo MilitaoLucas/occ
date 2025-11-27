@@ -24,6 +24,9 @@ target_link_libraries(occ_dft
     occ_qm
     occ_io
     Libxc::xc
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
 target_include_directories(occ_dft PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>

@@ -22,7 +22,7 @@ add_library(occ_main
 )
 
 target_link_libraries(occ_main
-    PUBLIC 
+    PUBLIC
     occ_core
     occ_xtb
     occ_qm
@@ -42,16 +42,19 @@ target_link_libraries(occ_main
     occ_cg
     occ_elastic_fit
     CLI11::CLI11
+    PRIVATE
+    libcint::libcint
+    libecpint_static
 )
-target_include_directories(occ_main PUBLIC 
+target_include_directories(occ_main PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include> 
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 
 target_compile_features(occ_main PUBLIC cxx_std_20)
 
-add_executable(xdm EXCLUDE_FROM_ALL 
+add_executable(xdm EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/xdm.cpp")
 target_link_libraries(xdm
     PUBLIC
@@ -68,6 +71,10 @@ add_executable(occ "${CMAKE_CURRENT_SOURCE_DIR}/occ.cpp")
 target_link_libraries(occ
     PUBLIC
     occ_main
+    PRIVATE
+    libcint::libcint
+    libecpint_static
+
 )
 set_target_properties(occ
     PROPERTIES
@@ -85,7 +92,7 @@ set_target_properties(make_radial_interpolators
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-add_executable(occ-mlx EXCLUDE_FROM_ALL 
+add_executable(occ-mlx EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/mlx.cpp")
 target_link_libraries(occ-mlx
     PUBLIC
@@ -94,14 +101,14 @@ target_link_libraries(occ-mlx
 )
 target_compile_features(occ-mlx PUBLIC cxx_std_20)
 
-add_executable(make_atomic_pair_potentials EXCLUDE_FROM_ALL 
+add_executable(make_atomic_pair_potentials EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_SOURCE_DIR}/make_atomic_pair_potentials.cpp")
-target_link_libraries(make_atomic_pair_potentials 
+target_link_libraries(make_atomic_pair_potentials
     PUBLIC
     occ_main
 )
 target_compile_features(make_atomic_pair_potentials PUBLIC cxx_std_20)
-set_target_properties(make_atomic_pair_potentials 
+set_target_properties(make_atomic_pair_potentials
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )

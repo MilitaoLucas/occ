@@ -11,17 +11,21 @@ add_library(occ_cg
 )
 
 target_link_libraries(occ_cg
-    PUBLIC 
+    PUBLIC
     occ_io
     occ_xtb
     occ_dft
     occ_solvent
     occ_interaction
     occ_crystal
+    PRIVATE
+    libcint::libcint
+    libecpint_static
+
 )
-target_include_directories(occ_cg PUBLIC 
+target_include_directories(occ_cg PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include> 
+    $<INSTALL_INTERFACE:include>
     ${GEMMI_INCLUDE_DIR}
 )
 
