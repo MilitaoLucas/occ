@@ -31,6 +31,10 @@ set(occ_libs
 )
 
 foreach (libname ${occ_libs})
+    if (libname MATCHES "^occ_")
+        string(REGEX REPLACE "^occ_" "" SHORT_NAME ${libname})
+        add_library(occ::${SHORT_NAME} ALIAS ${libname})
+    endif ()
     if(TARGET ${libname})
         install(TARGETS ${libname}
             EXPORT occTargets
@@ -41,8 +45,8 @@ foreach (libname ${occ_libs})
         )
     endif()
 endforeach ()
-install(EXPORT occTargets
-        FILE occTargets.cmake
-        NAMESPACE occ::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
-)
+#install(EXPORT occTargets
+#        FILE occTargets.cmake
+#        NAMESPACE occ::
+#        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
+#)
