@@ -20,6 +20,7 @@ set(occ_libs
         "occ_descriptors"
         "occ_cg"
         "occ_elastic_fit"
+        "occ_main"
         "_subprocess"
         "libecpint_static"
         "nlohmann_json"
