@@ -12,6 +12,12 @@ CPMAddPackage(
     VERSION "1.x"
 )
 
+CPMAddPackage(
+    NAME tomlplusplus
+    GITHUB_REPOSITORY "marzer/tomlplusplus"
+    VERSION "3.4.0"
+)
+
 if(NOT "${USE_SYSTEM_TBB}")
 
 set(TBB_OPTIONS "")

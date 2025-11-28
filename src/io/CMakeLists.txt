@@ -48,6 +48,7 @@ target_link_libraries(occ_io
     occ_qm
     PRIVATE
     libcint::libcint
+    tomlplusplus::tomlplusplus
     libecpint_static
 )
 target_include_directories(occ_io PUBLIC
