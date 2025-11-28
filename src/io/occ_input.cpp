@@ -45,6 +45,9 @@ OccInput read_occ_input_file(const std::string path) {
             result.output.formats.push_back(*val);
         }
     }
+  } else if (scf["output"].as_string()) {
+    result.output.formats.clear();
+    result.output.formats.emplace_back(scf["output"].ref<std::string>());
   }
   result.electronic.multiplicity = scf["multiplicity"].value_or(result.electronic.multiplicity);
   result.electronic.spinorbital_kind =  scf["unrestricted"].value_or(result.electronic.spinorbital_kind) ? SpinorbitalKind::Unrestricted : SpinorbitalKind::Restricted;
