@@ -110,7 +110,7 @@ install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/3rdparty/gau2grid/gau2grid" DESTINATION include)
-install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/gemmi-src/include/gemmi" DESTINATION include)
+install(DIRECTORY "${gemmi_INCLUDE_DIRECTORY}" DESTINATION include)
 # eigen
 install(DIRECTORY "${eigen3_SOURCE_DIR}/Eigen" DESTINATION include)
 install(DIRECTORY "${eigen3_SOURCE_DIR}/unsupported" DESTINATION include)
