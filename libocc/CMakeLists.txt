@@ -29,6 +29,8 @@ set(occ_libs
         "spdlog"
         "fast_float"
         "unordered_dense"
+        "fmt"
+        "TBB"
 )
 
 foreach (libname ${occ_libs})
