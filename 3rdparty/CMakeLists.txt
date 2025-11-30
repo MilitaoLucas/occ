@@ -105,6 +105,7 @@ CPMAddPackage(
 if("${gemmi_ADDED}")
     add_library(gemmi::gemmi INTERFACE IMPORTED GLOBAL)
     target_include_directories(gemmi::gemmi INTERFACE "${gemmi_SOURCE_DIR}/include")
+    set(gemmi_INCLUDE_DIRECTORY "${gemmi_SOURCE_DIR}/include" PARENT_SCOPE)
 endif()
 
 CPMAddPackage(
