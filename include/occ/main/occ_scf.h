@@ -1,6 +1,7 @@
 #pragma once
 #include <CLI/App.hpp>
 #include <occ/io/occ_input.h>
+#include <occ/qm/wavefunction.h>
 
 namespace occ::main {
 

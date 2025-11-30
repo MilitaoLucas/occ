@@ -89,6 +89,7 @@ CPMAddPackage(
 if("${eigen3_ADDED}")
     add_library(Eigen3::Eigen INTERFACE IMPORTED GLOBAL)
     target_include_directories(Eigen3::Eigen INTERFACE "${eigen3_SOURCE_DIR}")
+    set(eigen3_SOURCE_DIR ${eigen3_SOURCE_DIR} PARENT_SCOPE)
 endif()
 
 endif()
