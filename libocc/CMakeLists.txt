@@ -107,6 +107,7 @@ install_lib_srcs(TBB::tbb INAME "../../include/tbb")
 install_lib_srcs(TBB::tbb INAME "../../include/oneapi")
 install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
+install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/3rdparty/gau2grid/gau2grid" DESTINATION include)
 # eigen
