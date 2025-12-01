@@ -119,19 +119,24 @@ install(DIRECTORY "${eigen3_SOURCE_DIR}/Eigen" DESTINATION include)
 install(DIRECTORY "${eigen3_SOURCE_DIR}/unsupported" DESTINATION include)
 # =========================== end lib include installs ===========================
 install(DIRECTORY ${OCC_INCLUDE_DIR}/occ DESTINATION include)
-message(STATUS "Recursively hunting for TBB binaries...")
 
-file(GLOB_RECURSE TBB_FOUND
-    "${CMAKE_BINARY_DIR}/*tbb*.a*"
-)
 
-# 2. Filter out CMake artifacts (like cmake_install.cmake) just in case
-list(FILTER TBB_FOUND EXCLUDE REGEX "cmake_install")
+install(CODE "
+    message(STATUS \"Recursively hunting for TBB binaries...\")
+    file(GLOB_RECURSE TBB_FOUND
+        \"${CMAKE_BINARY_DIR}/*tbb*.so*\"
+        \"${CMAKE_BINARY_DIR}/*tbb*.a*\"
+        \"${CMAKE_BINARY_DIR}/*tbb*.DLL*\"
+    )
 
-# 3. Install (Copy) them to the final flat destination
-if(TBB_FOUND)
-    message(STATUS "Found and installing: ${TBB_FOUND}")
-    install(FILES ${TBB_FOUND} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64")
-else()
-    message(WARNING "Could not find any TBB binaries in ${CMAKE_BINARY_DIR}")
-endif()
+    list(FILTER TBB_FOUND EXCLUDE REGEX \"cmake_install\")
+    if(TBB_FOUND)
+        message(STATUS \"Found and installing: \${TBB_FOUND}\")
+        file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/lib\"
+             TYPE SHARED_LIBRARY
+             FILES \${TBB_FOUND}
+        )
+    else()
+        message(WARNING \"Could not find any TBB binaries in ${CMAKE_BINARY_DIR}\")
+    endif()
+")
