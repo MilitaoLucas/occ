@@ -131,7 +131,7 @@ list(FILTER TBB_FOUND EXCLUDE REGEX "cmake_install")
 # 3. Install (Copy) them to the final flat destination
 if(TBB_FOUND)
     message(STATUS "Found and installing: ${TBB_FOUND}")
-    install(FILES ${TBB_FOUND} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+    install(FILES ${TBB_FOUND} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64")
 else()
     message(WARNING "Could not find any TBB binaries in ${CMAKE_BINARY_DIR}")
 endif()
