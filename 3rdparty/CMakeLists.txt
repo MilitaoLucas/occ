@@ -156,6 +156,7 @@ CPMAddPackage(
         "WITH_RANGE_COULOMB ON"
         "CMAKE_C_FLAGS ${LIBCINT_C_FLAGS}"
         ${LIBCINT_BUILD_TYPE}
+    PATCHES ${CMAKE_SOURCE_DIR}/cmake/fix_quadmath.patch
     VERSION "6.1.2"
 )
 
@@ -181,6 +182,7 @@ CPMAddPackage(
     NAME Libxc
     URL "https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.gz"
     OPTIONS
+        "CMAKE_BUILD_TYPE Release"
         "BUILD_TESTING OFF"
         "ENABLE_XHOST ${ENABLE_HOST_OPT}"
         "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"
