@@ -20,7 +20,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 if(SKBUILD)
   set(WITH_PYTHON_BINDINGS ON)
 endif()
-
+add_link_options(-static-libgcc -static-libstdc++)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
