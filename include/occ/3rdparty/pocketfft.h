@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define POCKETFFT_NOINLINE
 #define POCKETFFT_RESTRICT
 #endif
-
+#include <exception>
 namespace pocketfft {
 
 namespace detail {
