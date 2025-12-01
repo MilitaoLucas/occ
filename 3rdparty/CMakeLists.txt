@@ -156,9 +156,12 @@ CPMAddPackage(
         "WITH_RANGE_COULOMB ON"
         "CMAKE_C_FLAGS ${LIBCINT_C_FLAGS}"
         ${LIBCINT_BUILD_TYPE}
-    PATCHES ${CMAKE_SOURCE_DIR}/cmake/fix_quadmath.patch
     VERSION "6.1.2"
 )
+if (libcint_ADDED)
+    file(COPY_FILE ${CMAKE_SOURCE_DIR}/cmake/FindQUADMATH.cmake ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake)
+    message(WARNING "ADDED LIBCINT")
+endif ()
 
 # Apply the flags to the target after it's created
 if(TARGET cint)
