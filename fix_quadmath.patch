@@ -1,5 +1,5 @@
---- occ/cmake/FindQUADMATH.cmake
-+++ libcint-src/cmake/FindQUADMATH.cmake
+--- a/cmake/FindQUADMATH.cmake
++++ b/cmake/FindQUADMATH.cmake
 @@ -1,15 +1,27 @@
 -set(QUADMATH_TEST_SOURCE
 -"
