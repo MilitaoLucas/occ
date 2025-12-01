@@ -136,6 +136,10 @@ install(CODE "
              TYPE SHARED_LIBRARY
              FILES \${TBB_FOUND}
         )
+        file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/lib64\"
+             TYPE SHARED_LIBRARY
+             FILES \${TBB_FOUND}
+        )
     else()
         message(WARNING \"Could not find any TBB binaries in ${CMAKE_BINARY_DIR}\")
     endif()
