@@ -159,7 +159,7 @@ CPMAddPackage(
     VERSION "6.1.2"
 )
 if (libcint_ADDED)
-    file(COPY_FILE ${CMAKE_SOURCE_DIR}/cmake/FindQUADMATH.cmake ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake)
+    file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindQUADMATH.cmake ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake)
     message(WARNING "ADDED LIBCINT")
 endif ()
 
