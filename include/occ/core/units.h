@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <libecpint/mathutil.hpp>
 #include <occ/core/constants.h>
 
 namespace occ::units {
@@ -9,7 +10,7 @@ constexpr double ANGSTROM_TO_BOHR = 1.0 / BOHR_TO_ANGSTROM;
 constexpr double BOHR_TO_METER = BOHR_TO_ANGSTROM * 1e-10;
 constexpr double METER_TO_BOHR = 1.0 / BOHR_TO_METER;
 
-// Energy conversions (CODATA 2018) 
+// Energy conversions (CODATA 2018)
 constexpr double AU_TO_JOULE = 4.3597447222071e-18;  // Hartree to Joule
 constexpr double JOULE_TO_AU = 1.0 / AU_TO_JOULE;
 constexpr double AU_TO_KJ_PER_MOL = AU_TO_JOULE * constants::avogadro<double> / 1000.0;

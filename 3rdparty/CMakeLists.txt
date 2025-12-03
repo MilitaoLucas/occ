@@ -134,14 +134,23 @@ if("${USE_QCINT}")
 else()
     set(LIBCINT_REPOSITORY "peterspackman/libcint")
 endif()
+if (MSVC)
+    if (${USE_QCINT})
+        message(WARNING "MSVC doesn't support qcint, switching to MilitaoLucas/libcint")
+    endif ()
+    set(LIBCINT_REPOSITORY "MilitaoLucas/libcint")
+endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(LIBCINT_BUILD_TYPE "CMAKE_BUILD_TYPE Release")
 endif ()
 
 # Add compiler flags to fix the implicit function declaration error
-set(LIBCINT_C_FLAGS "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE")
-
+if(MSVC)
+    set(LIBCINT_C_FLAGS "/Tc  /wd4024 ")
+else()
+    set(LIBCINT_C_FLAGS "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE")
+endif()
 CPMAddPackage(
     NAME libcint
     GITHUB_REPOSITORY "${LIBCINT_REPOSITORY}"
@@ -152,7 +161,7 @@ CPMAddPackage(
         "ENABLE_STATIC ON"
         "BUILD_SHARED_LIBS OFF"
         "PYPZPX ON"
-        "BUILD_MARCH_NATIVE ON"
+#        $<$<NOT:$<PLATFORM_ID:WIN32>>:"BUILD_MARCH_NATIVE ON">
         "WITH_RANGE_COULOMB ON"
         "CMAKE_C_FLAGS ${LIBCINT_C_FLAGS}"
         ${LIBCINT_BUILD_TYPE}
@@ -165,10 +174,12 @@ endif ()
 
 # Apply the flags to the target after it's created
 if(TARGET cint)
-    target_compile_options(cint PRIVATE
-        -Wno-implicit-function-declaration
-        -Wno-deprecated-non-prototype
-    )
+    if (NOT WIN32)
+        target_compile_options(cint PRIVATE
+            -Wno-implicit-function-declaration
+            -Wno-deprecated-non-prototype
+        )
+    endif ()
 endif()
 
 add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
@@ -185,7 +196,6 @@ CPMAddPackage(
     NAME Libxc
     URL "https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.gz"
     OPTIONS
-        "CMAKE_BUILD_TYPE Release"
         "BUILD_TESTING OFF"
         "ENABLE_XHOST ${ENABLE_HOST_OPT}"
         "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"

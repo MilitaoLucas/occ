@@ -15,7 +15,16 @@ target_link_libraries(_subprocess
     PUBLIC
     Threads::Threads
 )
-
+if(UNIX)
+    target_sources(_subprocess PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/ProcessBuilder_posix.cpp"
+    )
+elseif(WIN32)
+    target_sources(_subprocess PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/ProcessBuilder_windows.cpp"
+    )
+endif()
 target_compile_features(_subprocess PUBLIC cxx_std_20)
 
 target_include_directories(_subprocess
