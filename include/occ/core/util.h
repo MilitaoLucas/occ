@@ -1,4 +1,5 @@
 #pragma once
+#include <libecpint/mathutil.hpp>
 #include <algorithm>
 #include <cctype>
 #include <chrono>
