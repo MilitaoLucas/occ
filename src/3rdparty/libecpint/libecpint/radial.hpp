@@ -81,7 +81,7 @@ namespace libecpint {
 		* @param grid - the quadrature grid to be used
 		* @param Utab - the array to put the values into.
 		*/
-		void buildU(const ECP &U, const int l, const int N, const GCQuadrature &grid, double *Utab) const;
+		void buildU(const ECP &U, const int l, const int N, const GCQuadrature &grid, std::vector<double>& Utab) const;
 
 		/**
 		* Tabulate the F function values for the default mode of calculating type 2 integrals.
