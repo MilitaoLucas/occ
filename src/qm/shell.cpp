@@ -8,6 +8,9 @@
 #include <occ/qm/cint_interface.h>
 #include <occ/qm/shell.h>
 #include <occ/qm/sto3g_basis.h>
+#ifndef M_2_SQRTPI
+#define M_2_SQRTPI 1.1283791670955125585606993
+#endif
 
 namespace fs = std::filesystem;
 
