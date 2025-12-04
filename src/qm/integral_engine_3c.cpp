@@ -132,7 +132,7 @@ Vec IntegralEngine::electric_potential(const MolecularOrbitals &mo,
   ShellList dummy_shells;
   dummy_shells.reserve(points.cols());
   Vec result = Vec::Zero(points.cols());
-  for (size_t i = 0; i < points.cols(); i++) {
+  for (Eigen::Index i = 0; i < points.cols(); i++) {
     dummy_shells.push_back(Shell(PointCharge(1.0, points.col(i))));
   }
   set_auxiliary_basis(dummy_shells, true);

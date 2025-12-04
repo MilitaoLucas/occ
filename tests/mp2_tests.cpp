@@ -67,9 +67,9 @@ TEST_CASE("MO integral transformation validation", "[mp2]") {
 
   // Print a few diagonal and off-diagonal elements for debugging
 #ifdef _WIN32
-  for (size_t i = 0; i < std::min(3ull, static_cast<size_t>(S_MO.rows())); ++i) {
+  for (Eigen::Index i = 0; i < std::min(static_cast<Eigen::Index>(3), S_MO.rows()); ++i) {
 #else
-  for (size_t i = 0; i < std::min(3ul, static_cast<size_t>(S_MO.rows())); ++i) {
+  for (Eigen::Index i = 0; i < std::min(static_cast<Eigen::Index>(3), S_MO.rows()); ++i) {
 #endif
     occ::log::info("S_MO({},{}) = {:.10f} (should be 1.0)", i, i, S_MO(i, i));
     if (i + 1 < S_MO.rows()) {
@@ -434,13 +434,13 @@ TEST_CASE("DF tensor comparison", "[mp2][ri]") {
   size_t count = 0;
   size_t failures = 0;
 
-  for (size_t i = 0; i < nbf; ++i) {
-    for (size_t j = 0; j <= i; ++j) { // j <= i
-      for (size_t k = 0; k < nbf; ++k) {
-        for (size_t l = 0; l <= k; ++l) { // l <= k
+  for (Eigen::Index i = 0; i < nbf; ++i) {
+    for (Eigen::Index j = 0; j <= i; ++j) { // j <= i
+      for (Eigen::Index k = 0; k < nbf; ++k) {
+        for (Eigen::Index l = 0; l <= k; ++l) { // l <= k
           // Additional constraint: ij >= kl to avoid double counting
-          size_t ij = i * (i + 1) / 2 + j;
-          size_t kl = k * (k + 1) / 2 + l;
+          Eigen::Index ij = i * (i + 1) / 2 + j;
+          Eigen::Index kl = k * (k + 1) / 2 + l;
           if (ij < kl)
             continue;
           double conv_val = conv_tensor(i, j, k, l);

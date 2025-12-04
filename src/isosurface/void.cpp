@@ -44,7 +44,7 @@ VoidSurfaceFunctor::VoidSurfaceFunctor(const occ::crystal::Crystal &crystal,
 
   auto basis = occ::slater::load_slaterbasis("thakkar");
   ankerl::unordered_dense::map<int, std::vector<int>> tmp_map;
-  for (size_t i = 0; i < elements.rows(); i++) {
+  for (Eigen::Index i = 0; i < elements.rows(); i++) {
     int el = elements(i);
     tmp_map[el].push_back(i);
     auto search = m_interpolators.find(el);

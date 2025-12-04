@@ -19,20 +19,20 @@ void apply_adaptive_bounds(Functor& func, const VolumeGenerationParameters& para
     typename io::AdaptiveGridBounds<Functor>::Parameters adapt_params;
     adapt_params.value_threshold = params.value_threshold;
     adapt_params.extra_buffer = params.buffer_distance * occ::units::ANGSTROM_TO_BOHR;
-    
+
     auto bounds_calc = io::make_adaptive_bounds(func, adapt_params);
     core::Molecule mol(atoms);
     auto raw_bounds = bounds_calc.compute(mol);
-    
+
     // Check what user specified to determine what to preserve
     bool user_specified_steps = !params.steps.empty();
     bool user_specified_spacing = !params.da.empty() || !params.db.empty() || !params.dc.empty();
-    
+
     if (user_specified_steps && !user_specified_spacing) {
         // User specified steps - keep those, adjust spacing to fit adaptive bounds
-        occ::log::info("Preserving user-specified steps: {} x {} x {}", 
+        occ::log::info("Preserving user-specified steps: {} x {} x {}",
                       volume.steps(0), volume.steps(1), volume.steps(2));
-        
+
         // Calculate new basis vectors to fit the adaptive extent with user's steps
         Vec3 extent = raw_bounds.max_corner() - raw_bounds.origin;
         volume.origin = raw_bounds.origin;
@@ -40,52 +40,52 @@ void apply_adaptive_bounds(Functor& func, const VolumeGenerationParameters& para
         volume.basis(0,0) = extent(0) / volume.steps(0);
         volume.basis(1,1) = extent(1) / volume.steps(1);
         volume.basis(2,2) = extent(2) / volume.steps(2);
-        
+
         occ::log::info("Adjusted spacing to fit adaptive bounds: [{:.3f}, {:.3f}, {:.3f}] Bohr/step",
                       volume.basis(0,0), volume.basis(1,1), volume.basis(2,2));
-        
+
     } else if (user_specified_spacing && !user_specified_steps) {
         // User specified spacing - keep that, adjust steps to fit adaptive bounds
         occ::log::info("Preserving user-specified spacing");
-        
+
         // Keep the user's basis vectors, calculate steps to fit adaptive bounds
         Vec3 extent = raw_bounds.max_corner() - raw_bounds.origin;
         volume.origin = raw_bounds.origin;
         // volume.basis already set by user in setup_grid_parameters
-        
+
         // Calculate steps needed for this extent with user's spacing
         volume.steps(0) = std::max(1, static_cast<int>(std::ceil(extent(0) / std::abs(volume.basis(0,0)))));
         volume.steps(1) = std::max(1, static_cast<int>(std::ceil(extent(1) / std::abs(volume.basis(1,1)))));
         volume.steps(2) = std::max(1, static_cast<int>(std::ceil(extent(2) / std::abs(volume.basis(2,2)))));
-        
+
         occ::log::info("Adjusted steps to fit adaptive bounds: {} x {} x {}",
                       volume.steps(0), volume.steps(1), volume.steps(2));
-        
+
     } else {
         // Neither or both specified - use adaptive bounds as-is (original behavior)
         volume.origin = raw_bounds.origin;
         volume.basis = raw_bounds.basis;
         volume.steps = raw_bounds.steps;
-        
+
         occ::log::info("Using adaptive bounds as-is: {} x {} x {} points",
                       volume.steps(0), volume.steps(1), volume.steps(2));
     }
-    
+
     // Log final grid information
-    occ::log::info("Grid origin: [{:.3f}, {:.3f}, {:.3f}] Bohr", 
+    occ::log::info("Grid origin: [{:.3f}, {:.3f}, {:.3f}] Bohr",
                   volume.origin(0), volume.origin(1), volume.origin(2));
-    
+
     Vec3 corner = volume.origin + Vec3(volume.steps(0) * volume.basis(0,0),
-                                      volume.steps(1) * volume.basis(1,1), 
+                                      volume.steps(1) * volume.basis(1,1),
                                       volume.steps(2) * volume.basis(2,2));
     occ::log::info("Grid extent: [{:.3f}, {:.3f}, {:.3f}] to [{:.3f}, {:.3f}, {:.3f}] Bohr",
                   volume.origin(0), volume.origin(1), volume.origin(2),
                   corner(0), corner(1), corner(2));
-    
+
     Vec3 spacing = volume.basis.diagonal();
-    occ::log::info("Final grid spacing: [{:.3f}, {:.3f}, {:.3f}] Bohr/step", 
+    occ::log::info("Final grid spacing: [{:.3f}, {:.3f}, {:.3f}] Bohr/step",
                   spacing(0), spacing(1), spacing(2));
-    
+
     double grid_volume = std::abs(volume.basis.determinant()) * volume.steps.prod();
     occ::log::info("Final grid volume: {:.2f} Bohr³", grid_volume);
 }
@@ -165,7 +165,7 @@ void VolumeCalculator::list_supported_properties() {
     occ::log::info("");
     occ::log::info("Electron density properties:");
     occ::log::info("  electron_density, density, rho  - Total electron density (requires wavefunction)");
-    occ::log::info("  rho_alpha                       - Alpha spin density (requires wavefunction)");  
+    occ::log::info("  rho_alpha                       - Alpha spin density (requires wavefunction)");
     occ::log::info("  rho_beta                        - Beta spin density (requires wavefunction)");
     occ::log::info("");
     occ::log::info("Electrostatic properties:");
@@ -212,28 +212,28 @@ bool VolumeCalculator::requires_crystal(VolumePropertyKind property) {
 // Main computation method
 VolumeData VolumeCalculator::compute_volume(const VolumeGenerationParameters& params) {
     validate_parameters(params);
-    
+
     if (!have_required_inputs(params)) {
         throw std::runtime_error("Missing required inputs for property: " + property_to_string(params.property));
     }
-    
+
     VolumeData volume;
     volume.property = params.property;
     volume.name = fmt::format("Generated by OCC VolumeCalculator - {}", property_to_string(params.property));
-    
+
     // Get atoms for this property
     volume.atoms = get_atoms_for_property(params);
-    
+
     // Set up grid parameters
     setup_grid_parameters(volume, params, volume.atoms);
-    
+
     // Initialize the tensor with the correct dimensions
     volume.data = Eigen::Tensor<double, 3>(volume.nx(), volume.ny(), volume.nz());
     volume.data.setZero();
-    
+
     // Fill the volume data
     fill_volume_data(volume, params);
-    
+
     return volume;
 }
 
@@ -254,14 +254,14 @@ std::vector<core::Atom> VolumeCalculator::get_atoms_for_property(const VolumeGen
         // For crystal void, we need expanded atoms (cluster around unit cell)
         const auto& crystal = m_crystal.value();
         const auto& uc_atoms = crystal.unit_cell_atoms();
-        
+
         // Use same approach as VoidSurfaceFunctor - expand by buffer radius
         double buffer_radius = params.crystal_buffer; // Use parameter or default 6.0 Angstrom
         crystal::HKL upper = crystal::HKL::minimum();
         crystal::HKL lower = crystal::HKL::maximum();
         occ::Vec3 frac_radius = buffer_radius * 2 / crystal.unit_cell().lengths().array();
 
-        for (size_t i = 0; i < uc_atoms.frac_pos.cols(); i++) {
+        for (Eigen::Index i = 0; i < uc_atoms.frac_pos.cols(); i++) {
             const auto& pos = uc_atoms.frac_pos.col(i);
             upper.h = std::max(upper.h, static_cast<int>(ceil(pos(0) + frac_radius(0))));
             upper.k = std::max(upper.k, static_cast<int>(ceil(pos(1) + frac_radius(1))));
@@ -271,9 +271,9 @@ std::vector<core::Atom> VolumeCalculator::get_atoms_for_property(const VolumeGen
             lower.k = std::min(lower.k, static_cast<int>(floor(pos(1) - frac_radius(1))));
             lower.l = std::min(lower.l, static_cast<int>(floor(pos(2) - frac_radius(2))));
         }
-        
+
         auto slab = crystal.slab(lower, upper);
-        
+
         std::vector<core::Atom> atoms;
         for (size_t i = 0; i < slab.atomic_numbers.size(); i++) {
             atoms.push_back(core::Atom{
@@ -283,22 +283,22 @@ std::vector<core::Atom> VolumeCalculator::get_atoms_for_property(const VolumeGen
                 slab.cart_pos(2, i) * occ::units::ANGSTROM_TO_BOHR
             });
         }
-        occ::log::info("Crystal void calculation using {} atoms in expanded cluster (buffer: {:.1f} Å)", 
+        occ::log::info("Crystal void calculation using {} atoms in expanded cluster (buffer: {:.1f} Å)",
                       atoms.size(), buffer_radius);
         return atoms;
     }
     throw std::runtime_error("No suitable atoms found for property: " + property_to_string(params.property));
 }
 
-void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGenerationParameters& params, 
+void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGenerationParameters& params,
                                              const std::vector<core::Atom>& atoms) {
     // Set default grid parameters - ALL IN BOHR UNITS
     volume.origin = Vec3::Zero();
     volume.basis = Mat3::Zero();
-    
+
     // Set default steps
     volume.steps = IVec3::Constant(11);    // Default 11x11x11
-    
+
     // Apply parameter overrides for steps
     if (!params.steps.empty()) {
         if (params.steps.size() == 1) {
@@ -309,17 +309,17 @@ void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGen
             }
         }
     }
-    
+
     // Handle adaptive bounds if requested (only for molecular calculations, not crystals)
     if (params.adaptive_bounds && !requires_crystal(params.property)) {
         occ::log::info("Computing adaptive bounds for property: {}", property_to_string(params.property));
-        occ::log::info("Adaptive parameters: threshold={:.2e}, buffer={:.1f} Å", 
+        occ::log::info("Adaptive parameters: threshold={:.2e}, buffer={:.1f} Å",
                       params.value_threshold, params.buffer_distance);
-        
+
         // Create adaptive grid based on the property
         switch (params.property) {
             case VolumePropertyKind::ElectronDensity:
-            case VolumePropertyKind::ElectronDensityAlpha: 
+            case VolumePropertyKind::ElectronDensityAlpha:
             case VolumePropertyKind::ElectronDensityBeta: {
                 if (m_wavefunction.has_value()) {
                     ElectronDensityFunctor func(m_wavefunction.value());
@@ -365,33 +365,33 @@ void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGen
                 break;
             }
             default:
-                occ::log::warn("Adaptive bounds not supported for property: {}, using regular grid", 
+                occ::log::warn("Adaptive bounds not supported for property: {}, using regular grid",
                               property_to_string(params.property));
                 break;
         }
     }
-    
+
     // If adaptive bounds were not used, set basis vectors based on final step counts
     if (!params.adaptive_bounds) {
         if (requires_crystal(params.property) && m_crystal.has_value()) {
             const auto& crystal = m_crystal.value();
             const auto& cell = crystal.unit_cell();
-            
+
             // Grid basis = unit cell vectors (in Bohr) / number of steps
             volume.basis.col(0) = cell.direct().col(0) * occ::units::ANGSTROM_TO_BOHR / volume.steps(0);
-            volume.basis.col(1) = cell.direct().col(1) * occ::units::ANGSTROM_TO_BOHR / volume.steps(1); 
+            volume.basis.col(1) = cell.direct().col(1) * occ::units::ANGSTROM_TO_BOHR / volume.steps(1);
             volume.basis.col(2) = cell.direct().col(2) * occ::units::ANGSTROM_TO_BOHR / volume.steps(2);
-            
-            occ::log::info("Using crystal unit cell grid: {} x {} x {} steps", 
+
+            occ::log::info("Using crystal unit cell grid: {} x {} x {} steps",
                           volume.steps(0), volume.steps(1), volume.steps(2));
-            occ::log::info("Unit cell: a={:.3f} b={:.3f} c={:.3f} Å", 
+            occ::log::info("Unit cell: a={:.3f} b={:.3f} c={:.3f} Å",
                           cell.a(), cell.b(), cell.c());
         } else {
             // Regular molecular calculation - use diagonal basis
             volume.basis.diagonal().array() = 0.2; // Default 0.2 Bohr spacing
         }
     }
-    
+
     // Apply origin if specified (assumed to be in Bohr units)
     if (!params.origin.empty()) {
         if (params.origin.size() == 1) {
@@ -414,10 +414,10 @@ void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGen
                     center += Vec3(atom.x, atom.y, atom.z);
                 }
                 center /= atoms.size();
-                
+
                 // Set origin to center minus half the grid extent
-                Vec3 extent = Vec3(volume.steps(0) * volume.basis(0,0), 
-                                  volume.steps(1) * volume.basis(1,1), 
+                Vec3 extent = Vec3(volume.steps(0) * volume.basis(0,0),
+                                  volume.steps(1) * volume.basis(1,1),
                                   volume.steps(2) * volume.basis(2,2));
                 volume.origin = center - 0.5 * extent;
             }
@@ -428,11 +428,11 @@ void VolumeCalculator::setup_grid_parameters(VolumeData& volume, const VolumeGen
 void VolumeCalculator::fill_volume_data(VolumeData& volume, const VolumeGenerationParameters& params) {
     occ::log::info("Computing volume data for property: {}", property_to_string(params.property));
     occ::log::info("Grid: {} x {} x {} points", volume.nx(), volume.ny(), volume.nz());
-    
+
     // Create points matrix for evaluation - ALL COORDINATES IN BOHR
     Mat3N points(3, volume.total_points());
     size_t point_idx = 0;
-    
+
     for (int i = 0; i < volume.nx(); i++) {
         for (int j = 0; j < volume.ny(); j++) {
             for (int k = 0; k < volume.nz(); k++) {
@@ -442,10 +442,10 @@ void VolumeCalculator::fill_volume_data(VolumeData& volume, const VolumeGenerati
             }
         }
     }
-    
+
     // Evaluate property at all points
     Vec values = Vec::Zero(volume.total_points());
-    
+
     switch (params.property) {
         case VolumePropertyKind::ElectronDensity: {
             ElectronDensityFunctor func(m_wavefunction.value());
@@ -494,7 +494,7 @@ void VolumeCalculator::fill_volume_data(VolumeData& volume, const VolumeGenerati
             break;
         }
     }
-    
+
     // Copy values back to tensor
     point_idx = 0;
     for (int i = 0; i < volume.nx(); i++) {
@@ -512,15 +512,15 @@ void VolumeCalculator::validate_parameters(const VolumeGenerationParameters& par
     if (requires_wavefunction(params.property) && !m_wavefunction.has_value()) {
         throw std::runtime_error("Property requires a wavefunction: " + property_to_string(params.property));
     }
-    
+
     if (requires_crystal(params.property) && !m_crystal.has_value()) {
         throw std::runtime_error("Property requires a crystal structure: " + property_to_string(params.property));
     }
-    
+
     if (params.mo_number >= 0 && !requires_wavefunction(params.property)) {
         throw std::runtime_error("MO index specified but property does not use wavefunction");
     }
-    
+
     if (params.mo_number >= 0 && m_wavefunction.has_value()) {
         int max_mo = static_cast<int>(m_wavefunction->mo.n_ao);
         if (params.mo_number >= max_mo) {
@@ -543,14 +543,14 @@ bool VolumeCalculator::have_required_inputs(const VolumeGenerationParameters& pa
 // Custom points evaluation
 Vec VolumeCalculator::evaluate_at_points(const Mat3N& points, const VolumeGenerationParameters& params) {
     validate_parameters(params);
-    
+
     if (!have_required_inputs(params)) {
         throw std::runtime_error("Missing required inputs for property: " + property_to_string(params.property));
     }
-    
+
     Vec result = Vec::Zero(points.cols());
     std::vector<core::Atom> atoms = get_atoms_for_property(params);
-    
+
     switch (params.property) {
         case VolumePropertyKind::ElectronDensity: {
             ElectronDensityFunctor func(m_wavefunction.value());
@@ -599,7 +599,7 @@ Vec VolumeCalculator::evaluate_at_points(const Mat3N& points, const VolumeGenera
             break;
         }
     }
-    
+
     return result;
 }
 
@@ -637,37 +637,37 @@ io::Cube VolumeCalculator::to_cube(const VolumeData& volume) {
     cube.origin = volume.origin;
     cube.basis = volume.basis;
     cube.steps = volume.steps;
-    
+
     // Create volume grid with proper dimensions
     // This will create the internal storage
     // Note: VolumeGrid constructor takes size_t arguments in (nx, ny, nz) order
     cube.grid() = geometry::VolumeGrid(volume.nx(), volume.ny(), volume.nz());
     float* data = cube.data();
-    
+
     // Convert to cube file format: [x][y][z] order (x outer loop, z inner loop)
     size_t idx = 0;
     for (int i = 0; i < volume.nx(); i++) {        // x outer loop
-        for (int j = 0; j < volume.ny(); j++) {    // y middle loop  
+        for (int j = 0; j < volume.ny(); j++) {    // y middle loop
             for (int k = 0; k < volume.nz(); k++) { // z inner loop
                 data[idx] = static_cast<float>(volume.data(i, j, k));
                 idx++;
             }
         }
     }
-    
+
     return cube;
 }
 
 // Convenience static methods
-VolumeData VolumeCalculator::compute_mo_volume(const occ::qm::Wavefunction& wfn, int mo_index, 
+VolumeData VolumeCalculator::compute_mo_volume(const occ::qm::Wavefunction& wfn, int mo_index,
                                               const VolumeGenerationParameters& params) {
     VolumeCalculator calc;
     calc.set_wavefunction(wfn);
-    
+
     VolumeGenerationParameters mo_params = params;
     mo_params.property = VolumePropertyKind::ElectronDensity;
     mo_params.mo_number = mo_index;
-    
+
     return calc.compute_volume(mo_params);
 }
 
@@ -675,10 +675,10 @@ VolumeData VolumeCalculator::compute_density_volume(const occ::qm::Wavefunction&
                                                    const VolumeGenerationParameters& params) {
     VolumeCalculator calc;
     calc.set_wavefunction(wfn);
-    
+
     VolumeGenerationParameters density_params = params;
     density_params.property = VolumePropertyKind::ElectronDensity;
-    
+
     return calc.compute_volume(density_params);
 }
 
@@ -686,10 +686,10 @@ VolumeData VolumeCalculator::compute_esp_volume(const occ::qm::Wavefunction& wfn
                                                const VolumeGenerationParameters& params) {
     VolumeCalculator calc;
     calc.set_wavefunction(wfn);
-    
+
     VolumeGenerationParameters esp_params = params;
     esp_params.property = VolumePropertyKind::ElectricPotential;
-    
+
     return calc.compute_volume(esp_params);
 }
 

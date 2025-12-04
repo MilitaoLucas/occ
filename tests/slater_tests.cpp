@@ -58,7 +58,7 @@ TEST_CASE("Vector vs. repeated function call") {
   fmt::print("Time for {} points vec: {}\n", rho_vec.rows(), sw.read(0));
   sw.clear_all();
   sw.start(0);
-  for (size_t i = 0; i < rtest.rows(); i++) {
+  for (Eigen::Index i = 0; i < rtest.rows(); i++) {
     rho_func(i) = Ag.rho(rtest(i));
   }
   sw.stop(0);

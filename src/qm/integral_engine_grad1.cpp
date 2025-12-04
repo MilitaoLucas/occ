@@ -54,7 +54,6 @@ MatTriple one_electron_operator_grad_kernel(const AOBasis &basis, IntEnv &env,
       auto bufsize = thread_env.buffer_size_1e(op, 1);
       auto buffer = std::make_unique<double[]>(bufsize);
       const auto &first_bf = basis.first_bf();
-      
       int bf1 = first_bf[p];
       for (const auto &q : shellpairs[p]) {
         int bf2 = first_bf[q];
@@ -86,13 +85,13 @@ MatTriple one_electron_operator_grad_kernel(const AOBasis &basis, IntEnv &env,
     const auto nsh = basis.size();
     occ::parallel::parallel_for_2d(size_t(0), nsh, size_t(0), nsh, [&](size_t p, size_t q) {
       if (q > p) return;  // Only lower triangle
-      
+
       IntEnv thread_env = env;
       occ::qm::cint::Optimizer opt(thread_env, op, 2, 1);
       auto bufsize = thread_env.buffer_size_1e(op, 1);
       auto buffer = std::make_unique<double[]>(bufsize);
       const auto &first_bf = basis.first_bf();
-      
+
       int bf1 = first_bf[p];
       int bf2 = first_bf[q];
       std::array<int, 2> idxs{static_cast<int>(p), static_cast<int>(q)};

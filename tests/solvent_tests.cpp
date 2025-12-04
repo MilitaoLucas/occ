@@ -149,7 +149,7 @@ TEST_CASE("SMD CDS energy (naphthol)", "[solvent]") {
   auto output = fmt::output_file(
       "desloratadine.cpcm", fmt::file::WRONLY | O_TRUNC | fmt::file::CREATE);
   output.print("{}\nelement, x, y, z, atom_idx, area\n", surface_areas.rows());
-  for (size_t i = 0; i < surface_areas.rows(); i++) {
+  for (Eigen::Index i = 0; i < surface_areas.rows(); i++) {
     output.print("{:4d} {: 12.6f} {: 12.6f} {: 12.6f} {:4d} {: 12.6f}\n",
                  nums(surface_atoms(i)), surface_positions(0, i),
                  surface_positions(1, i), surface_positions(2, i),

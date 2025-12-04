@@ -67,8 +67,8 @@ private:
 
   Mat m_C_occ;
   Mat m_C_virt;
-  size_t m_n_occ;
-  size_t m_n_virt;
+  Eigen::Index m_n_occ;
+  Eigen::Index m_n_virt;
 };
 
 } // namespace occ::qm
