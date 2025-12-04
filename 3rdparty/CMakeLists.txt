@@ -197,6 +197,7 @@ CPMAddPackage(
     NAME Libxc
     URL "https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.gz"
     OPTIONS
+        "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}"
         "BUILD_TESTING OFF"
         "ENABLE_XHOST ${ENABLE_HOST_OPT}"
         "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"
