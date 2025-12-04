@@ -15,7 +15,7 @@ void compute_three_center_integrals_tbb(Lambda &process_lambda,
                                         const ShellPairList &shellpairs,
                                         cint::Optimizer &opt) {
   occ::timing::start(occ::timing::category::ints3c2e);
-  
+
   // Parallelize over auxiliary basis functions using TBB work-stealing
   occ::parallel::parallel_for(size_t(0), auxbasis.size(), [&](size_t auxP) {
     size_t bufsize = aobasis.max_shell_size() * aobasis.max_shell_size() *
@@ -27,10 +27,10 @@ void compute_three_center_integrals_tbb(Lambda &process_lambda,
     const auto &first_bf_ao = aobasis.first_bf();
     const auto &first_bf_aux = auxbasis.first_bf();
     const int nsh_ao = aobasis.size();
-    
+
     args.bf[2] = first_bf_aux[auxP];
     args.shell[2] = auxP;
-    
+
     for (int p = 0; p < aobasis.size(); p++) {
       args.bf[0] = first_bf_ao[p];
       args.shell[0] = p;
@@ -47,7 +47,7 @@ void compute_three_center_integrals_tbb(Lambda &process_lambda,
       }
     }
   });
-  
+
   occ::timing::stop(occ::timing::category::ints3c2e);
 }
 
@@ -57,13 +57,13 @@ std::vector<T> reduce_thread_local_vectors(const occ::parallel::thread_local_sto
   if (tl_storage.begin() == tl_storage.end()) {
     return {};
   }
-  
+
   size_t n_items = tl_storage.begin()->size();
   std::vector<T> result(n_items);
   for (size_t i = 0; i < n_items; i++) {
     result[i] = T::Zero(tl_storage.begin()->operator[](i).rows(), tl_storage.begin()->operator[](i).cols());
   }
-  
+
   for (const auto &local_data : tl_storage) {
     for (size_t i = 0; i < n_items; i++) {
       result[i] += local_data[i];
@@ -74,7 +74,7 @@ std::vector<T> reduce_thread_local_vectors(const occ::parallel::thread_local_sto
 
 // Generic exchange contraction helper
 template<typename KMatType>
-void contract_exchange_matrices(const std::vector<Mat>& iuP, const Eigen::LLT<Mat>& V_LLt, 
+void contract_exchange_matrices(const std::vector<Mat>& iuP, const Eigen::LLT<Mat>& V_LLt,
                                KMatType& K_block) {
   Mat X(iuP[0].rows(), iuP[0].cols());
   for (size_t i = 0; i < iuP.size(); i++) {
@@ -87,8 +87,8 @@ void contract_exchange_matrices(const std::vector<Mat>& iuP, const Eigen::LLT<Ma
 struct JKData {
   Vec g;
   std::vector<Mat> iuP;
-  
-  JKData(size_t ndf, size_t nbf, size_t nocc) 
+
+  JKData(size_t ndf, size_t nbf, size_t nocc)
     : g(Vec::Zero(ndf)), iuP(nocc, Mat::Zero(nbf, ndf)) {}
 };
 
@@ -272,9 +272,9 @@ inline auto k_lambda_direct_r(std::vector<Mat> &iuP,
 
 inline auto k_lambda_direct_u(std::vector<Mat> &iuPa, std::vector<Mat> &iuPb,
                               const MolecularOrbitals &mo) {
-  size_t nocc = mo.Cocc.cols();
+  Eigen::Index nocc = mo.Cocc.cols();
   return [&, nocc](const IntegralResult &args) {
-    for (size_t i = 0; i < mo.Cocc.cols(); i++) {
+    for (Eigen::Index i = 0; i < mo.Cocc.cols(); i++) {
       auto &iuPxa = iuPa[nocc * args.thread + i];
       auto &iuPxb = iuPb[nocc * args.thread + i];
       auto c2a = block::a(mo.Cocc).block(args.bf[0], i, args.dims[0], 1);
@@ -531,7 +531,7 @@ Mat direct_exchange_operator_kernel_r(IntegralEngine &engine,
   // Process each auxiliary shell with work-stealing parallelization
   auto process_integrals = [&](const IntegralResult &args) {
     auto &local_iuP = tl_iuP.local();
-    
+
     for (size_t i = 0; i < nocc; i++) {
       auto &iuPx = local_iuP[i];
       auto c2 = mo.Cocc.block(args.bf[0], i, args.dims[0], 1);
@@ -555,8 +555,8 @@ Mat direct_exchange_operator_kernel_r(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local results and contract
@@ -593,7 +593,7 @@ Mat direct_exchange_operator_kernel_u(IntegralEngine &engine,
   auto process_integrals = [&](const IntegralResult &args) {
     auto &local_iuPa = tl_iuPa.local();
     auto &local_iuPb = tl_iuPb.local();
-    
+
     for (size_t i = 0; i < nocc; i++) {
       auto &iuPxa = local_iuPa[i];
       auto &iuPxb = local_iuPb[i];
@@ -623,14 +623,14 @@ Mat direct_exchange_operator_kernel_u(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local results and contract for both spin channels
   auto iuPa = reduce_thread_local_vectors(tl_iuPa);
   auto iuPb = reduce_thread_local_vectors(tl_iuPb);
-  
+
   Mat K = Mat::Zero(rows, cols);
   auto Ka = block::a(K);
   auto Kb = block::b(K);
@@ -670,7 +670,7 @@ Mat direct_exchange_operator_kernel_g(IntegralEngine &engine,
   auto process_integrals = [&](const IntegralResult &args) {
     auto &local_iuPa = tl_iuPa.local();
     auto &local_iuPb = tl_iuPb.local();
-    
+
     for (size_t i = 0; i < nocc; i++) {
       auto &iuPxa = local_iuPa[i];
       auto &iuPxb = local_iuPb[i];
@@ -700,17 +700,17 @@ Mat direct_exchange_operator_kernel_g(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local results and contract for general spinorbital case
   auto iuPa = reduce_thread_local_vectors(tl_iuPa);
   auto iuPb = reduce_thread_local_vectors(tl_iuPb);
-  
+
   Mat K = Mat::Zero(rows, cols);
   Mat Xa(nbf, ndf), Xb(nbf, ndf);
-  
+
   // Contract exchange matrix with cross-terms for general case
   for (size_t i = 0; i < nocc; i++) {
     Xa = V_LLt.solve(iuPa[i].transpose());
@@ -750,7 +750,7 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
     size_t offset = 0;
     const auto Dblock1 = mo.D.block(args.bf[0], args.bf[1], args.dims[0], args.dims[1]);
     const auto Dblock2 = mo.D.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -767,8 +767,8 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local g vectors
@@ -776,7 +776,7 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
   for (const auto &g : tl_g) {
     g_total += g;
   }
-  
+
   Vec d = V_LLt.solve(g_total);
 
   // TBB thread-local storage for Coulomb matrix
@@ -786,7 +786,7 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
   auto build_J = [&](const IntegralResult &args) {
     auto &J = tl_J.local();
     size_t offset = 0;
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -803,8 +803,8 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(build_J, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(build_J, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local J matrices
@@ -812,7 +812,7 @@ Mat direct_coulomb_operator_kernel_r(IntegralEngine &engine,
   for (const auto &local_J : tl_J) {
     J += local_J;
   }
-  
+
   occ::timing::stop(occ::timing::category::df);
   return (J + J.transpose());
 }
@@ -842,7 +842,7 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
     const auto Da_block2 = Da.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
     const auto Db_block1 = Db.block(args.bf[0], args.bf[1], args.dims[0], args.dims[1]);
     const auto Db_block2 = Db.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -864,8 +864,8 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local g vectors to get total
@@ -873,7 +873,7 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
   for (const auto &g : tl_g) {
     g_total += g;
   }
-  
+
   // Solve once for total density
   Vec d = V_LLt.solve(g_total);
 
@@ -886,7 +886,7 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
     auto Ja = block::a(J);
     auto Jb = block::b(J);
     size_t offset = 0;
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -908,8 +908,8 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(build_J, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(build_J, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local J matrices
@@ -917,7 +917,7 @@ Mat direct_coulomb_operator_kernel_u(IntegralEngine &engine,
   for (const auto &local_J : tl_J) {
     J += local_J;
   }
-  
+
   occ::timing::stop(occ::timing::category::df);
   return 2 * J;
 }
@@ -949,7 +949,7 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
     const auto Daa_block2 = Daa.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
     const auto Dbb_block1 = Dbb.block(args.bf[0], args.bf[1], args.dims[0], args.dims[1]);
     const auto Dbb_block2 = Dbb.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -969,8 +969,8 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(compute_g, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local g vectors separately
@@ -982,8 +982,8 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
   for (const auto &gbb : tl_gbb) {
     gbb_total += gbb;
   }
-  
-  // Apply factor of 2 before solving, matching stored kernel exactly  
+
+  // Apply factor of 2 before solving, matching stored kernel exactly
   Vec d_aa = V_LLt.solve(2 * gaa_total);
   Vec d_bb = V_LLt.solve(2 * gbb_total);
 
@@ -996,7 +996,7 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
     auto Jaa = block::aa(J);
     auto Jbb = block::bb(J);
     size_t offset = 0;
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -1016,8 +1016,8 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(build_J, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(build_J, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce thread-local J matrices
@@ -1025,7 +1025,7 @@ Mat direct_coulomb_operator_kernel_g(IntegralEngine &engine,
   for (const auto &local_J : tl_J) {
     J += local_J;
   }
-  
+
   occ::timing::stop(occ::timing::category::df);
   return 2 * J;  // Apply final factor of 2 to match stored kernel exactly
 }
@@ -1050,7 +1050,7 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
     auto &local_data = tl_jk_data.local();
     auto &g = local_data.g;
     auto &iuP = local_data.iuP;
-    
+
     size_t offset = 0;
     const auto c2 = mo.Cocc.block(args.bf[0], 0, args.dims[0], nocc);
     const auto c3 = mo.Cocc.block(args.bf[1], 0, args.dims[1], nocc);
@@ -1063,11 +1063,11 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
     if (args.bf[0] != args.bf[1]) {
       for (size_t r = args.bf[2]; r < args.bf[2] + args.dims[2]; r++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
-        
+
         // Coulomb contribution
         g(r) += (Dblock1.array() * buf_mat.array()).sum();
         g(r) += (Dblock2.array() * buf_mat.transpose().array()).sum();
-        
+
         // Exchange contribution
         c3_term = buf_mat * c3;
         c2_term = buf_mat.transpose() * c2;
@@ -1080,10 +1080,10 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
     } else {
       for (size_t r = args.bf[2]; r < args.bf[2] + args.dims[2]; r++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
-        
+
         // Coulomb contribution
         g(r) += (Dblock1.array() * buf_mat.array()).sum();
-        
+
         // Exchange contribution
         c3_term = buf_mat * c3;
         for (int i = 0; i < nocc; i++) {
@@ -1094,8 +1094,8 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce Coulomb data and solve
@@ -1103,18 +1103,18 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
   for (const auto &local_data : tl_jk_data) {
     g += local_data.g;
   }
-  
+
   occ::timing::start(occ::timing::category::la);
   Vec d = V_LLt.solve(g);
   occ::timing::stop(occ::timing::category::la);
 
   // Build J matrix using TBB
   occ::parallel::thread_local_storage<Mat> tl_J(Mat::Zero(nbf, nbf));
-  
+
   auto build_J = [&](const IntegralResult &args) {
     auto &local_J = tl_J.local();
     size_t offset = 0;
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -1131,8 +1131,8 @@ JKPair direct_coulomb_and_exchange_operator_kernel_r(
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(build_J, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(build_J, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce J matrices
@@ -1258,7 +1258,7 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
   // TBB thread-local storage for Coulomb vectors (separate for aa and bb)
   occ::parallel::thread_local_storage<Vec> tl_gaa(Vec::Zero(ndf));
   occ::parallel::thread_local_storage<Vec> tl_gbb(Vec::Zero(ndf));
-  
+
   // TBB thread-local storage for exchange intermediate matrices
   occ::parallel::thread_local_storage<std::vector<Mat>> tl_iuPa([=]() {
     return std::vector<Mat>(nocc, Mat::Zero(nbf, ndf));
@@ -1273,17 +1273,17 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
     auto &gbb = tl_gbb.local();
     auto &local_iuPa = tl_iuPa.local();
     auto &local_iuPb = tl_iuPb.local();
-    
+
     const auto Daa = block::aa(mo.D);
     const auto Dbb = block::bb(mo.D);
     size_t offset = 0;
-    
+
     // Precompute orbital coefficient blocks
     const auto Ca_block1 = block::a(mo.Cocc).block(args.bf[0], 0, args.dims[0], nocc);
     const auto Ca_block2 = block::a(mo.Cocc).block(args.bf[1], 0, args.dims[1], nocc);
     const auto Cb_block1 = block::b(mo.Cocc).block(args.bf[0], 0, args.dims[0], nocc);
     const auto Cb_block2 = block::b(mo.Cocc).block(args.bf[1], 0, args.dims[1], nocc);
-    
+
     const auto Daa_block1 = Daa.block(args.bf[0], args.bf[1], args.dims[0], args.dims[1]);
     const auto Daa_block2 = Daa.block(args.bf[1], args.bf[0], args.dims[1], args.dims[0]);
     const auto Dbb_block1 = Dbb.block(args.bf[0], args.bf[1], args.dims[0], args.dims[1]);
@@ -1297,19 +1297,19 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
     if (args.bf[0] != args.bf[1]) {
       for (size_t r = args.bf[2]; r < args.bf[2] + args.dims[2]; r++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
-        
-        // Coulomb contributions  
+
+        // Coulomb contributions
         gaa(r) += (Daa_block1.array() * buf_mat.array()).sum();
         gaa(r) += (Daa_block2.array() * buf_mat.transpose().array()).sum();
         gbb(r) += (Dbb_block1.array() * buf_mat.array()).sum();
         gbb(r) += (Dbb_block2.array() * buf_mat.transpose().array()).sum();
-        
+
         // Exchange contributions
         ca_term1 = buf_mat * Ca_block2;
         ca_term2 = buf_mat.transpose() * Ca_block1;
         cb_term1 = buf_mat * Cb_block2;
         cb_term2 = buf_mat.transpose() * Cb_block1;
-        
+
         for (int i = 0; i < nocc; i++) {
           local_iuPa[i].block(args.bf[0], r, args.dims[0], 1) += ca_term1.block(0, i, args.dims[0], 1);
           local_iuPa[i].block(args.bf[1], r, args.dims[1], 1) += ca_term2.block(0, i, args.dims[1], 1);
@@ -1321,15 +1321,15 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
     } else {
       for (size_t r = args.bf[2]; r < args.bf[2] + args.dims[2]; r++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
-        
-        // Coulomb contributions  
+
+        // Coulomb contributions
         gaa(r) += (Daa_block1.array() * buf_mat.array()).sum();
         gbb(r) += (Dbb_block1.array() * buf_mat.array()).sum();
-        
+
         // Exchange contributions
         ca_term1 = buf_mat * Ca_block2;
         cb_term1 = buf_mat * Cb_block2;
-        
+
         for (int i = 0; i < nocc; i++) {
           local_iuPa[i].block(args.bf[0], r, args.dims[0], 1) += ca_term1.block(0, i, args.dims[0], 1);
           local_iuPb[i].block(args.bf[0], r, args.dims[0], 1) += cb_term1.block(0, i, args.dims[0], 1);
@@ -1339,8 +1339,8 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(process_integrals, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce Coulomb vectors
@@ -1352,7 +1352,7 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
   for (const auto &gbb : tl_gbb) {
     gbb_total += gbb;
   }
-  
+
   // Solve for Coulomb coefficients (apply factor of 2 like stored kernel)
   occ::timing::start(occ::timing::category::la);
   Vec d_aa = V_LLt.solve(2 * gaa_total);
@@ -1361,13 +1361,13 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
 
   // Build Coulomb matrix using TBB
   occ::parallel::thread_local_storage<Mat> tl_J(Mat::Zero(rows, cols));
-  
+
   auto build_J = [&](const IntegralResult &args) {
     auto &J_local = tl_J.local();
     auto Jaa = block::aa(J_local);
     auto Jbb = block::bb(J_local);
     size_t offset = 0;
-    
+
     if (args.bf[0] != args.bf[1]) {
       for (size_t i = args.bf[2]; i < args.bf[2] + args.dims[2]; i++) {
         Eigen::Map<const Mat> buf_mat(args.buffer + offset, args.dims[0], args.dims[1]);
@@ -1387,8 +1387,8 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
     }
   };
 
-  compute_three_center_integrals_tbb<kind>(build_J, engine.env(), 
-                                           engine.aobasis(), engine.auxbasis(), 
+  compute_three_center_integrals_tbb<kind>(build_J, engine.env(),
+                                           engine.aobasis(), engine.auxbasis(),
                                            engine.shellpairs(), opt);
 
   // Reduce J matrices
@@ -1400,10 +1400,10 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
   // Reduce exchange data and contract
   auto iuPa_total = reduce_thread_local_vectors(tl_iuPa);
   auto iuPb_total = reduce_thread_local_vectors(tl_iuPb);
-  
+
   Mat K = Mat::Zero(rows, cols);
   Mat Xa(nbf, ndf), Xb(nbf, ndf);
-  
+
   // Contract exchange matrix with cross-terms for general case
   for (size_t i = 0; i < nocc; i++) {
     Xa = V_LLt.solve(iuPa_total[i].transpose());
@@ -1422,7 +1422,7 @@ JKPair direct_coulomb_and_exchange_operator_kernel_g(
 
   // Apply final factor of 2 to match stored kernel exactly
   J *= 2;
-  
+
   occ::timing::stop(occ::timing::category::df);
   return {J, K};
 }
@@ -1530,10 +1530,10 @@ inline Mat stored_exchange_kernel_u(const Mat &ints, const AOBasis &aobasis,
   // temporaries
   Mat iuPa = Mat::Zero(nbf, ndf), iuPb = Mat::Zero(nbf, ndf);
   Mat Xa(nbf, ndf), Xb(nbf, ndf);
-  for (size_t i = 0; i < mo.Cocc.cols(); i++) {
+  for (Eigen::Index i = 0; i < mo.Cocc.cols(); i++) {
     auto ca = block::a(mo.Cocc.col(i));
     auto cb = block::b(mo.Cocc.col(i));
-    for (size_t r = 0; r < ndf; r++) {
+    for (Eigen::Index r = 0; r < ndf; r++) {
       const auto vu = Eigen::Map<const Mat>(ints.col(r).data(), nbf, nbf);
       iuPa.col(r) = (vu * ca);
       iuPb.col(r) = (vu * cb);
@@ -1558,10 +1558,10 @@ inline Mat stored_exchange_kernel_g(const Mat &ints, const AOBasis &aobasis,
   // temporaries
   Mat iuPa = Mat::Zero(nbf, ndf), iuPb = Mat::Zero(nbf, ndf);
   Mat Xa(nbf, ndf), Xb(nbf, ndf);
-  for (size_t i = 0; i < mo.Cocc.cols(); i++) {
+  for (Eigen::Index i = 0; i < mo.Cocc.cols(); i++) {
     auto ca = block::a(mo.Cocc.col(i));
     auto cb = block::b(mo.Cocc.col(i));
-    for (size_t r = 0; r < ndf; r++) {
+    for (Eigen::Index r = 0; r < ndf; r++) {
       const auto vu = Eigen::Map<const Mat>(ints.col(r).data(), nbf, nbf);
       iuPa.col(r) = (vu * ca);
       iuPb.col(r) = (vu * cb);
@@ -1585,56 +1585,56 @@ inline auto ao_tensor_reconstruction_kernel(std::vector<Eigen::Tensor<double, 4>
   const auto nbf = aobasis.nbf();
   const auto naux = auxbasis.nbf();
   const auto nthreads = occ::parallel::get_num_threads();
-  
+
   return [&tensors, &ints, &V_LLt, nbf, naux, nthreads](int thread_id) {
     auto& tensor = tensors[thread_id];
-    
+
     // Divide work among threads by μν pairs
-    size_t total_pairs = nbf * nbf;
-    size_t pairs_per_thread = (total_pairs + nthreads - 1) / nthreads;
-    size_t pair_start = thread_id * pairs_per_thread;
-    size_t pair_end = std::min(pair_start + pairs_per_thread, total_pairs);
-    
+    Eigen::Index total_pairs = nbf * nbf;
+    Eigen::Index pairs_per_thread = (total_pairs + nthreads - 1) / nthreads;
+    Eigen::Index pair_start = thread_id * pairs_per_thread;
+    Eigen::Index pair_end = std::min(pair_start + pairs_per_thread, total_pairs);
+
     // Temporary storage
     Mat munuP = Mat::Zero(nbf, naux);  // (μν|P) for all μν
     Mat X = Mat::Zero(nbf, naux);      // V^(-1) * (ρσ|P)^T
-    
+
     // Process assigned μν pairs
-    for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-      size_t mu = pair_idx / nbf;
-      size_t nu = pair_idx % nbf;
-      
+    for (Eigen::Index pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
+      Eigen::Index mu = pair_idx / nbf;
+      Eigen::Index nu = pair_idx % nbf;
+
       // Extract (μν|P) vector for this μν pair following exchange kernel pattern
-      for (size_t P = 0; P < naux; ++P) {
+      for (Eigen::Index P = 0; P < naux; ++P) {
         const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
         munuP(mu * nbf + nu, P) = eri_P(mu, nu);
       }
     }
-    
+
     // For each ρσ pair, compute V^(-1) * (ρσ|P) and then dot with (μν|P)
-    for (size_t rho = 0; rho < nbf; ++rho) {
-      for (size_t sigma = 0; sigma < nbf; ++sigma) {
+    for (Eigen::Index rho = 0; rho < nbf; ++rho) {
+      for (Eigen::Index sigma = 0; sigma < nbf; ++sigma) {
         // Extract (ρσ|P) vector
         Vec rhosigmaP = Vec::Zero(naux);
-        for (size_t P = 0; P < naux; ++P) {
+        for (Eigen::Index P = 0; P < naux; ++P) {
           const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
           rhosigmaP(P) = eri_P(rho, sigma);
         }
-        
+
         // Solve V * x = (ρσ|P) to get x = V^(-1) * (ρσ|P)
         Vec x = V_LLt.solve(rhosigmaP);
-        
+
         // Now compute (μν|ρσ) = (μν|P) * V^(-1) * (ρσ|P) for assigned μν pairs
-        for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-          size_t mu = pair_idx / nbf;
-          size_t nu = pair_idx % nbf;
-          
+        for (Eigen::Index pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
+          Eigen::Index mu = pair_idx / nbf;
+          Eigen::Index nu = pair_idx % nbf;
+
           double integral_value = 0.0;
-          for (size_t P = 0; P < naux; ++P) {
+          for (Eigen::Index P = 0; P < naux; ++P) {
             const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
             integral_value += eri_P(mu, nu) * x(P);
           }
-          
+
           tensor(mu, nu, rho, sigma) = integral_value;
         }
       }
@@ -1650,20 +1650,20 @@ inline auto ao_tensor_reconstruction_kernel_batched(std::vector<Eigen::Tensor<do
   const auto nbf = aobasis.nbf();
   const auto naux = auxbasis.nbf();
   const auto nthreads = occ::parallel::get_num_threads();
-  
+
   return [&tensors, &ints, &V_LLt, nbf, naux, nthreads](int thread_id) {
     auto& tensor = tensors[thread_id];
-    
+
     // Divide work among threads by μν pairs
     size_t total_pairs = nbf * nbf;
     size_t pairs_per_thread = (total_pairs + nthreads - 1) / nthreads;
     size_t pair_start = thread_id * pairs_per_thread;
     size_t pair_end = std::min(pair_start + pairs_per_thread, total_pairs);
-    
+
     // Pre-compute V^(-1) * (ρσ|P)^T for all ρσ pairs to avoid repeated solves
     Mat all_rhosigma_P = Mat::Zero(naux, nbf * nbf);
     Mat X_all = Mat::Zero(naux, nbf * nbf);
-    
+
     // Extract all (ρσ|P) integrals
     for (size_t rho = 0; rho < nbf; ++rho) {
       for (size_t sigma = 0; sigma < nbf; ++sigma) {
@@ -1674,25 +1674,25 @@ inline auto ao_tensor_reconstruction_kernel_batched(std::vector<Eigen::Tensor<do
         }
       }
     }
-    
+
     // Solve V * X = (ρσ|P) for all ρσ pairs at once
     X_all = V_LLt.solve(all_rhosigma_P);
-    
+
     // Process assigned μν pairs
     for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-      size_t mu = pair_idx / nbf;
-      size_t nu = pair_idx % nbf;
-      
+      Eigen::Index mu = pair_idx / nbf;
+      Eigen::Index nu = pair_idx % nbf;
+
       // Extract (μν|P) vector
       Vec munuP = Vec::Zero(naux);
       for (size_t P = 0; P < naux; ++P) {
         const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
         munuP(P) = eri_P(mu, nu);
       }
-      
+
       // Compute all (μν|ρσ) for this μν using precomputed X values
-      for (size_t rho = 0; rho < nbf; ++rho) {
-        for (size_t sigma = 0; sigma < nbf; ++sigma) {
+      for (Eigen::Index rho = 0; rho < nbf; ++rho) {
+        for (Eigen::Index sigma = 0; sigma < nbf; ++sigma) {
           size_t rhosigma_idx = rho * nbf + sigma;
           double integral_value = munuP.dot(X_all.col(rhosigma_idx));
           tensor(mu, nu, rho, sigma) = integral_value;
@@ -1710,11 +1710,11 @@ inline void compute_df_mp2_integrals(std::vector<std::vector<std::vector<std::ve
                                      size_t n_occ, size_t n_virt) {
   const auto nbf = aobasis.nbf();
   const auto naux = auxbasis.nbf();
-  
+
   // Step 1: First transformation b^Q_iν = Σ_μ C^i_μ (μν|Q)
   // Following exchange kernel pattern
   std::vector<Mat> b_iP(n_occ, Mat::Zero(nbf, naux));
-  
+
   for (size_t i = 0; i < n_occ; ++i) {
     auto c_i = mo.C.col(i);  // occupied orbital coefficients
     for (size_t P = 0; P < naux; ++P) {
@@ -1722,10 +1722,10 @@ inline void compute_df_mp2_integrals(std::vector<std::vector<std::vector<std::ve
       b_iP[i].col(P) = eri_P * c_i;  // b^P_iν
     }
   }
-  
+
   // Step 2: Second transformation b^Q_ia = Σ_ν C^a_ν b^Q_iν
   std::vector<Mat> b_ia(n_occ, Mat::Zero(n_virt, naux));
-  
+
   for (size_t i = 0; i < n_occ; ++i) {
     for (size_t P = 0; P < naux; ++P) {
       for (size_t a = 0; a < n_virt; ++a) {
@@ -1738,19 +1738,19 @@ inline void compute_df_mp2_integrals(std::vector<std::vector<std::vector<std::ve
       }
     }
   }
-  
+
   // Step 3: Apply Coulomb metric J^(-1/2) to get symmetric b^Q objects
   std::vector<Mat> b_ia_sym(n_occ, Mat::Zero(n_virt, naux));
-  
+
   for (size_t i = 0; i < n_occ; ++i) {
     // X = J^(-1/2) * b^T, so b_sym = b * J^(-1/2)^T = b * J^(-1/2) (since J^(-1/2) is symmetric)
     Mat X = V_LLt.solve(b_ia[i].transpose());  // X = J^(-1) * b^T
     b_ia_sym[i] = X.transpose();  // b_sym = X^T = b * J^(-1)
-    
+
     // For proper symmetric formulation, we need sqrt(J^(-1)) not J^(-1)
     // But following the exchange kernel pattern exactly first
   }
-  
+
   // Step 4: Final integral construction (ia|jb) = Σ_Q b^Q_ia * b^Q_jb
   for (size_t i = 0; i < n_occ; ++i) {
     for (size_t a = 0; a < n_virt; ++a) {

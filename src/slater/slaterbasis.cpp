@@ -143,7 +143,7 @@ void Shell::renormalize() {
 
 void Shell::unnormalize() {
   using occ::util::factorial;
-  for (size_t i = 0; i < n_prim(); i++) {
+  for (Eigen::Index i = 0; i < n_prim(); i++) {
     int n2 = 2 * m_n(i);
     double z2 = 2 * m_z(i);
     double factor = sqrt(z2 / factorial(n2)) * pow(z2, m_n(i));

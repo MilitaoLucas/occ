@@ -243,7 +243,7 @@ std::string Dimer::xyz_string() const {
   const auto &pos = positions();
   const auto &nums = atomic_numbers();
   result += fmt::format("{}\n\n", nums.rows());
-  for (size_t i = 0; i < nums.rows(); i++) {
+  for (Eigen::Index i = 0; i < nums.rows(); i++) {
     result +=
         fmt::format("{:5s} {:12.5f} {:12.5f} {:12.5f}\n",
                     Element(nums(i)).symbol(), pos(0, i), pos(1, i), pos(2, i));

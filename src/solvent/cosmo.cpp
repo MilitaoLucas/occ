@@ -16,7 +16,7 @@ Vec solvation_radii(const IVec &nums) {
                                    1.830, 1.720, 1.720, 1.8018, 1.755,  1.638,
                                    1.404, 2.457, 2.106, 2.160,  2.05};
 
-  for (size_t i = 0; i < nums.rows(); i++) {
+  for (Eigen::Index i = 0; i < nums.rows(); i++) {
     int n = nums(i);
     double r = 2.223;
     if (n <= 17 && n > 0)
@@ -32,8 +32,8 @@ COSMO::Result COSMO::operator()(const Mat3N &positions, const Vec &areas,
                                 const Vec &charges) const {
   COSMO::Result res;
   Mat A(positions.cols(), positions.cols());
-  for (size_t i = 0; i < positions.cols(); i++) {
-    for (size_t j = i + 1; j < positions.cols(); j++) {
+  for (Eigen::Index i = 0; i < positions.cols(); i++) {
+    for (Eigen::Index j = i + 1; j < positions.cols(); j++) {
       double norm = (positions.col(i) - positions.col(j)).norm();
       if (norm > 1e-3)
         A(i, j) = 1.0 / norm;

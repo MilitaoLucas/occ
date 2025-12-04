@@ -56,7 +56,7 @@ void EDIIS::minimize_coefficients() {
     grad = fc.transpose() * cx;
 
     double result = 0.0;
-    for (size_t i = 0; i < coeffs.rows(); i++) {
+    for (Eigen::Index i = 0; i < coeffs.rows(); i++) {
       result += c(i) * m_energies[i];
       result -= c(i) * df2.row(i).dot(c);
     }

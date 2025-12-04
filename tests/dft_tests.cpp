@@ -48,7 +48,7 @@ TEST_CASE("LDA (Slater) exchange energy density", "[lda]") {
       5, occ::dft::DensityFunctional::Family::LDA,
       occ::qm::SpinorbitalKind::Unrestricted);
   REQUIRE(params_u.rho.size() == 10);
-  for (size_t i = 0; i < params.rho.rows(); i++) {
+  for (Eigen::Index i = 0; i < params.rho.rows(); i++) {
     params_u.rho(2 * i) = params.rho(i);
     params_u.rho(2 * i + 1) = params.rho(i);
   }
@@ -374,17 +374,17 @@ TEST_CASE("H2 VV10 from ORCA wavefunction") {
  Molden file created by orca_2mkl for BaseName=h2
 
 [Atoms] AU
-H    1   1          0.0000000000         0.0000000000         0.0000000000 
-H    2   1          0.0000000000         0.0000000000         1.3983973391 
+H    1   1          0.0000000000         0.0000000000         0.0000000000
+H    2   1          0.0000000000         0.0000000000         1.3983973391
 [GTO]
   1 0
-s   3 1.0 
+s   3 1.0
         3.4252509100         0.2769343610
         0.6239137300         0.2678388518
         0.1688554000         0.0834736696
 
   2 0
-s   3 1.0 
+s   3 1.0
         3.4252509100         0.2769343610
         0.6239137300         0.2678388518
         0.1688554000         0.0834736696
@@ -726,7 +726,7 @@ TEST_CASE("wB97X range-separated gradient for water", "[dft_gradient][wb97x]") {
   // Verify range-separated parameters are loaded
   auto rs_params = dft.range_separated_parameters();
   REQUIRE(rs_params.omega != 0.0); // wB97X should have omega parameter
-  fmt::print("wB97X parameters: ω={:.6f}, α={:.6f}, β={:.6f}\n", 
+  fmt::print("wB97X parameters: ω={:.6f}, α={:.6f}, β={:.6f}\n",
              rs_params.omega, rs_params.alpha, rs_params.beta);
 
   // Compute gradients
@@ -749,7 +749,7 @@ TEST_CASE("wB97X range-separated gradient for water", "[dft_gradient][wb97x]") {
   REQUIRE(gradient.rows() == 3);
   REQUIRE(gradient.cols() == 3);
   REQUIRE(std::isfinite(gradient.sum()));
-  
+
   // Compare with ORCA reference values (allow for small differences due to integral implementations)
   REQUIRE(occ::util::all_close(expected, gradient, 1e-3, 1e-3));
 }
@@ -767,18 +767,18 @@ TEST_CASE("Voronoi basic functionality", "[voronoi]") {
   // Test class interface
   occ::dft::VoronoiPartition voronoi(basis);
   occ::Vec charges = voronoi.calculate(mo);
-  
+
   // Test convenience function (should give identical results)
   occ::Vec charges2 = occ::dft::calculate_voronoi_charges(basis, mo);
 
   // Basic validation
   REQUIRE(charges.size() == 3);
   REQUIRE(charges(0) < 0);  // Oxygen negative
-  REQUIRE(charges(1) > 0);  // Hydrogens positive  
+  REQUIRE(charges(1) > 0);  // Hydrogens positive
   REQUIRE(charges(2) > 0);
   REQUIRE(charges.sum() == Approx(0.0).margin(1e-8));  // Charge conservation
   REQUIRE(all_close(charges, charges2));  // Class vs function consistency
-  
+
   auto volumes = voronoi.atom_volumes();
   REQUIRE(volumes.size() == 3);
   REQUIRE((volumes.array() > 0).all());  // All volumes positive
@@ -795,7 +795,7 @@ TEST_CASE("Voronoi VDW scaling and temperature effects", "[voronoi]") {
   // Test pure geometric Voronoi
   occ::dft::VoronoiPartition voronoi_geom(basis, 0, 0.1, false);
   occ::Vec charges_geom = voronoi_geom.calculate(mo);
-  
+
   // Test VDW-scaled Voronoi with optimized temperature
   occ::dft::VoronoiPartition voronoi_vdw(basis, 0, 0.37, true);
   occ::Vec charges_vdw = voronoi_vdw.calculate(mo);
@@ -805,16 +805,16 @@ TEST_CASE("Voronoi VDW scaling and temperature effects", "[voronoi]") {
   REQUIRE(charges_vdw.size() == 5);
   REQUIRE(charges_geom.sum() == Approx(0.0).margin(1e-8));
   REQUIRE(charges_vdw.sum() == Approx(0.0).margin(1e-8));
-  
+
   // Check symmetry preservation for methane hydrogens
   auto h_avg_geom = (charges_geom(1) + charges_geom(2) + charges_geom(3) + charges_geom(4)) / 4.0;
   auto h_avg_vdw = (charges_vdw(1) + charges_vdw(2) + charges_vdw(3) + charges_vdw(4)) / 4.0;
-  
+
   for (int i = 1; i <= 4; i++) {
     REQUIRE(charges_geom(i) == Approx(h_avg_geom).margin(1e-2));
     REQUIRE(charges_vdw(i) == Approx(h_avg_vdw).margin(1e-2));
   }
-  
+
   // VDW and geometric should produce different results
   REQUIRE(!all_close(charges_geom, charges_vdw, 1e-3));
 }

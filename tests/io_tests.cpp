@@ -506,11 +506,11 @@ Scalar values for property 'electron_density'
     8     0.000000    -1.326958    -0.105939     0.018788
     1     0.000000    -1.931665     1.600174    -0.021710
     1     0.000000     0.486644     0.079598     0.009862
-    0.929560     0.846625     0.763947     0.713051 
-    1.598553     0.518882     0.931769     0.437888 
-    0.706532     0.627551     0.595849     0.527861 
-    1.218836     0.821015     0.877120     0.692500 
-    1.299062     0.597163     0.894824     0.502266 
+    0.929560     0.846625     0.763947     0.713051
+    1.598553     0.518882     0.931769     0.437888
+    0.706532     0.627551     0.595849     0.527861
+    1.218836     0.821015     0.877120     0.692500
+    1.299062     0.597163     0.894824     0.502266
     0.806580     0.605963     0.681185     0.509903)";
 
     auto cube = occ::io::Cube::load(ss);
@@ -716,7 +716,7 @@ TEST_CASE("ShelxFile unified read/write", "[shelx][file]") {
     REQUIRE(rebuilt.has_value());
     REQUIRE(rebuilt->space_group().symbol() == crystal.space_group().symbol());
   }
-  
+
   SECTION("Parse SHELX string with detailed checks") {
     const std::string acetic_acid_res = R"(TITL acetic_acid
 CELL 0.71073 13.31 4.09 5.769 90 90 90
@@ -753,7 +753,7 @@ END
     REQUIRE_THAT(uc.a(), Catch::Matchers::WithinRel(13.31, 1e-3));
     REQUIRE_THAT(uc.b(), Catch::Matchers::WithinRel(4.09, 1e-3));
     REQUIRE_THAT(uc.c(), Catch::Matchers::WithinRel(5.769, 1e-3));
-    
+
     // Check number and types of atoms
     REQUIRE(asym.size() == 8);
     REQUIRE(asym.atomic_numbers(0) == 6); // C1
@@ -761,13 +761,13 @@ END
     REQUIRE(asym.atomic_numbers(2) == 1); // H1
     REQUIRE(asym.atomic_numbers(6) == 8); // O1
     REQUIRE(asym.atomic_numbers(7) == 8); // O2
-    
+
     // Check space group detection
     INFO("Detected space group: " << sg.symbol());
     REQUIRE(sg.number() >= 1);
     REQUIRE(sg.number() <= 230);
   }
-  
+
   SECTION("Parse R3c rhombohedral structure") {
     const std::string r3c_res = R"(TITL r3c
 CELL 0.71073 34.4501 34.4501 11.2367 90 90 120
@@ -831,30 +831,30 @@ C 0.46040 0.41640 0.00000 1.0000
 
     occ::io::CifParser parser;
     auto crystal = parser.parse_crystal_from_string(test_cif);
-    
+
     REQUIRE(crystal.has_value());
     const auto& c = crystal.value();
     const auto& sg = c.space_group();
-    
+
     // Check that the space group is correctly recognized with exact setting
     INFO("Actual space group number: " << sg.number());
     INFO("Actual space group symbol: " << sg.symbol());
     REQUIRE(sg.number() == 26);
     // Input 'P C M 21        ' should be parsed as 'P c m 21' (ba-c setting)
     REQUIRE(sg.symbol() == "P c m 21");
-    
+
     // Verify that it's the correct setting by checking symmetry operations count
     // P c m 21 should have 4 symmetry operations
     REQUIRE(sg.symmetry_operations().size() == 4);
-    
+
     // Verify unit cell parameters
     const auto& uc = c.unit_cell();
     REQUIRE_THAT(uc.a(), Catch::Matchers::WithinRel(8.29, 1e-3));
     REQUIRE_THAT(uc.b(), Catch::Matchers::WithinRel(14.0, 1e-3));
     REQUIRE_THAT(uc.c(), Catch::Matchers::WithinRel(7.225, 1e-3));
   }
-  
-  
+
+
   SECTION("Parse space group 26 different settings") {
     // Test that we get the correct setting for different orientations of space group 26
     struct TestCase {
@@ -862,16 +862,16 @@ C 0.46040 0.41640 0.00000 1.0000
       std::string expected_hm;
       std::string expected_hall;
     };
-    
+
     std::vector<TestCase> test_cases = {
-      {"'P C M 21'", "P c m 21", "P 2c -2c"},      // ba-c setting  
+      {"'P C M 21'", "P c m 21", "P 2c -2c"},      // ba-c setting
       {"'P M C 21'", "P m c 21", "P 2c -2"},       // standard setting
       {"'P 21 M A'", "P 21 m a", "P -2a 2a"},      // cab setting
       {"'P 21 A M'", "P 21 a m", "P -2 2a"},       // -cba setting
-      {"'P B 21 M'", "P b 21 m", "P -2 -2b"},      // bca setting  
+      {"'P B 21 M'", "P b 21 m", "P -2 -2b"},      // bca setting
       {"'P M 21 B'", "P m 21 b", "P -2b -2"}       // a-cb setting
     };
-    
+
     for (const auto& test_case : test_cases) {
       std::string test_cif = fmt::format(R"(data_test
 _symmetry_space_group_name_H-M     {}
@@ -892,19 +892,19 @@ C 0.46040 0.41640 0.00000 1.0000
 
       occ::io::CifParser parser;
       auto crystal = parser.parse_crystal_from_string(test_cif);
-      
+
       INFO("Testing HM symbol: " << test_case.hm_input);
       REQUIRE(crystal.has_value());
-      
+
       const auto& sg = crystal->space_group();
       REQUIRE(sg.number() == 26);
       REQUIRE(sg.symbol() == test_case.expected_hm);
-      
+
       // All should have 4 symmetry operations
       REQUIRE(sg.symmetry_operations().size() == 4);
     }
   }
-  
+
 }
 
 TEST_CASE("CIF writer", "[io][cif][write]") {
@@ -913,26 +913,26 @@ TEST_CASE("CIF writer", "[io][cif][write]") {
     occ::crystal::AsymmetricUnit asym;
     asym.atomic_numbers.resize(4);
     asym.atomic_numbers << 6, 1, 1, 1; // CH3
-    
+
     occ::crystal::UnitCell uc(10.0, 10.0, 10.0, 90.0, 90.0, 90.0);
-    
+
     // Create positions in Cartesian then convert
     occ::Mat3N cart_coords(3, 4);
     cart_coords.col(0) = occ::Vec3(5.0, 5.0, 5.0); // C at center
     cart_coords.col(1) = occ::Vec3(6.0, 5.0, 5.0); // H1
     cart_coords.col(2) = occ::Vec3(4.5, 5.8, 5.0); // H2
     cart_coords.col(3) = occ::Vec3(4.5, 4.2, 5.0); // H3
-    
+
     asym.positions = uc.to_fractional(cart_coords);
     asym.labels = {"C1", "H1", "H2", "H3"};
-    
+
     occ::crystal::SpaceGroup sg(1);
     occ::crystal::Crystal crystal(asym, sg, uc);
-    
+
     // Write to CIF
     occ::io::CifWriter writer;
     std::string cif_content = writer.to_string(crystal, "Test CH3");
-    
+
     // Basic checks that CIF contains expected content
     REQUIRE(cif_content.find("_atom_site_label") != std::string::npos);
     REQUIRE(cif_content.find("_atom_site_fract_x") != std::string::npos);
@@ -943,7 +943,7 @@ TEST_CASE("CIF writer", "[io][cif][write]") {
     REQUIRE(cif_content.find("H2") != std::string::npos);
     REQUIRE(cif_content.find("H3") != std::string::npos);
   }
-  
+
   SECTION("Write crystal with normalized hydrogens") {
     // Create test crystal with wrong H bond lengths
     occ::crystal::AsymmetricUnit asym;
@@ -953,65 +953,65 @@ TEST_CASE("CIF writer", "[io][cif][write]") {
     asym.positions.col(0) = occ::Vec3(0.5, 0.5, 0.5);
     asym.positions.col(1) = occ::Vec3(0.5, 0.55, 0.5); // Wrong O-H distance
     asym.labels = {"O1", "H1"};
-    
-    occ::crystal::UnitCell uc(8.0, 8.0, 12.0, occ::units::radians(90.0), 
+
+    occ::crystal::UnitCell uc(8.0, 8.0, 12.0, occ::units::radians(90.0),
                               occ::units::radians(90.0), occ::units::radians(120.0)); // Hexagonal
     occ::crystal::SpaceGroup sg(194); // P6_3/mmc
     occ::crystal::Crystal crystal(asym, sg, uc);
-    
+
     // Normalize hydrogens first
     int normalized = crystal.normalize_hydrogen_bondlengths();
     REQUIRE(normalized == 1);
-    
+
     // Write to CIF
     occ::io::CifWriter writer;
     std::string cif_content = writer.to_string(crystal, "Normalized_OH");
-    
+
     // Check space group is preserved
     REQUIRE(cif_content.find("P 63/m m c") != std::string::npos);
-    
+
     // Parse the CIF content to check unit cell parameters properly
     gemmi::cif::Document doc = gemmi::cif::read_string(cif_content);
     REQUIRE(doc.blocks.size() > 0);
-    
+
     const auto& block = doc.blocks[0];
-    
+
     // Check unit cell parameters with appropriate tolerances
     auto a_pair = block.find_pair("_cell_length_a");
     auto b_pair = block.find_pair("_cell_length_b");
     auto c_pair = block.find_pair("_cell_length_c");
     auto gamma_pair = block.find_pair("_cell_angle_gamma");
-    
+
     REQUIRE(a_pair != nullptr);
     REQUIRE(b_pair != nullptr);
     REQUIRE(c_pair != nullptr);
     REQUIRE(gamma_pair != nullptr);
-    
+
     CHECK_THAT(std::stod((*a_pair)[1]), Catch::Matchers::WithinAbs(8.0, 0.001));
     CHECK_THAT(std::stod((*b_pair)[1]), Catch::Matchers::WithinAbs(8.0, 0.001));
     CHECK_THAT(std::stod((*c_pair)[1]), Catch::Matchers::WithinAbs(12.0, 0.001));
     CHECK_THAT(std::stod((*gamma_pair)[1]), Catch::Matchers::WithinAbs(120.0, 0.001));
-    
+
     // Check O-H bond length is normalized
     occ::Mat3N cart_pos = crystal.to_cartesian(crystal.asymmetric_unit().positions);
     occ::Vec3 oh_bond = cart_pos.col(1) - cart_pos.col(0);
     CHECK_THAT(oh_bond.norm(), Catch::Matchers::WithinAbs(0.983, 0.001));
   }
-  
+
   SECTION("CIF writer file output") {
     // Test writing to actual file
     auto acetic = acetic_crystal();
-    
+
     occ::io::CifWriter writer;
-    std::string temp_file = "/tmp/test_acetic.cif";
-    
+    std::string temp_file = std::filesystem::temp_directory_path().string() + "/test_acetic.cif";
+
     // This should not throw
     REQUIRE_NOTHROW(writer.write(temp_file, acetic, "Acetic acid test"));
-    
+
     // File should exist and have content
     std::ifstream file(temp_file);
     REQUIRE(file.good());
-    
+
     std::string line;
     bool found_atom_site = false;
     while (std::getline(file, line)) {

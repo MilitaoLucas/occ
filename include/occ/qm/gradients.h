@@ -111,15 +111,15 @@ public:
     const auto &basis = m_proc.aobasis();
     const auto &first_bf = basis.first_bf();
     const auto &atom_to_shell = basis.atom_to_shell();
-    
+
     // Compute Schwarz matrix once and cache it
     if (!m_schwarz_computed) {
       occ::log::debug("Computing Schwarz screening matrix for gradients");
       m_schwarz = m_proc.compute_schwarz_ints();
       m_schwarz_computed = true;
     }
-    
-    occ::log::info("computing atomic gradients");
+
+    occ::log::info("computing atomic gradients"); // probably after he
 
     Mat3N result = m_proc.additional_atomic_gradients(mo);
     auto ovlp = m_proc.compute_overlap_gradient();
@@ -137,7 +137,7 @@ public:
       grad_rinv.scale_by(-1.0 * atoms[atom].atomic_number);
 
       double x = 0.0, y = 0.0, z = 0.0;
-
+      // problem appears in s == 5 and atom==1
       for (int s : atom_to_shell[atom]) {
         const auto &sh = basis[s];
         for (int bf0 = first_bf[s]; bf0 < first_bf[s] + sh.size(); bf0++) {

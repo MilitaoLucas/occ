@@ -203,13 +203,13 @@ double MP2::compute_conventional_mp2_energy() {
       double &local_same_spin = local_data.same_spin;
       double &local_opposite_spin = local_data.opposite_spin;
 
-      for (size_t j = 0; j < n_occ_active; ++j) {
-        for (size_t a = 0; a < n_virt_active; ++a) {
-          for (size_t b = 0; b < n_virt_active; ++b) {
+      for (Eigen::Index j = 0; j < n_occ_active; ++j) {
+        for (Eigen::Index a = 0; a < n_virt_active; ++a) {
+          for (Eigen::Index b = 0; b < n_virt_active; ++b) {
 
             // Map to full orbital space indices
-            size_t i_full = i + m_n_frozen_core;
-            size_t j_full = j + m_n_frozen_core;
+            Eigen::Index i_full = i + m_n_frozen_core;
+            Eigen::Index j_full = j + m_n_frozen_core;
 
             // Get integrals (ia|jb) and (ib|ja) from tensor
             double integral_iajb = ovov_tensor(i_full, a, j_full, b);
