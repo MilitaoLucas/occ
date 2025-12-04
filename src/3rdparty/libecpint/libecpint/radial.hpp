@@ -59,7 +59,7 @@ namespace libecpint {
 		double tolerance;
 
 		/// This integrand simply returns the pretabulated integrand values stored in p given an index ix
-		static double integrand(double r, const double *p, int ix);
+		static double integrand(double r, const std::vector<double>& p, int ix);
 
 		/**
 		* Builds a matrix of Bessel at the given points up to the given maximum angular momentum.
