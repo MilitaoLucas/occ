@@ -49,6 +49,7 @@ endif()
 
 if(WIN32)
     add_compile_definitions(NOMINMAX)
+    add_compile_options($<$<CONFIG:Release>:/MT> $<$<CONFIG:Debug>:/MTd>)
 endif()
 
 if("${WITH_PYTHON_BINDINGS}")
