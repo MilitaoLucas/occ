@@ -170,7 +170,7 @@ template <> struct VLEN<double> {
 #endif
 #endif
 
-#if __cplusplus >= 201703L && !defined __MINGW32__
+#if __cplusplus >= 201703L && !defined(_WIN32)
 inline void *aligned_alloc(size_t align, size_t size) {
   // aligned_alloc() requires that the requested size is a multiple of "align"
   void *ptr = ::aligned_alloc(align, (size + align - 1) & (~(align - 1)));
