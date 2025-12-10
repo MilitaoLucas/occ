@@ -80,8 +80,11 @@ if("${USE_SYSTEM_BLAS}")
 endif()
 
 if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN)
+
+    set(TBB_OPTIONS "")
+    list(APPEND TBB_OPTIONS "TBB_TEST OFF")
+    list(APPEND TBB_OPTIONS "TBB_STRICT OFF")
     find_package(TBB CONFIG REQUIRED)
-    set_target_properties(TBB::tbb PROPERTIES TYPE STATIC_LIBRARY)
 endif()
 
 if(${EMSCRIPTEN})
