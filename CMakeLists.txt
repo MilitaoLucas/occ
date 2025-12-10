@@ -83,20 +83,8 @@ if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN AND NOT TBB_PREFIX_PATH)
     find_package(TBB CONFIG REQUIRED)
 endif()
 if (TBB_PREFIX_PATH)
-    find_library(_tbb_release_lib
-        NAMES libtbb12.a tbb12.lib
-        PATHS ${TBB_PREFIX_PATH}
-        PATH_SUFFIXES "lib/${_tbb_intel_arch}/${_tbb_subdir}" "lib${_tbb_arch_suffix}/${_tbb_subdir}" "lib${_tbb_arch_suffix}" "lib"
-        NO_DEFAULT_PATH
-    )
-
-    add_library(TBB::tbb STATIC IMPORTED)
-    set_target_properties(TBB::tbb PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${TBB_PREFIX_PATH}/include"
-            INTERFACE_COMPILE_DEFINITIONS "__TBB_NO_IMPLICIT_LINKAGE=1"
-            IMPORTED_LOCATION_RELEASE "${_tbb_release_lib}"
-            IMPORTED_CONFIGURATIONS RELEASE
-    )
+    add_library(TBB::tbb STATIC IMPORTED OBJECT ${TBB_PREFIX_PATH}/tbb12.lib)
+    target_include_directories(TBB::tbb INTERFACE ${TBB_PREFIX_PATH}/include)
 endif ()
 
 if(${EMSCRIPTEN})
