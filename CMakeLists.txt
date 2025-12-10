@@ -80,13 +80,24 @@ if("${USE_SYSTEM_BLAS}")
 endif()
 
 if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN)
-
-    set(TBB_OPTIONS "")
-    list(APPEND TBB_OPTIONS "TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH OFF")
-    list(APPEND TBB_OPTIONS "TBB_TEST OFF")
-    list(APPEND TBB_OPTIONS "TBB_STRICT OFF")
     find_package(TBB CONFIG REQUIRED)
 endif()
+if (TBB_PREFIX_PATH)
+    find_library(_tbb_release_lib
+        NAMES libtbb12.a tbb12.lib
+        PATHS ${TBB_PREFIX_PATH}
+        PATH_SUFFIXES "lib/${_tbb_intel_arch}/${_tbb_subdir}" "lib${_tbb_arch_suffix}/${_tbb_subdir}" "lib${_tbb_arch_suffix}" "lib"
+        NO_DEFAULT_PATH
+    )
+
+    add_library(TBB::tbb STATIC IMPORTED)
+    set_target_properties(TBB::tbb PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${TBB_PREFIX_PATH}/include"
+            INTERFACE_COMPILE_DEFINITIONS "__TBB_NO_IMPLICIT_LINKAGE=1"
+            IMPORTED_LOCATION_RELEASE "${_tbb_release_lib}"
+            IMPORTED_CONFIGURATIONS RELEASE
+    )
+endif ()
 
 if(${EMSCRIPTEN})
 message(STATUS "Emscripten build flags")
