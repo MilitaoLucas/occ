@@ -45,7 +45,9 @@ target_link_libraries(occ_core
     OpenMP::OpenMP_CXX
 )
 endif()
+include(${CMAKE_SOURCE_DIR}/cmake/get_all_properties.cmake)
 
+print_target_properties(TBB::tbb)
 target_link_libraries(occ_core
     PUBLIC
     TBB::tbb
