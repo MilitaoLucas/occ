@@ -50,8 +50,10 @@ include(${CMAKE_SOURCE_DIR}/cmake/get_all_properties.cmake)
 print_target_properties(TBB::tbb)
 target_link_libraries(occ_core
     PUBLIC
-    TBB::tbb
+    $<$<PLATFORM_ID:Windows>:${TBB_PREFIX_PATH}/lib/tbb12.lib>
+    $<$<PLATFORM_ID:Linux>:${TBB_PREFIX_PATH}/lib/libtbb12.a>
 )
+target_include_directories(occ_core PRIVATE ${TBB_PREFIX_PATH}/include)
 
 if(NOT ENABLE_HOST_OPT)
     target_compile_definitions(occ_core PUBLIC OCC_DISABLE_SIMD)
