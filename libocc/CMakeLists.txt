@@ -31,7 +31,7 @@ set(occ_libs
         "unordered_dense"
         "cint"
         "fmt"
-        "TBB"
+        "tbb"
 )
 
 foreach (libname ${occ_libs})
