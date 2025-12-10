@@ -49,6 +49,7 @@ foreach (libname ${occ_libs})
         )
     endif()
 endforeach ()
+add_library(occ::tbb ALIAS tbb)
 # ============================= lib include installs =============================
 function(install_lib_srcs lib)
     set(oneValueArgs INAME ITDIR)
