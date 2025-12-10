@@ -83,7 +83,7 @@ if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN AND NOT TBB_PREFIX_PATH)
     find_package(TBB CONFIG REQUIRED)
 endif()
 if (TBB_PREFIX_PATH)
-    add_library(TBB::tbb STATIC IMPORTED OBJECT ${TBB_PREFIX_PATH}/tbb12.lib)
+    add_library(TBB::tbb STATIC IMPORTED OBJECT ${TBB_PREFIX_PATH}/lib/tbb12.lib)
     target_include_directories(TBB::tbb INTERFACE ${TBB_PREFIX_PATH}/include)
 endif ()
 
