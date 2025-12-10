@@ -81,6 +81,7 @@ endif()
 
 if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN)
     find_package(TBB CONFIG REQUIRED)
+    set_target_properties(TBB::tbb PROPERTIES TYPE STATIC_LIBRARY)
 endif()
 
 if(${EMSCRIPTEN})
