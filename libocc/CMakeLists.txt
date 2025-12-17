@@ -112,6 +112,7 @@ install_lib_srcs(TBB::tbb INAME "../../include/oneapi")
 install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
+install_lib_srcs(libecpint_static INAME "libecpint")
 
 install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../src/3rdparty/gau2grid/gau2grid" DESTINATION include)
 install(DIRECTORY "${gemmi_INCLUDE_DIRECTORY}/gemmi" DESTINATION include)
