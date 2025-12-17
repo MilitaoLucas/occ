@@ -211,7 +211,8 @@ target_include_directories(
     "${Libxc_BINARY_DIR}/src"
     "${Libxc_BINARY_DIR}"
 )
-
+#include(${CMAKE_SOURCE_DIR}/cmake/get_all_properties.cmake)
+#print_target_properties(xc)
 endif()
 
 

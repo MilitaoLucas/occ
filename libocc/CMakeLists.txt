@@ -42,10 +42,10 @@ foreach (libname ${occ_libs})
     if(TARGET ${libname})
         install(TARGETS ${libname}
             EXPORT occTargets
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+            INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
         )
     endif()
 endforeach ()
@@ -113,12 +113,18 @@ install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
 install_lib_srcs(libecpint_static INAME "libecpint")
-
 install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../src/3rdparty/gau2grid/gau2grid" DESTINATION include)
 install(DIRECTORY "${gemmi_INCLUDE_DIRECTORY}/gemmi" DESTINATION include)
 # eigen
 install(DIRECTORY "${eigen3_SOURCE_DIR}/Eigen" DESTINATION include)
 install(DIRECTORY "${eigen3_SOURCE_DIR}/unsupported" DESTINATION include)
+install(TARGETS xc
+    EXPORT occTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+)
 # =========================== end lib include installs ===========================
 install(DIRECTORY ${OCC_INCLUDE_DIR}/occ DESTINATION include)
 
