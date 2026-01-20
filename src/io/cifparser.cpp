@@ -1,4 +1,4 @@
-﻿#include <filesystem>
+#include <filesystem>
 #include <gemmi/numb.hpp>
 #include <iostream>
 #include <occ/core/element.h>

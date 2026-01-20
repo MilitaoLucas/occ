@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "mdspan-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766001533,
+        "narHash": "sha256-TsDiAkeghScTFjZ4KHrHO3FW4hf+bLSU8VAvmIbiyFY=",
+        "owner": "kokkos",
+        "repo": "mdspan",
+        "rev": "546d4dd63697c6a331554adb6fe650e09b690812",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kokkos",
+        "repo": "mdspan",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1767640445,
+        "narHash": "sha256-UWYqmD7JFBEDBHWYcqE6s6c77pWdcU/i+bwD6XxMb8A=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "9f0c42f8bc7151b8e7e5840fb3bd454ad850d8c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "mdspan-src": "mdspan-src",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
