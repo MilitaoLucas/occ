@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "mdspan-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1766001533,
-        "narHash": "sha256-TsDiAkeghScTFjZ4KHrHO3FW4hf+bLSU8VAvmIbiyFY=",
-        "owner": "kokkos",
-        "repo": "mdspan",
-        "rev": "546d4dd63697c6a331554adb6fe650e09b690812",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kokkos",
-        "repo": "mdspan",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1767640445,
@@ -34,7 +18,6 @@
     },
     "root": {
       "inputs": {
-        "mdspan-src": "mdspan-src",
         "nixpkgs": "nixpkgs"
       }
     }
