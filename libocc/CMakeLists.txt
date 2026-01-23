@@ -119,13 +119,15 @@ install(DIRECTORY "${gemmi_INCLUDE_DIRECTORY}/gemmi" DESTINATION include)
 # eigen
 install(DIRECTORY "${eigen3_SOURCE_DIR}/Eigen" DESTINATION include)
 install(DIRECTORY "${eigen3_SOURCE_DIR}/unsupported" DESTINATION include)
-install(TARGETS xc dftd4
-    EXPORT occTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-)
+if (NOT NIX_BUILD)
+    install(TARGETS xc dftd4
+        EXPORT occTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+    )
+endif ()
 # =========================== end lib include installs ===========================
 install(DIRECTORY ${OCC_INCLUDE_DIR}/occ DESTINATION include)
 
