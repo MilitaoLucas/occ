@@ -152,6 +152,7 @@ if(MSVC)
 else()
     set(LIBCINT_C_FLAGS "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE")
 endif()
+if (NOT USE_SYSTEM_LIBCINT)
 CPMAddPackage(
     NAME libcint
     GITHUB_REPOSITORY "${LIBCINT_REPOSITORY}"
@@ -182,6 +183,7 @@ if(TARGET cint)
         )
     endif ()
 endif()
+endif ()
 
 add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
 target_link_libraries(libcint::libcint INTERFACE cint)
@@ -191,7 +193,6 @@ target_include_directories(
     "${libcint_SOURCE_DIR}/src"
     "${libcint_BINARY_DIR}/include"
 )
-
 if(NOT "${USE_SYSTEM_LIBXC}")
 CPMAddPackage(
     NAME Libxc
