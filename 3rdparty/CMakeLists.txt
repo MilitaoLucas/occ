@@ -183,7 +183,6 @@ if(TARGET cint)
         )
     endif ()
 endif()
-endif ()
 
 add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
 target_link_libraries(libcint::libcint INTERFACE cint)
@@ -193,6 +192,7 @@ target_include_directories(
     "${libcint_SOURCE_DIR}/src"
     "${libcint_BINARY_DIR}/include"
 )
+endif ()
 if(NOT "${USE_SYSTEM_LIBXC}")
 CPMAddPackage(
     NAME Libxc
