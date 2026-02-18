@@ -109,7 +109,7 @@ install_lib_srcs(nlohmann_json::nlohmann_json INAME "include/nlohmann" ITDIR "in
 install_lib_srcs(spdlog::spdlog)
 install_lib_srcs(TBB::tbb INAME "../../include/tbb")
 install_lib_srcs(TBB::tbb INAME "../../include/oneapi")
-install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
+#install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
 install_lib_srcs(libecpint_static INAME "libecpint")
