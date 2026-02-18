@@ -129,7 +129,7 @@ install(TARGETS xc dftd4
 # =========================== end lib include installs ===========================
 install(DIRECTORY ${OCC_INCLUDE_DIR}/occ DESTINATION include)
 
-
+if (NOT WIN32)
 install(CODE "
     message(STATUS \"Recursively hunting for TBB binaries...\")
     file(GLOB_RECURSE TBB_FOUND
@@ -153,6 +153,7 @@ install(CODE "
         message(WARNING \"Could not find any TBB binaries in ${CMAKE_BINARY_DIR}\")
     endif()
 ")
-include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
+endif ()
+#include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
 
-bundle_static_library(occ_main libocc)
+#bundle_static_library(occ_main libocc)
