@@ -29,7 +29,7 @@ set(occ_libs
         "spdlog"
         "fast_float"
         "unordered_dense"
-        "cint"
+#        "cint"
         "fmt"
         "tbb"
 )
