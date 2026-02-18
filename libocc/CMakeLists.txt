@@ -153,6 +153,6 @@ install(CODE "
         message(WARNING \"Could not find any TBB binaries in ${CMAKE_BINARY_DIR}\")
     endif()
 ")
-include(${CMAKE_SOURCE_DIR}/cmake/BundleLibs.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
 
 bundle_static_library(occ_main libocc)
