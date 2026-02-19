@@ -154,6 +154,7 @@ install(CODE "
     endif()
 ")
 endif ()
-#include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
-
-#bundle_static_library(occ_main libocc)
+if (UNIX)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
+    bundle_static_library(occ_main libocc)
+endif()
