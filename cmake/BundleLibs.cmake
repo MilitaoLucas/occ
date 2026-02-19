@@ -37,7 +37,17 @@ function(bundle_static_library tgt_name bundled_tgt_name)
   set(bundled_tgt_full_name
     ${CMAKE_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${bundled_tgt_name}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
-  if (CMAKE_CXX_COMPILER_ID MATCHES "^(Clang|GNU)$")
+  if (APPLE)
+    foreach(tgt IN LISTS static_libs)
+      list(APPEND static_libs_full_names $<TARGET_FILE:${tgt}>)
+    endforeach()
+
+    add_custom_command(
+      COMMAND libtool -static -o ${bundled_tgt_full_name} ${static_libs_full_names}
+      OUTPUT ${bundled_tgt_full_name}
+      COMMENT "Bundling ${bundled_tgt_name}"
+      VERBATIM)
+  elseif (CMAKE_CXX_COMPILER_ID MATCHES "^(Clang|GNU)$")
     file(WRITE ${CMAKE_BINARY_DIR}/${bundled_tgt_name}.ar.in
       "CREATE ${bundled_tgt_full_name}\n" )
 
