@@ -46,6 +46,7 @@ function(bundle_static_library tgt_name bundled_tgt_name)
       COMMAND libtool -static -o ${bundled_tgt_full_name} ${static_libs_full_names}
       OUTPUT ${bundled_tgt_full_name}
       COMMENT "Bundling ${bundled_tgt_name}"
+      DEPENDS ${static_libs}
       VERBATIM)
   elseif (CMAKE_CXX_COMPILER_ID MATCHES "^(Clang|GNU)$")
     file(WRITE ${CMAKE_BINARY_DIR}/${bundled_tgt_name}.ar.in
@@ -72,6 +73,7 @@ function(bundle_static_library tgt_name bundled_tgt_name)
       COMMAND ${ar_tool} -M < ${CMAKE_BINARY_DIR}/${bundled_tgt_name}.ar
       OUTPUT ${bundled_tgt_full_name}
       COMMENT "Bundling ${bundled_tgt_name}"
+      DEPENDS ${static_libs}
       VERBATIM)
   elseif(MSVC)
     find_program(lib_tool lib)
