@@ -8,6 +8,9 @@
 #include <occ/gto/io/json_basis.h>
 #include <occ/gto/sto3g_basis.h>
 
+#ifndef M_2_SQRTPI
+#define M_2_SQRTPI 1.1283791670955125585606993
+#endif
 namespace fs = std::filesystem;
 
 namespace occ::gto {
@@ -48,8 +51,8 @@ void normalize_contracted_gto(int l, const Vec &alpha, Mat &coeffs) {
   Mat ee = alpha.rowwise().replicate(alpha.rows()) +
            alpha.transpose().colwise().replicate(alpha.rows());
 
-  for (size_t i = 0; i < ee.rows(); i++) {
-    for (size_t j = 0; j < ee.cols(); j++) {
+  for (Eigen::Index i = 0; i < ee.rows(); i++) {
+    for (Eigen::Index j = 0; j < ee.cols(); j++) {
       ee(i, j) = gint(l * 2 + 2, ee(i, j));
     }
   }
@@ -486,7 +489,7 @@ inline std::string data_path() {
     occ::log::warn("There is a problem with the basis set directory, the "
                    "path '{}' is not valid (not a directory)",
                    basis_path);
-    basis_path = fs::current_path().string();
+    basis_path = fs::current_path().string() + std::string("/basis");
   }
   return basis_path;
 }

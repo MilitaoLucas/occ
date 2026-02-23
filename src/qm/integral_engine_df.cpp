@@ -282,17 +282,17 @@ IntegralEngineDF::four_center_integrals_tensor() const {
   result.setZero();
   
   // Use TBB parallel_for to distribute work over μν pairs
-  size_t total_pairs = nbf * nbf;
-  occ::parallel::parallel_for(size_t(0), total_pairs, [&](size_t pair_idx) {
-    size_t mu = pair_idx / nbf;
-    size_t nu = pair_idx % nbf;
+  Eigen::Index total_pairs = nbf * nbf;
+  occ::parallel::parallel_for(Eigen::Index(0), total_pairs, [&](size_t pair_idx) {
+    Eigen::Index mu = pair_idx / nbf;
+    Eigen::Index nu = pair_idx % nbf;
 
     // For each ρσ pair, compute (μν|ρσ) = Σ_P (μν|P) * V^(-1) * (ρσ|P)
-    for (size_t rho = 0; rho < nbf; ++rho) {
-      for (size_t sigma = 0; sigma < nbf; ++sigma) {
+    for (Eigen::Index rho = 0; rho < nbf; ++rho) {
+      for (Eigen::Index sigma = 0; sigma < nbf; ++sigma) {
         // Extract (ρσ|P) vector
         Vec rhosigmaP = Vec::Zero(naux);
-        for (size_t P = 0; P < naux; ++P) {
+        for (Eigen::Index P = 0; P < naux; ++P) {
           const auto eri_P =
               Eigen::Map<const Mat>(m_integral_store.col(P).data(), nbf, nbf);
           rhosigmaP(P) = eri_P(rho, sigma);

@@ -95,7 +95,7 @@ Vec becke_partition(const Vec &w) {
 Vec stratmann_scuseria_partition(const Vec &w) {
   Vec result(w.rows());
   constexpr double a = 0.64;
-  for (size_t i = 0; i < w.rows(); i++) {
+  for (Eigen::Index i = 0; i < w.rows(); i++) {
     double ma = w(i) / a;
     double ma2 = ma * ma;
     double det = ma / 16 * (35 + ma2 * (-35 + ma2 * (21 - 5 * ma2)));

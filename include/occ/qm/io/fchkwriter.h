@@ -85,8 +85,8 @@ public:
       if constexpr (std::is_same<typename T::Scalar, bool>::value) {
         std::vector<bool> vals;
         vals.reserve(mat.size());
-        for (size_t c = 0; c < mat.cols(); c++) {
-          for (size_t r = 0; r < mat.rows(); r++) {
+        for (Eigen::Index c = 0; c < mat.cols(); c++) {
+          for (Eigen::Index r = 0; r < mat.rows(); r++) {
             vals.push_back(mat(r, c));
           }
         }
@@ -94,8 +94,8 @@ public:
       } else {
         std::vector<int> vals;
         vals.reserve(mat.size());
-        for (size_t c = 0; c < mat.cols(); c++) {
-          for (size_t r = 0; r < mat.rows(); r++) {
+        for (Eigen::Index c = 0; c < mat.cols(); c++) {
+          for (Eigen::Index r = 0; r < mat.rows(); r++) {
             vals.push_back(static_cast<int>(mat(r, c)));
           }
         }
@@ -104,8 +104,8 @@ public:
     } else if constexpr (std::is_floating_point<typename T::Scalar>::value) {
       std::vector<double> vals;
       vals.reserve(mat.size());
-      for (size_t c = 0; c < mat.cols(); c++) {
-        for (size_t r = 0; r < mat.rows(); r++) {
+      for (Eigen::Index c = 0; c < mat.cols(); c++) {
+        for (Eigen::Index r = 0; r < mat.rows(); r++) {
           vals.push_back(static_cast<double>(mat(r, c)));
         }
       }

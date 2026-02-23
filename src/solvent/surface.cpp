@@ -38,8 +38,8 @@ Surface solvent_surface(const Vec &radii, const IVec &atomic_numbers,
 
   Vec ri = radii.array();
 
-  size_t num_valid_points{0};
-  for (size_t i = 0; i < N; i++) {
+  Eigen::Index num_valid_points{0};
+  for (Eigen::Index i = 0; i < N; i++) {
     double rs = ri(i);
     double r = rs + solvent_radius;
     double surface_area = 4 * M_PI * rs * rs;
@@ -55,9 +55,9 @@ Surface solvent_surface(const Vec &radii, const IVec &atomic_numbers,
   Eigen::Matrix<bool, Eigen::Dynamic, 1> mask(num_valid_points);
   mask.setConstant(true);
 
-  for (size_t i = 0; i < N; i++) {
+  for (Eigen::Index i = 0; i < N; i++) {
     Vec3 q = centered.col(i);
-    for (size_t j = 0; j < tmp_vertices.cols(); j++) {
+    for (Eigen::Index j = 0; j < tmp_vertices.cols(); j++) {
       if (!mask(j) || tmp_atom_index(j) == i)
         continue;
       double r = (q - tmp_vertices.col(j)).norm();
@@ -71,10 +71,10 @@ Surface solvent_surface(const Vec &radii, const IVec &atomic_numbers,
   Mat3N remaining_points(3, num_valid_points);
   Vec remaining_weights(num_valid_points);
   IVec remaining_atom_index(num_valid_points);
-  size_t j = 0;
-  for (size_t i = 0; i < mask.rows(); i++) {
+  Eigen::Index j = 0;
+  for (Eigen::Index i = 0; i < mask.rows(); i++) {
     if (mask(i)) {
-      size_t atom_idx = tmp_atom_index(i);
+      Eigen::Index atom_idx = tmp_atom_index(i);
       Vec3 v = tmp_vertices.col(i);
       Vec3 shift = (v - centered.col(atom_idx));
       shift.normalize();

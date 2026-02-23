@@ -73,8 +73,8 @@ void EDIIS::minimize_coefficients(SpinorbitalKind kind) {
     // Chain rule: grad_x = dE/dc * dc/dx
     // dc_i/dx_j = 2*x_i/s * (delta_ij - c_i)
     Mat dc_dx = Mat::Zero(nvec, nvec);
-    for (size_t i = 0; i < nvec; i++) {
-      for (size_t j = 0; j < nvec; j++) {
+    for (Eigen::Index i = 0; i < nvec; i++) {
+      for (Eigen::Index j = 0; j < nvec; j++) {
         double delta = (i == j) ? 1.0 : 0.0;
         dc_dx(i, j) = 2 * x(j) / s * (delta - c(i));
       }

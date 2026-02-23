@@ -258,7 +258,7 @@ std::vector<core::Atom> VolumeCalculator::get_atoms_for_property(const VolumeGen
         crystal::HKL lower = crystal::HKL::maximum();
         occ::Vec3 frac_radius = buffer_radius * 2 / crystal.unit_cell().lengths().array();
 
-        for (size_t i = 0; i < uc_atoms.frac_pos.cols(); i++) {
+        for (Eigen::Index i = 0; i < uc_atoms.frac_pos.cols(); i++) {
             const auto& pos = uc_atoms.frac_pos.col(i);
             upper.h = std::max(upper.h, static_cast<int>(ceil(pos(0) + frac_radius(0))));
             upper.k = std::max(upper.k, static_cast<int>(ceil(pos(1) + frac_radius(1))));

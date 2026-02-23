@@ -272,9 +272,9 @@ inline auto k_lambda_direct_r(std::vector<Mat> &iuP,
 
 inline auto k_lambda_direct_u(std::vector<Mat> &iuPa, std::vector<Mat> &iuPb,
                               const MolecularOrbitals &mo) {
-  size_t nocc = mo.Cocc.cols();
+  Eigen::Index nocc = mo.Cocc.cols();
   return [&, nocc](const IntegralResult &args) {
-    for (size_t i = 0; i < mo.Cocc.cols(); i++) {
+    for (Eigen::Index i = 0; i < mo.Cocc.cols(); i++) {
       auto &iuPxa = iuPa[nocc * args.thread + i];
       auto &iuPxb = iuPb[nocc * args.thread + i];
       auto c2a = block::a(mo.Cocc).block(args.bf[0], i, args.dims[0], 1);
@@ -1596,7 +1596,7 @@ inline Mat stored_exchange_kernel_u(const Mat &ints, const AOBasis &aobasis,
   const auto ndf = auxbasis.nbf();
   const auto [rows, cols] =
       occ::qm::matrix_dimensions<occ::qm::SpinorbitalKind::Unrestricted>(nbf);
-  const size_t nocc = mo.Cocc.cols();
+  const Eigen::Index nocc = mo.Cocc.cols();
 
   // Thread-local accumulators
   occ::parallel::thread_local_storage<Mat> K_local([rows, cols]() {
@@ -1626,7 +1626,7 @@ inline Mat stored_exchange_kernel_u(const Mat &ints, const AOBasis &aobasis,
 
     auto ca = block::a(mo.Cocc.col(i));
     auto cb = block::b(mo.Cocc.col(i));
-    for (size_t r = 0; r < ndf; r++) {
+    for (Eigen::Index r = 0; r < ndf; r++) {
       const auto vu = Eigen::Map<const Mat>(ints.col(r).data(), nbf, nbf);
       iuPa.col(r) = vu * ca;
       iuPb.col(r) = vu * cb;
@@ -1654,7 +1654,7 @@ inline Mat stored_exchange_kernel_g(const Mat &ints, const AOBasis &aobasis,
   const auto ndf = auxbasis.nbf();
   const auto [rows, cols] =
       occ::qm::matrix_dimensions<occ::qm::SpinorbitalKind::General>(nbf);
-  const size_t nocc = mo.Cocc.cols();
+  const Eigen::Index nocc = mo.Cocc.cols();
 
   // Thread-local accumulators
   occ::parallel::thread_local_storage<Mat> K_local([rows, cols]() {
@@ -1675,7 +1675,7 @@ inline Mat stored_exchange_kernel_g(const Mat &ints, const AOBasis &aobasis,
   });
 
   // Parallelize over occupied orbitals
-  occ::parallel::parallel_for(size_t(0), nocc, [&](size_t i) {
+  occ::parallel::parallel_for(Eigen::Index(0), nocc, [&](Eigen::Index i) {
     auto &K_tl = K_local.local();
     auto &iuPa = iuPa_local.local();
     auto &iuPb = iuPb_local.local();
@@ -1684,7 +1684,7 @@ inline Mat stored_exchange_kernel_g(const Mat &ints, const AOBasis &aobasis,
 
     auto ca = block::a(mo.Cocc.col(i));
     auto cb = block::b(mo.Cocc.col(i));
-    for (size_t r = 0; r < ndf; r++) {
+    for (Eigen::Index r = 0; r < ndf; r++) {
       const auto vu = Eigen::Map<const Mat>(ints.col(r).data(), nbf, nbf);
       iuPa.col(r) = vu * ca;
       iuPb.col(r) = vu * cb;
@@ -1720,22 +1720,22 @@ inline auto ao_tensor_reconstruction_kernel(std::vector<Eigen::Tensor<double, 4>
     auto& tensor = tensors[thread_id];
     
     // Divide work among threads by μν pairs
-    size_t total_pairs = nbf * nbf;
-    size_t pairs_per_thread = (total_pairs + nthreads - 1) / nthreads;
-    size_t pair_start = thread_id * pairs_per_thread;
-    size_t pair_end = std::min(pair_start + pairs_per_thread, total_pairs);
+    Eigen::Index total_pairs = nbf * nbf;
+    Eigen::Index pairs_per_thread = (total_pairs + nthreads - 1) / nthreads;
+    Eigen::Index pair_start = thread_id * pairs_per_thread;
+    Eigen::Index pair_end = std::min(pair_start + pairs_per_thread, total_pairs);
     
     // Temporary storage
     Mat munuP = Mat::Zero(nbf, naux);  // (μν|P) for all μν
     Mat X = Mat::Zero(nbf, naux);      // V^(-1) * (ρσ|P)^T
     
     // Process assigned μν pairs
-    for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-      size_t mu = pair_idx / nbf;
-      size_t nu = pair_idx % nbf;
+    for (Eigen::Index pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
+      Eigen::Index mu = pair_idx / nbf;
+      Eigen::Index nu = pair_idx % nbf;
       
       // Extract (μν|P) vector for this μν pair following exchange kernel pattern
-      for (size_t P = 0; P < naux; ++P) {
+      for (Eigen::Index P = 0; P < naux; ++P) {
         const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
         munuP(mu * nbf + nu, P) = eri_P(mu, nu);
       }
@@ -1755,12 +1755,12 @@ inline auto ao_tensor_reconstruction_kernel(std::vector<Eigen::Tensor<double, 4>
         Vec x = V_LLt.solve(rhosigmaP);
         
         // Now compute (μν|ρσ) = (μν|P) * V^(-1) * (ρσ|P) for assigned μν pairs
-        for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-          size_t mu = pair_idx / nbf;
-          size_t nu = pair_idx % nbf;
+        for (Eigen::Index pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
+          Eigen::Index mu = pair_idx / nbf;
+          Eigen::Index nu = pair_idx % nbf;
           
           double integral_value = 0.0;
-          for (size_t P = 0; P < naux; ++P) {
+          for (Eigen::Index P = 0; P < naux; ++P) {
             const auto eri_P = Eigen::Map<const Mat>(ints.col(P).data(), nbf, nbf);
             integral_value += eri_P(mu, nu) * x(P);
           }
@@ -1810,8 +1810,8 @@ inline auto ao_tensor_reconstruction_kernel_batched(std::vector<Eigen::Tensor<do
     
     // Process assigned μν pairs
     for (size_t pair_idx = pair_start; pair_idx < pair_end; ++pair_idx) {
-      size_t mu = pair_idx / nbf;
-      size_t nu = pair_idx % nbf;
+      Eigen::Index mu = pair_idx / nbf;
+      Eigen::Index nu = pair_idx % nbf;
       
       // Extract (μν|P) vector
       Vec munuP = Vec::Zero(naux);
@@ -1821,8 +1821,8 @@ inline auto ao_tensor_reconstruction_kernel_batched(std::vector<Eigen::Tensor<do
       }
       
       // Compute all (μν|ρσ) for this μν using precomputed X values
-      for (size_t rho = 0; rho < nbf; ++rho) {
-        for (size_t sigma = 0; sigma < nbf; ++sigma) {
+      for (Eigen::Index rho = 0; rho < nbf; ++rho) {
+        for (Eigen::Index sigma = 0; sigma < nbf; ++sigma) {
           size_t rhosigma_idx = rho * nbf + sigma;
           double integral_value = munuP.dot(X_all.col(rhosigma_idx));
           tensor(mu, nu, rho, sigma) = integral_value;

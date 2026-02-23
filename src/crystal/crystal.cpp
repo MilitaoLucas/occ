@@ -837,7 +837,7 @@ CrystalDimers Crystal::unit_cell_dimers(double radius) const {
 
   for (const auto &mol : uc_mols) {
     Mat3N pos_frac = to_fractional(mol.positions());
-    for (size_t i = 0; i < pos_frac.cols(); i++) {
+    for (Eigen::Index i = 0; i < pos_frac.cols(); i++) {
       const auto &pos = pos_frac.col(i);
       upper.h = std::max(upper.h,
                          static_cast<int>(ceil(pos(0) + frac_radius(0))) + 1);

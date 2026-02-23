@@ -13,7 +13,7 @@ inline void write_dimer(const std::string &filename, const Dimer &dimer) {
   const auto &nums = dimer.atomic_numbers();
   output.print("{}\n", nums.rows());
   output.print("\n");
-  for (size_t i = 0; i < nums.rows(); i++) {
+  for (Eigen::Index i = 0; i < nums.rows(); i++) {
     output.print("{:5s} {:12.5f} {:12.5f} {:12.5f}\n",
                  Element(nums(i)).symbol(), pos(0, i), pos(1, i), pos(2, i));
   }

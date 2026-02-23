@@ -156,26 +156,27 @@ double MOIntegralEngine::compute_mo_eri(size_t i, size_t j, size_t k,
 
 Tensor4D MOIntegralEngine::transform_first_index(const Tensor4D &ao_tensor,
                                                  size_t n_ao) const {
-  Tensor4D half1(m_n_occ, n_ao, n_ao, n_ao);
+  Tensor4D half1(m_n_occ, static_cast<Eigen::Index>(n_ao),
+    static_cast<Eigen::Index>(n_ao), static_cast<Eigen::Index>(n_ao));
   half1.setZero();
 
   auto start_time = std::chrono::high_resolution_clock::now();
   occ::log::debug("Step 1: Transform first index (μν|ρσ) -> (iν|ρσ)");
 
-  for (size_t i = 0; i < m_n_occ; ++i) {
+  for (Eigen::Index i = 0; i < m_n_occ; ++i) {
     for (size_t nu = 0; nu < n_ao; ++nu) {
       for (size_t rho = 0; rho < n_ao; ++rho) {
         for (size_t sigma = 0; sigma < n_ao; ++sigma) {
           double sum = 0.0;
 
           for (size_t mu = 0; mu < n_ao; ++mu) {
-            size_t mu_can = std::min(mu, nu);
-            size_t nu_can = std::max(mu, nu);
-            size_t rho_can = std::min(rho, sigma);
-            size_t sigma_can = std::max(rho, sigma);
+            Eigen::Index mu_can = std::min(mu, nu);
+            Eigen::Index nu_can = std::max(mu, nu);
+            Eigen::Index rho_can = std::min(rho, sigma);
+            Eigen::Index sigma_can = std::max(rho, sigma);
 
-            size_t munu = mu_can * n_ao + nu_can;
-            size_t rhosigma = rho_can * n_ao + sigma_can;
+            Eigen::Index munu = mu_can * n_ao + nu_can;
+            Eigen::Index rhosigma = rho_can * n_ao + sigma_can;
 
             double integral_value;
             if (munu <= rhosigma) {
@@ -187,7 +188,9 @@ Tensor4D MOIntegralEngine::transform_first_index(const Tensor4D &ao_tensor,
             sum += m_C_occ(mu, i) * integral_value;
           }
 
-          half1(i, nu, rho, sigma) = sum;
+          half1(i, static_cast<Eigen::Index>(nu),
+            static_cast<Eigen::Index>(rho),
+            static_cast<Eigen::Index>(sigma)) = sum;
         }
       }
     }
@@ -202,18 +205,18 @@ Tensor4D MOIntegralEngine::transform_first_index(const Tensor4D &ao_tensor,
 
 Tensor4D MOIntegralEngine::transform_second_index(const Tensor4D &half1,
                                                   size_t n_ao) const {
-  Tensor4D half2(m_n_occ, m_n_virt, n_ao, n_ao);
+  Tensor4D half2(m_n_occ, m_n_virt, static_cast<Eigen::Index>(n_ao), static_cast<Eigen::Index>(n_ao));
   half2.setZero();
 
   auto start_time = std::chrono::high_resolution_clock::now();
   occ::log::debug("Step 2: Transform second index (iν|ρσ) -> (ia|ρσ)");
 
-  for (size_t i = 0; i < m_n_occ; ++i) {
-    for (size_t a = 0; a < m_n_virt; ++a) {
-      for (size_t rho = 0; rho < n_ao; ++rho) {
-        for (size_t sigma = 0; sigma < n_ao; ++sigma) {
+  for (Eigen::Index i = 0; i < m_n_occ; ++i) {
+    for (Eigen::Index a = 0; a < m_n_virt; ++a) {
+      for (Eigen::Index rho = 0; rho < n_ao; ++rho) {
+        for (Eigen::Index sigma = 0; sigma < n_ao; ++sigma) {
           double sum = 0.0;
-          for (size_t nu = 0; nu < n_ao; ++nu) {
+          for (Eigen::Index nu = 0; nu < n_ao; ++nu) {
             sum += m_C_virt(nu, a) * half1(i, nu, rho, sigma);
           }
           half2(i, a, rho, sigma) = sum;
@@ -231,18 +234,18 @@ Tensor4D MOIntegralEngine::transform_second_index(const Tensor4D &half1,
 
 Tensor4D MOIntegralEngine::transform_third_index(const Tensor4D &half2,
                                                  size_t n_ao) const {
-  Tensor4D half3(m_n_occ, m_n_virt, m_n_occ, n_ao);
+  Tensor4D half3(m_n_occ, m_n_virt, m_n_occ, static_cast<Eigen::Index>(n_ao));
   half3.setZero();
 
   auto start_time = std::chrono::high_resolution_clock::now();
   occ::log::debug("Step 3: Transform third index (ia|ρσ) -> (ia|jσ)");
 
-  for (size_t i = 0; i < m_n_occ; ++i) {
-    for (size_t a = 0; a < m_n_virt; ++a) {
-      for (size_t j = 0; j < m_n_occ; ++j) {
-        for (size_t sigma = 0; sigma < n_ao; ++sigma) {
+  for (Eigen::Index i = 0; i < m_n_occ; ++i) {
+    for (Eigen::Index a = 0; a < m_n_virt; ++a) {
+      for (Eigen::Index j = 0; j < m_n_occ; ++j) {
+        for (Eigen::Index sigma = 0; sigma < n_ao; ++sigma) {
           double sum = 0.0;
-          for (size_t rho = 0; rho < n_ao; ++rho) {
+          for (Eigen::Index rho = 0; rho < n_ao; ++rho) {
             sum += m_C_occ(rho, j) * half2(i, a, rho, sigma);
           }
           half3(i, a, j, sigma) = sum;
@@ -264,12 +267,12 @@ void MOIntegralEngine::transform_fourth_index(const Tensor4D &half3,
   auto start_time = std::chrono::high_resolution_clock::now();
   occ::log::debug("Step 4: Transform fourth index (ia|jσ) -> (ia|jb)");
 
-  for (size_t i = 0; i < m_n_occ; ++i) {
-    for (size_t a = 0; a < m_n_virt; ++a) {
-      for (size_t j = 0; j < m_n_occ; ++j) {
-        for (size_t b = 0; b < m_n_virt; ++b) {
+  for (Eigen::Index i = 0; i < m_n_occ; ++i) {
+    for (Eigen::Index a = 0; a < m_n_virt; ++a) {
+      for (Eigen::Index j = 0; j < m_n_occ; ++j) {
+        for (Eigen::Index b = 0; b < m_n_virt; ++b) {
           double sum = 0.0;
-          for (size_t sigma = 0; sigma < n_ao; ++sigma) {
+          for (Eigen::Index sigma = 0; sigma < n_ao; ++sigma) {
             sum += m_C_virt(sigma, b) * half3(i, a, j, sigma);
           }
           result(i, a, j, b) = sum;
@@ -389,12 +392,12 @@ Mat MOIntegralEngine::compute_ovov_block() const {
 
   Mat result = Mat::Zero(m_n_occ * m_n_virt, m_n_occ * m_n_virt);
 
-  for (size_t i = 0; i < m_n_occ; ++i) {
-    for (size_t a = 0; a < m_n_virt; ++a) {
-      for (size_t j = 0; j < m_n_occ; ++j) {
-        for (size_t b = 0; b < m_n_virt; ++b) {
-          size_t ia = i * m_n_virt + a;
-          size_t jb = j * m_n_virt + b;
+  for (Eigen::Index i = 0; i < m_n_occ; ++i) {
+    for (Eigen::Index a = 0; a < m_n_virt; ++a) {
+      for (Eigen::Index j = 0; j < m_n_occ; ++j) {
+        for (Eigen::Index b = 0; b < m_n_virt; ++b) {
+          Eigen::Index ia = i * m_n_virt + a;
+          Eigen::Index jb = j * m_n_virt + b;
           result(ia, jb) = tensor(i, a, j, b);
         }
       }
