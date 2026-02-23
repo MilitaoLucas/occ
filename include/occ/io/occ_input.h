@@ -154,5 +154,6 @@ template <typename T> OccInput build(const std::string &filename) {
 template <typename T> OccInput build(std::istream &file) {
   return T(file).as_occ_input();
 }
+OccInput read_occ_input_file(const std::string path);
 
 } // namespace occ::io
