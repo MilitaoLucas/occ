@@ -135,37 +135,53 @@ if("${USE_QCINT}")
 else()
     set(LIBCINT_REPOSITORY "peterspackman/libcint")
 endif()
+if (MSVC)
+    if (${USE_QCINT})
+        message(WARNING "MSVC doesn't support qcint, switching to MilitaoLucas/libcint")
+    endif ()
+    set(LIBCINT_REPOSITORY "MilitaoLucas/libcint")
+endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(LIBCINT_BUILD_TYPE "CMAKE_BUILD_TYPE Release")
 endif ()
 
 # Add compiler flags to fix the implicit function declaration error
+if(MSVC)
+    set(LIBCINT_C_FLAGS "/Tc  /wd4024 ")
+else()
 set(LIBCINT_C_FLAGS "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE")
-
+endif()
+if (NOT USE_SYSTEM_LIBCINT)
 CPMAddPackage(
     NAME libcint
     GITHUB_REPOSITORY "${LIBCINT_REPOSITORY}"
     GIT_TAG master
     OPTIONS
-        "WITH_FORTRAN OFF"
+        "WITH_FORTRAN ${USE_FORTRAN}"
         "WITH_CINT2_INTERFACE OFF"
         "ENABLE_STATIC ON"
         "BUILD_SHARED_LIBS OFF"
         "PYPZPX ON"
-        "BUILD_MARCH_NATIVE ON"
+#        $<$<NOT:$<PLATFORM_ID:WIN32>>:"BUILD_MARCH_NATIVE ON">
         "WITH_RANGE_COULOMB ON"
         "CMAKE_C_FLAGS ${LIBCINT_C_FLAGS}"
         ${LIBCINT_BUILD_TYPE}
     VERSION "6.1.2"
 )
+if (libcint_ADDED)
+    file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindQUADMATH.cmake ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake)
+    message(WARNING "ADDED LIBCINT")
+endif ()
 
 # Apply the flags to the target after it's created
 if(TARGET cint)
-    target_compile_options(cint PRIVATE 
+    if (NOT WIN32)
+    target_compile_options(cint PRIVATE
         -Wno-implicit-function-declaration
         -Wno-deprecated-non-prototype
     )
+endif()
 endif()
 
 add_library(libcint::libcint INTERFACE IMPORTED GLOBAL) 
@@ -176,7 +192,7 @@ target_include_directories(
     "${libcint_SOURCE_DIR}/src"
     "${libcint_BINARY_DIR}/include"
 )
-
+endif ()
 if(NOT "${USE_SYSTEM_LIBXC}")
 CPMAddPackage(
     NAME Libxc
@@ -184,7 +200,7 @@ CPMAddPackage(
     OPTIONS
         "BUILD_TESTING OFF"
         "ENABLE_XHOST ${ENABLE_HOST_OPT}"
-        "BUILD_FPIC ${WITH_PYTHON_BINDINGS}"
+        "BUILD_FPIC ${BUILD_FPIC}"
         "CMAKE_POLICY_VERSION_MINIMUM 3.5"
 )
 add_library(Libxc::xc INTERFACE IMPORTED GLOBAL) 
