@@ -77,7 +77,7 @@ namespace libecpint {
 			// along with the zeroth order term
 			// Pmm = (-1)^m (2m-1)!!(1-x^2)^{m/2}
 			double x2 = x * x;
-			double Plm[lmax+1][lmax+1]; 
+			std::vector<std::vector<double>> Plm(lmax + 1, std::vector<double>(lmax + 1, 0.0));
 			// First get all Pmm terms
 			Plm[0][0] = 1.0;
 			double sox2 = std::sqrt(std::max(0.0, 1.0 - x2));

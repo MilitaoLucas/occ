@@ -130,7 +130,7 @@ namespace libecpint {
 		
 		void estimate_type2(
         const ECP& U, const GaussianShell &shellA, const GaussianShell &shellB,
-        const ShellPairData &data, double* results) const;
+        const ShellPairData &data, std::vector<double>& results) const;
 	
 		/**
 		  * Computes the overall ECP integrals over the given ECP center and shell pair. This is the lower level API, where you want finer control

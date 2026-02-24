@@ -302,7 +302,7 @@ namespace libecpint {
 
 	void ECPIntegral::estimate_type2(
       const ECP& U, const GaussianShell &shellA, const GaussianShell &shellB,
-      const ShellPairData &data, double* results) const {
+      const ShellPairData &data, std::vector<double>& results) const {
 		double sigma_a, sigma_b, min_eta, n2, an, bn, a_bound, b_bound, ab_bound;
 		double atilde, btilde, ztilde, Tk, Tk_0, xp;
 		
@@ -386,7 +386,7 @@ namespace libecpint {
 		makeC(CA, data.LA, data.A);
 		makeC(CB, data.LB, data.B);
 		
-		double screens[U.getL() + 1];
+		std::vector<double> screens(U.getL() + 1);
 		estimate_type2(U, shellA, shellB, data, screens);
 	
 		// Calculate type1 integrals, if necessary

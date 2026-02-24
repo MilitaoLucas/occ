@@ -62,8 +62,8 @@ namespace libecpint {
 		GCTYPE t; ///< Algorithm type to be used
 	
 		/// Worker function for integration routines, should not be called directly.	
-		double sumTerms(const std::function<double(double, const double*, int)> &f,
-                  const double *p, int limit, int start, int end, int shift, int skip) const;
+		double sumTerms(const std::function<double(double, const std::vector<double>, int)> &f,
+                  const std::vector<double>& p, int limit, int start, int end, int shift, int skip) const;
 
 	public:
 		
@@ -93,8 +93,8 @@ namespace libecpint {
 		* @returns the integral (first) and true if integration converged, false otherwise (second)
 		*/
 		std::pair<double, bool> integrate(
-		    std::function<double(double, const double*, int)> &f,
-		    const double *params, double tolerance, int start, int end) const;
+		    std::function<double(double, const std::vector<double>, int)> &f,
+		    const std::vector<double> params, double tolerance, int start, int end) const;
 	
 		/**
 		* Transforms the region of integration to [0, inf) using the logarithmic transformation of Krack98
