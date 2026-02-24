@@ -63,7 +63,7 @@ namespace libecpint {
 		// where F_j(z) = e^(-z) * (z^2/2)^j / j!
 		int lmax = lMax + TAYLOR_CUT;
 	
-		double F[order + 1]; // F_j above
+		std::vector<double> F(order + 1); // F_j above
 	
 		K[0][0] = 1.0;
 		double z, z2; // z and z^2 / 2
