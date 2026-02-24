@@ -28,6 +28,7 @@ endif()
 
 
 list(APPEND CMAKE_MODULE_PATH "${catch_SOURCE_DIR}/extras")
+set($ENV{OCC_DATA_PATH} ${CMAKE_SOURCE_DIR}/share)
 include(CTest)
 include(Catch)
 
