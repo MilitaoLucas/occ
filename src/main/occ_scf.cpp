@@ -304,4 +304,29 @@ void run_scf_subcommand(occ::io::OccInput config) {
   }
 }
 
+Wavefunction run_scf_external(occ::io::OccInput config, bool write_wfn) {
+  occ::main::print_header();
+
+  occ::timing::start(occ::timing::category::io);
+
+  config.name = config.filename;
+  // read input file first so we can override with command line settings
+  read_input_file(config.filename, config);
+  if (config.filename.empty()) {
+    config.filename = config.name;
+  }
+  occ::timing::stop(occ::timing::category::io);
+
+  if (!config.geometry.point_charge_filename.empty()) {
+    occ::io::PointChargeFileReader pc(config.geometry.point_charge_filename);
+    pc.update_occ_input(config);
+  }
+
+  Wavefunction wfn = occ::driver::single_point(config);
+  occ::log::info("Driver: {}", config.driver.driver);
+  if (write_wfn)
+      write_output_files(config, wfn);
+  return wfn;
+}
+
 } // namespace occ::main
