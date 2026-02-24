@@ -3,7 +3,10 @@
 #include <occ/core/log.h>
 #include <occ/io/cube.h>
 #include <occ/io/periodic_grid.h>
-
+#include <util.h>
+#ifndef M_2_SQRTPI
+#define M_2_SQRTPI 1.1283791670955125585606993
+#endif
 namespace occ::io {
 
 PeriodicGrid::PeriodicGrid() : basis(Mat3::Identity()), m_grid(11, 11, 11) {}
