@@ -1,4 +1,4 @@
-add_library(occ_driver
+add_library(occ_driver OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/geometry_optimization.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal_growth.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/single_point.cpp"

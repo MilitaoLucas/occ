@@ -1,4 +1,4 @@
-add_library(occ_disp
+add_library(occ_disp OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/dftd4.cpp"
     ${OCC_DISP_INCLUDE_FILES}
 )

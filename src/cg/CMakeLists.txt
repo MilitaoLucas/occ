@@ -1,4 +1,4 @@
-add_library(occ_cg
+add_library(occ_cg OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/distance_partition.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/interaction_mapper.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/neighbor_atoms.cpp"

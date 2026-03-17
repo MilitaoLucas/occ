@@ -1,4 +1,4 @@
-add_library(occ_dma
+add_library(occ_dma OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/add_qlm.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/binomial.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dma.cpp"

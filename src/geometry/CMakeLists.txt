@@ -1,4 +1,4 @@
-add_library(occ_geometry
+add_library(occ_geometry OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/icosphere_mesh.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/index_cache.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/marching_cubes.cpp"

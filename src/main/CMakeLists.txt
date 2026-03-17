@@ -1,4 +1,4 @@
-add_library(occ_main
+add_library(occ_main OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/cli_validators.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal_surface_energy.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/monomer_wavefunctions.cpp"

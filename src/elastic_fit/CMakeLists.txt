@@ -1,4 +1,4 @@
-add_library(occ_elastic_fit
+add_library(occ_elastic_fit OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/monkhorst_pack.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/potentials.cpp"

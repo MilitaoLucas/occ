@@ -1,4 +1,4 @@
-add_library(occ_numint
+add_library(occ_numint OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/grid_types.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/grid_utils.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lebedev.cpp"

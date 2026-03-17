@@ -1,4 +1,4 @@
-add_library(occ_crystal
+add_library(occ_crystal OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/asymmetric_unit.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/crystal.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dimer_labeller.cpp"

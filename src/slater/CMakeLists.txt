@@ -1,4 +1,4 @@
-add_library(occ_slater
+add_library(occ_slater OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/hirshfeld.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/promolecule.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/slaterbasis.cpp"

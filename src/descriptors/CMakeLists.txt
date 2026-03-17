@@ -1,4 +1,4 @@
-add_library(occ_descriptors
+add_library(occ_descriptors OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/promolecule_shape.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/steinhardt.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pdd_amd.cpp"

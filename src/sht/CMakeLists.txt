@@ -1,4 +1,4 @@
-add_library(occ_sht
+add_library(occ_sht OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/clebsch.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/legendre.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/quadrature.cpp"

@@ -1,4 +1,4 @@
-add_library(occ_isosurface
+add_library(occ_isosurface OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/curvature.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/deformation_density.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/eeq_esp.cpp"

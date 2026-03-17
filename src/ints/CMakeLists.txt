@@ -1,4 +1,4 @@
-add_library(occ_ints
+add_library(occ_ints OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/esp.cpp"
 )
 

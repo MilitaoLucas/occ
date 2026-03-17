@@ -1,4 +1,4 @@
-add_library(occ_io
+add_library(occ_io OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/basis_g94.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifparser.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cifwriter.cpp"

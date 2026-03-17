@@ -1,4 +1,4 @@
-add_library(occ_interaction
+add_library(occ_interaction OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/ce_energy_model.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/coulomb.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/disp.cpp"

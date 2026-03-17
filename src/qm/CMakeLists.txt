@@ -1,4 +1,4 @@
-add_library(occ_qm
+add_library(occ_qm OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/auto_aux_basis.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/cdiis.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/convergence_accelerator.cpp"

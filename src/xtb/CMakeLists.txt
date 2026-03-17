@@ -1,4 +1,4 @@
-add_library(occ_xtb
+add_library(occ_xtb OBJECT
     OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/xtb_wrapper.cpp"
     ${OCC_XTB_INCLUDE_FILES}
@@ -32,7 +32,7 @@ add_library(TBLite::TBLite INTERFACE IMPORTED GLOBAL)
 # bit of a hack but the best I could do for linking gfortran etc. in a cross platform way
 target_link_libraries(TBLite::TBLite INTERFACE tblite-lib tblite "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 
-add_library(occ_tblite
+add_library(occ_tblite OBJECT
     OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/tblite_wrapper.cpp"
     ${OCC_XTB_INCLUDE_FILES}

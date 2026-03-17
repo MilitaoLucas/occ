@@ -1,4 +1,4 @@
-add_library(occ_opt
+add_library(occ_opt OBJECT
     angle_coordinate.cpp
     berny_optimizer.cpp
     bond_coordinate.cpp

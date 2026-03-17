@@ -1,4 +1,4 @@
-add_library(occ_gto
+add_library(occ_gto OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/density.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/gto.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/rotation.cpp"
