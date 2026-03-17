@@ -1,5 +1,5 @@
 add_library(_subprocess
-    STATIC
+    OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/CowData.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/environ.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp"

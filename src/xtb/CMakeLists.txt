@@ -1,5 +1,5 @@
 add_library(occ_xtb
-    STATIC
+    OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/xtb_wrapper.cpp"
     ${OCC_XTB_INCLUDE_FILES}
 )
@@ -33,7 +33,7 @@ add_library(TBLite::TBLite INTERFACE IMPORTED GLOBAL)
 target_link_libraries(TBLite::TBLite INTERFACE tblite-lib tblite "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 
 add_library(occ_tblite
-    STATIC
+    OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/tblite_wrapper.cpp"
     ${OCC_XTB_INCLUDE_FILES}
 )

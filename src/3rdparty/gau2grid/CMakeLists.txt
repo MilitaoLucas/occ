@@ -1,5 +1,5 @@
 add_library(gau2grid_static
-    STATIC
+    OBJECT
     "${CMAKE_CURRENT_SOURCE_DIR}/gau2grid_deriv1.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/gau2grid_deriv2.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/gau2grid_deriv3.c"
