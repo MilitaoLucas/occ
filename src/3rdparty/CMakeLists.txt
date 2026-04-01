@@ -15,23 +15,22 @@ target_link_libraries(_subprocess
     PUBLIC
     Threads::Threads
 )
-if(UNIX)
-    target_sources(_subprocess PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ProcessBuilder_posix.cpp"
-    )
-elseif(WIN32)
-    target_sources(_subprocess PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/ProcessBuilder_windows.cpp"
-    )
-endif()
+
+# Disable Unity Build for ONLY this target
+set_target_properties(_subprocess PROPERTIES UNITY_BUILD OFF)
+
 target_compile_features(_subprocess PUBLIC cxx_std_20)
+
+set(OCC_3RDPARTY_SUBPROCESS_INCLUDE_DIR
+    "${OCC_INCLUDE_DIR}/occ/3rdparty/subprocess/"
+)
 
 target_include_directories(_subprocess
     PUBLIC
     $<BUILD_INTERFACE:${OCC_INCLUDE_DIR}/occ/3rdparty/subprocess/>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/occ/3rdparty/subprocess/>
 )
+
 
 if("${MSVC}")
     target_compile_options(_subprocess PUBLIC -Zc:__cplusplus)
