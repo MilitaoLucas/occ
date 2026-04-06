@@ -106,7 +106,7 @@ if(WITH_PYTHON_BINDINGS)
     set(BUILD_FPIC ON)
 endif()
 if(WIN32)
-    add_compile_definitions(NOMINMAX)
+    add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)
     #    add_compile_options($<$<CONFIG:Release>:/MT> $<$<CONFIG:Debug>:/MTd>)
 endif()
 
