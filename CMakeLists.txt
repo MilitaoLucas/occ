@@ -4,8 +4,10 @@ set(PROJECT_VERSION_MAJOR "0")
 set(PROJECT_VERSION_MINOR "8")
 set(PROJECT_VERSION_PATCH "8")
 
-project(occ
-    VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+project(
+    occ
+    VERSION
+        "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
     LANGUAGES CXX C
 )
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
@@ -23,10 +25,14 @@ endif()
 
 # Build acceleration options
 option(WITH_CCACHE "Use ccache for faster clean rebuilds (if available)" ON)
-option(WITH_UNITY_BUILD "Enable unity builds (faster clean builds, slower incremental)" OFF)
+option(
+    WITH_UNITY_BUILD
+    "Enable unity builds (faster clean builds, slower incremental)"
+    OFF
+)
 
 # lld is faster on Linux but incompatible with Apple clang on macOS
-if(NOT APPLE)
+if(NOT APPLE AND NOT MSVC)
     option(WITH_LLD "Use lld linker for faster linking (if available)" ON)
 else()
     option(WITH_LLD "Use lld linker for faster linking (if available)" OFF)
@@ -69,40 +75,61 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     option(USE_SYSTEM_EIGEN "Use EIGEN installed on system" OFF)
     option(USE_SYSTEM_TBB "Use TBB installed on system" OFF)
     option(USE_SYSTEM_LIBCINT "Use libcint installed on system" OFF)
-    option(USE_FORTRAN "Enable the use of Fortran in the libraries that can use it" OFF)
+    option(
+        USE_FORTRAN
+        "Enable the use of Fortran in the libraries that can use it"
+        OFF
+    )
     option(USE_QCINT "Use SIMD optimised qcint rather than libcint" OFF)
     option(GG_NO_PRAGMA "Define the __GG_NO_PRAGMA macro" OFF)
     option(EMSCRIPTEN "Using emscripten" OFF)
-    option(ENABLE_JS_BINDINGS "Build JavaScript/WASM bindings using Emscripten" OFF)
+    option(
+        ENABLE_JS_BINDINGS
+        "Build JavaScript/WASM bindings using Emscripten"
+        OFF
+    )
     option(ENABLE_HOST_OPT "Enable -march=native and similar flags" ON)
-    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-      set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-      set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+    if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+        set(CMAKE_BUILD_TYPE
+            Release
+            CACHE STRING
+            "Choose the type of build."
+            FORCE
+        )
+        set_property(
+            CACHE CMAKE_BUILD_TYPE
+            PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+        )
     endif()
 endif()
-if (WITH_PYTHON_BINDINGS)
+if(WITH_PYTHON_BINDINGS)
     set(BUILD_FPIC ON)
-endif ()
+endif()
 if(WIN32)
     add_compile_definitions(NOMINMAX)
-#    add_compile_options($<$<CONFIG:Release>:/MT> $<$<CONFIG:Debug>:/MTd>)
+    #    add_compile_options($<$<CONFIG:Release>:/MT> $<$<CONFIG:Debug>:/MTd>)
 endif()
 
 if("${WITH_PYTHON_BINDINGS}")
-    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module
-	OPTIONAL_COMPONENTS Development.SABIModule)
-    message(STATUS "Enabled python bindings, setting CMAKE_POSITION_INDEPENDENT_CODE globally")
+    find_package(
+        Python
+        REQUIRED
+        COMPONENTS Interpreter Development.Module
+        OPTIONAL_COMPONENTS Development.SABIModule
+    )
+    message(
+        STATUS
+        "Enabled python bindings, setting CMAKE_POSITION_INDEPENDENT_CODE globally"
+    )
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-
-
 if("${USE_OPENMP}")
-find_package(OpenMP)
-if(NOT "${OpenMP_FOUND}")
-  message(STATUS "Could not find OpenMP, building without")
-  set(USE_OPENMP OFF)
-endif()
+    find_package(OpenMP)
+    if(NOT "${OpenMP_FOUND}")
+        message(STATUS "Could not find OpenMP, building without")
+        set(USE_OPENMP OFF)
+    endif()
 endif()
 
 find_package(Threads REQUIRED)
@@ -120,20 +147,30 @@ if("${USE_SYSTEM_TBB}" AND NOT EMSCRIPTEN)
 endif()
 
 if(${EMSCRIPTEN})
-message(STATUS "Emscripten build flags")
-# Disable system TBB for Emscripten builds (we'll use the built-in one)
-set(USE_SYSTEM_TBB OFF CACHE BOOL "System TBB is disabled for Emscripten builds" FORCE)
+    message(STATUS "Emscripten build flags")
+    # Disable system TBB for Emscripten builds (we'll use the built-in one)
+    set(USE_SYSTEM_TBB
+        OFF
+        CACHE BOOL
+        "System TBB is disabled for Emscripten builds"
+        FORCE
+    )
 
-# Set Emscripten-specific compile flags (serial build)
-add_compile_options(-Wno-unused-command-line-argument -matomics -mbulk-memory)
+    # Set Emscripten-specific compile flags (serial build)
+    add_compile_options(
+        -Wno-unused-command-line-argument
+        -matomics
+        -mbulk-memory
+    )
 
-# Set Emscripten-specific linker flags
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s NO_EXIT_RUNTIME=1")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s STACK_SIZE=5MB")
-message(STATUS "${CMAKE_EXE_LINKER_FLAGS}")
+    # Set Emscripten-specific linker flags
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s NO_EXIT_RUNTIME=1")
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1"
+    )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s STACK_SIZE=5MB")
+    message(STATUS "${CMAKE_EXE_LINKER_FLAGS}")
 endif()
-
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM.cmake")
 # don't use install commands from third party
@@ -145,33 +182,38 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     enable_testing()
     add_subdirectory(tests)
 endif()
-if (MSVC)
+if(MSVC)
     add_compile_options(/w)
-endif ()
+endif()
 if("${WITH_CLANG_TIDY}")
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;clang-diagnostic-*,clang-analyzer-*,-*,bugprone*,modernize*,performance*,-modernize-pass-by-value,-modernize-use-auto,-modernize-use-using")
+    set(CMAKE_CXX_CLANG_TIDY
+        "clang-tidy;clang-diagnostic-*,clang-analyzer-*,-*,bugprone*,modernize*,performance*,-modernize-pass-by-value,-modernize-use-auto,-modernize-use-using"
+    )
 endif()
 
 if(${BUILD_DOCS})
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
-	set(DOXYGEN_IN "${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in")
-	set(DOXYGEN_OUT "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out")
-	configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-	message(STATUS "Start building documentation with Doxygen")
-	add_custom_target(docs
-	    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	    COMMENT "Generating documentation with Doxygen"
-	    VERBATIM)
+        set(DOXYGEN_IN "${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in")
+        set(DOXYGEN_OUT "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out")
+        configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+        message(STATUS "Start building documentation with Doxygen")
+        add_custom_target(
+            docs
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating documentation with Doxygen"
+            VERBATIM
+        )
     else(DOXYGEN_FOUND)
-	message(STATUS "Doxygen must be installed to generate documentation")
+        message(STATUS "Doxygen must be installed to generate documentation")
     endif(DOXYGEN_FOUND)
 endif()
 
 include(GNUInstallDirs)
 include(InstallRequiredSystemLibraries)
-install(TARGETS occ
+install(
+    TARGETS occ
     EXPORT occ-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
