@@ -33,7 +33,6 @@ set(occ_libs
     "occ_numint"
     #        "cint"
     "fmt"
-    "tbb"
 )
 
 foreach(libname ${occ_libs})
@@ -160,8 +159,7 @@ if(NOT WIN32)
 "
     )
 endif()
-if(UNIX)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
-    bundle_static_library(occ_main libocc)
-endif()
-
+#if(UNIX)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BundleLibs.cmake)
+bundle_static_library(occ_main libocc)
+#endif()
