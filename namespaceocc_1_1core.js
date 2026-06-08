@@ -1,10 +1,6 @@
 var namespaceocc_1_1core =
 [
-    [ "charges", "namespaceocc_1_1core_1_1charges.html", [
-      [ "eem_partial_charges", "namespaceocc_1_1core_1_1charges.html#afc8eeaf4e95310c70f599a123cb31860", null ],
-      [ "eeq_coordination_numbers", "namespaceocc_1_1core_1_1charges.html#a59d2e91d6545b9ae54aee6a3b58568a4", null ],
-      [ "eeq_partial_charges", "namespaceocc_1_1core_1_1charges.html#a7458ef40901e8bc1cf3e10327619ce50", null ]
-    ] ],
+    [ "charges", "namespaceocc_1_1core_1_1charges.html", "namespaceocc_1_1core_1_1charges" ],
     [ "diis", "namespaceocc_1_1core_1_1diis.html", "namespaceocc_1_1core_1_1diis" ],
     [ "graph", "namespaceocc_1_1core_1_1graph.html", "namespaceocc_1_1core_1_1graph" ],
     [ "linalg", "namespaceocc_1_1core_1_1linalg.html", [
@@ -24,6 +20,7 @@ var namespaceocc_1_1core =
       [ "to_string", "namespaceocc_1_1core_1_1rotor.html#a83d27cb1f9a59dbb3740a5e6d4375530", null ]
     ] ],
     [ "Atom", "structocc_1_1core_1_1Atom.html", "structocc_1_1core_1_1Atom" ],
+    [ "AtomCellList", "classocc_1_1core_1_1AtomCellList.html", "classocc_1_1core_1_1AtomCellList" ],
     [ "Combinations", "classocc_1_1core_1_1Combinations.html", "classocc_1_1core_1_1Combinations" ],
     [ "ConditioningOrthogonalizerResult", "structocc_1_1core_1_1ConditioningOrthogonalizerResult.html", "structocc_1_1core_1_1ConditioningOrthogonalizerResult" ],
     [ "Dimer", "classocc_1_1core_1_1Dimer.html", "classocc_1_1core_1_1Dimer" ],
@@ -47,6 +44,10 @@ var namespaceocc_1_1core =
     [ "TerminalSize", "structocc_1_1core_1_1TerminalSize.html", "structocc_1_1core_1_1TerminalSize" ],
     [ "VibrationalModes", "structocc_1_1core_1_1VibrationalModes.html", "structocc_1_1core_1_1VibrationalModes" ],
     [ "KDTree", "namespaceocc_1_1core.html#acfa0e22cd0e47292fb5034e99d2432cb", null ],
+    [ "AtomMatchingMethod", "namespaceocc_1_1core.html#a900c4b0c0e817535925d528082d3af3b", [
+      [ "NearestNeighborGreedy", "namespaceocc_1_1core.html#a900c4b0c0e817535925d528082d3af3bac999d3de5a76b7cd208f0a63e2a784ca", null ],
+      [ "Hungarian", "namespaceocc_1_1core.html#a900c4b0c0e817535925d528082d3af3ba7b86112ec6401fd8f06ab5251d1a68fe", null ]
+    ] ],
     [ "AxisMethod", "namespaceocc_1_1core.html#a36515067f147def3d0afc6c9ffb41b2f", [
       [ "None", "namespaceocc_1_1core.html#a36515067f147def3d0afc6c9ffb41b2fa6adf97f83acf6453d4a6a4b1070f3754", null ],
       [ "Neighcrys", "namespaceocc_1_1core.html#a36515067f147def3d0afc6c9ffb41b2fa13de7ccdd0b93262dd2948ef6b79b898", null ],
@@ -118,6 +119,11 @@ var namespaceocc_1_1core =
       [ "I", "namespaceocc_1_1core.html#a116490d5f388f6e526b65a85d1c7e8a5add7536794b63bf90eccfd37f9b147d7f", null ],
       [ "Ih", "namespaceocc_1_1core.html#a116490d5f388f6e526b65a85d1c7e8a5a88c76da6f1765be3b493b1a553401488", null ]
     ] ],
+    [ "SpinorbitalKind", "namespaceocc_1_1core.html#a3af0c5c2ee6a3580eba6e1338efa0406", [
+      [ "Restricted", "namespaceocc_1_1core.html#a3af0c5c2ee6a3580eba6e1338efa0406a88a7224cbd336625fbcc1d66d6a8b04b", null ],
+      [ "Unrestricted", "namespaceocc_1_1core.html#a3af0c5c2ee6a3580eba6e1338efa0406a99fc205ab9717bdfa73f4696f622fb33", null ],
+      [ "General", "namespaceocc_1_1core.html#a3af0c5c2ee6a3580eba6e1338efa0406a674aa7e048c3d0b40ecd0dcdb5b7ce71", null ]
+    ] ],
     [ "chemical_formula", "namespaceocc_1_1core.html#a92246b981947e4e0f8af40db12185a2b", null ],
     [ "compute_multipoles", "namespaceocc_1_1core.html#a9ef36df550be7b8380e0fc954abdeb53", null ],
     [ "compute_vibrational_modes", "namespaceocc_1_1core.html#a77c032dde221f4d73319b5db710ade64", null ],
@@ -135,6 +141,7 @@ var namespaceocc_1_1core =
     [ "from_json", "namespaceocc_1_1core.html#a9f197daa6f9b876aa2e0879aeab14563", null ],
     [ "gensqrtinv", "namespaceocc_1_1core.html#ab25be21637f89ed6ac96910483c65e51", null ],
     [ "get_bond_tolerance", "namespaceocc_1_1core.html#a80ea5632e2f6e7ab784b0168c3b67d10", null ],
+    [ "get_spinorbital_kind_from_string", "namespaceocc_1_1core.html#adcd95445a6daa5e169a0560d80443fca", null ],
     [ "inertia_tensor", "namespaceocc_1_1core.html#a9201f84a536bf7194bf669c250db4707", null ],
     [ "label_molecules_by_chemical_formula", "namespaceocc_1_1core.html#a06bd80d9c43fa53a3494e04f9bbb79c6", null ],
     [ "lerp", "namespaceocc_1_1core.html#aec7ecfa2dc83b10e2e48637fdb4726e8", null ],
@@ -151,12 +158,13 @@ var namespaceocc_1_1core =
     [ "quasirandom_kgf", "namespaceocc_1_1core.html#abeb0483db6e31121318847e734ed6cf5", null ],
     [ "rotate_atoms", "namespaceocc_1_1core.html#a8e073a0d2e7882cf21f657c55f73d41c", null ],
     [ "set_bond_tolerance", "namespaceocc_1_1core.html#a062390827251be4cdda8275f26d42230", null ],
+    [ "spinorbital_kind_to_string", "namespaceocc_1_1core.html#acdf5d50ba5a772f08326985f6a2f3144", null ],
     [ "to_json", "namespaceocc_1_1core.html#ab539a0fe1dedd7d494d33ba2aec7157b", null ],
     [ "to_json", "namespaceocc_1_1core.html#ad5c48f070553f2f6bd57719768705bc8", null ],
     [ "total_atomic_mass", "namespaceocc_1_1core.html#aa7cc2ff83621321d05ab7bd860a2bb81", null ],
     [ "total_num_multipole_components", "namespaceocc_1_1core.html#a4c43c80b170febf6fb0c2e6fbaa82d9a", null ],
     [ "translate_atoms", "namespaceocc_1_1core.html#a03ad31d684771525fec5bd1c8d0524a8", null ],
-    [ "try_transformation_with_grouped_permutations", "namespaceocc_1_1core.html#abcf2553ba43ff999b49849a7fdcd1ff2", null ],
+    [ "try_transformation_with_grouped_permutations", "namespaceocc_1_1core.html#ab12b7da8178f1cbb8c077cfb9592c4c5", null ],
     [ "covalent_bond_tolerance", "namespaceocc_1_1core.html#a5ab8e34cdda6bb4f9065e51d0a930d2b", null ],
     [ "max_leaf", "namespaceocc_1_1core.html#a19df90100f5a4ddba86433c350fa160a", null ],
     [ "multipole_component_names", "namespaceocc_1_1core.html#a2c13a8ff8a8712711388809ff8ca9aec", null ]

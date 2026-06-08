@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['shellorder_0',['ShellOrder',['../namespaceocc_1_1gto.html#adfb6b6abb9aeb83b8928392ee43ae894',1,'occ::gto']]],
-  ['source_1',['Source',['../classocc_1_1io_1_1MoldenReader.html#ac815691851c154237c9ca13b5310d227',1,'occ::io::MoldenReader']]],
-  ['spinconstraint_2',['spinconstraint',['../namespaceocc_1_1isosurface.html#ae0568101b819c30a4333eec98499134c',1,'occ::isosurface::SpinConstraint'],['../namespaceocc_1_1main.html#a9154bffbc00f2a7302ceae3d043c3c2d',1,'occ::main::SpinConstraint']]],
-  ['spinorbitalkind_3',['SpinorbitalKind',['../namespaceocc_1_1qm.html#af7593c3db0168047bf727de310e0eeb4',1,'occ::qm']]],
-  ['surfacekind_4',['SurfaceKind',['../namespaceocc_1_1isosurface.html#a54e925e1f128c403a4e138c8de1cf726',1,'occ::isosurface']]]
+  ['radialgridmethod_0',['RadialGridMethod',['../namespaceocc_1_1numint.html#adfae001d345ff26f124a72c71d63856f',1,'occ::numint']]],
+  ['radii_1',['Radii',['../structocc_1_1scrf_1_1Options.html#a0b9411a28016afa046f22632a68ef2cb',1,'occ::scrf::Options']]],
+  ['radiuskind_2',['RadiusKind',['../classocc_1_1isosurface_1_1RadiusMetric.html#aa64744e03a919ce49762b023f568afca',1,'occ::isosurface::RadiusMetric']]],
+  ['reference_3',['Reference',['../structocc_1_1isosurface_1_1OrbitalIndex.html#a7de04a530b8bbf2e95cca3ed9992f6f8',1,'occ::isosurface::OrbitalIndex']]],
+  ['refqmode_4',['RefqMode',['../namespaceocc_1_1disp.html#ae268b9e322e6fbd4f8332f8795e7b59b',1,'occ::disp']]],
+  ['ripolicy_5',['RIPolicy',['../namespaceocc_1_1io.html#a894c92adce9e11c8a1b87d617a658b50',1,'occ::io']]],
+  ['rotor_6',['Rotor',['../namespaceocc_1_1core_1_1rotor.html#ae72a79f0509c18c91fbbe23883c2c2c6',1,'occ::core::rotor']]]
 ];

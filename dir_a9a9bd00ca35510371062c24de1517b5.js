@@ -1,6 +1,7 @@
 var dir_a9a9bd00ca35510371062c24de1517b5 =
 [
     [ "atom.h", "atom_8h.html", "atom_8h" ],
+    [ "atom_cell_list.h", "core_2atom__cell__list_8h.html", "core_2atom__cell__list_8h" ],
     [ "bondgraph.h", "bondgraph_8h.html", "bondgraph_8h" ],
     [ "combinations.h", "combinations_8h.html", "combinations_8h" ],
     [ "conditioning_orthogonalizer.h", "conditioning__orthogonalizer_8h.html", "conditioning__orthogonalizer_8h" ],
@@ -13,6 +14,7 @@ var dir_a9a9bd00ca35510371062c24de1517b5 =
     [ "elastic_tensor.h", "elastic__tensor_8h.html", "elastic__tensor_8h" ],
     [ "element.h", "element_8h.html", "element_8h" ],
     [ "energy_components.h", "energy__components_8h.html", "energy__components_8h" ],
+    [ "format_matrix.h", "format__matrix_8h.html", "format__matrix_8h" ],
     [ "fraction.h", "fraction_8h.html", "fraction_8h" ],
     [ "gensqrtinv.h", "gensqrtinv_8h.html", "gensqrtinv_8h" ],
     [ "graph.h", "graph_8h.html", "graph_8h" ],
@@ -38,6 +40,7 @@ var dir_a9a9bd00ca35510371062c24de1517b5 =
     [ "progress.h", "progress_8h.html", "progress_8h" ],
     [ "quasirandom.h", "quasirandom_8h.html", "quasirandom_8h" ],
     [ "rotor.h", "rotor_8h.html", "rotor_8h" ],
+    [ "spinorbital.h", "core_2spinorbital_8h.html", "core_2spinorbital_8h" ],
     [ "table.h", "table_8h.html", "table_8h" ],
     [ "timings.h", "timings_8h.html", "timings_8h" ],
     [ "units.h", "units_8h.html", "units_8h" ],
