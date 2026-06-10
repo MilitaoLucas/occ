@@ -107,6 +107,16 @@ install_lib_srcs(nlohmann_json::nlohmann_json INAME "include/nlohmann" ITDIR "in
 install_lib_srcs(spdlog::spdlog)
 install_lib_srcs(TBB::tbb INAME "../../include/tbb")
 install_lib_srcs(TBB::tbb INAME "../../include/oneapi")
+if(WIN32 AND TARGET TBB::tbb)
+    install(
+        FILES $<TARGET_FILE:TBB::tbb>
+        DESTINATION bin
+    )
+    install(
+        FILES $<TARGET_LINKER_FILE:TBB::tbb>
+        DESTINATION lib
+    )
+endif()
 #install_lib_srcs(cint BUILD_INCLUDE ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(cint ISFILE NONAMEDIR ITDIR "INCLUDE/../")
 install_lib_srcs(CLI11::CLI11 INAME "../include/CLI")
@@ -135,16 +145,14 @@ if(NOT WIN32)
     install(
         CODE
             "
-    message(STATUS \"Recursively hunting for TBB binaries...\")
     file(GLOB_RECURSE TBB_FOUND
-        \"${CMAKE_BINARY_DIR}/*tbb*.so*\"
-        \"${CMAKE_BINARY_DIR}/*tbb*.a*\"
-        \"${CMAKE_BINARY_DIR}/*tbb*.DLL*\"
+        \"${CMAKE_BINARY_DIR}/libtbb*.so*\"
+        \"${CMAKE_BINARY_DIR}/libtbb*.dylib*\"
     )
 
     list(FILTER TBB_FOUND EXCLUDE REGEX \"cmake_install\")
+    list(FILTER TBB_FOUND EXCLUDE REGEX \"tbbmalloc\")
     if(TBB_FOUND)
-        message(STATUS \"Found and installing: \${TBB_FOUND}\")
         file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/lib\"
              TYPE SHARED_LIBRARY
              FILES \${TBB_FOUND}
@@ -154,7 +162,7 @@ if(NOT WIN32)
              FILES \${TBB_FOUND}
         )
     else()
-        message(WARNING \"Could not find any TBB binaries in ${CMAKE_BINARY_DIR}\")
+        message(WARNING \"Could not find TBB runtime binaries in ${CMAKE_BINARY_DIR}\")
     endif()
 "
     )
