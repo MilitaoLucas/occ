@@ -49,6 +49,15 @@ IntegralEngineDF::IntegralEngineDF(const AtomList &atoms, const ShellList &ao,
   occ::timing::stop(occ::timing::category::la);
 }
 
+IntegralEngineDF::~IntegralEngineDF() {
+  // Release Eigen-owned buffers before the libcint-backed engines are torn down.
+  m_split_rij.reset();
+  m_integral_store.resize(0, 0);
+  V_LLt = CoulombMetric();
+  m_V_LLt_full = CoulombMetric();
+  m_V_LLt_lr = CoulombMetric();
+}
+
 void IntegralEngineDF::set_coulomb_method(CoulombMethod method) {
   m_coulomb_method = method;
   // Reset SplitRIJ if switching away from it
