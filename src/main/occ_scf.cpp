@@ -331,6 +331,7 @@ Wavefunction run_scf_external(occ::io::OccInput config, bool write_wfn) {
 
 void shutdown() {
   occ::log::flush();
+  occ::log::close_log_file();
   occ::timing::clear_all();
 }
 
