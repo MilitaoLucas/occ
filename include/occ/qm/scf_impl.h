@@ -572,6 +572,9 @@ template <SCFMethod P> double SCF<P>::compute_scf_energy() {
             scf_kind(), total_time);
   log::info("{}", ctx.energy.to_string());
   ctx.converged = true;
+  D_diff.resize(0, 0);
+  D_last.resize(0, 0);
+  FD_comm.resize(0, 0);
   return ctx.energy["total"];
 }
 } // namespace occ::qm

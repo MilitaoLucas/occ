@@ -166,6 +166,7 @@ void set_log_file(const std::string &filename) {
   }
   spdlog::set_pattern("%v");
   spdlog::enable_backtrace(32);
+  current_logger->flush_on(spdlog::level::trace);
 }
 
 void close_log_file() {
