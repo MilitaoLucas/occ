@@ -509,15 +509,15 @@ AOBasis AOBasis::load(const AtomList &atoms, const std::string &name) {
   } else {
     json_filepath = canonical_name;
   }
-  occ::gto::io::JsonBasisReader parser(json_filepath);
-  auto element_map = parser.element_map();
 
   std::vector<Shell> shells;
   std::vector<Shell> ecp_shells;
-
   std::vector<int> ecp_electrons(atoms.size(), 0);
   int nsh = 0;
   int nsh_ecp = 0;
+
+  occ::gto::io::JsonBasisReader parser(json_filepath);
+  const auto &element_map = parser.element_map();
 
   for (size_t a = 0; a < atoms.size(); ++a) {
     std::array<double, 3> origin = {atoms[a].x, atoms[a].y, atoms[a].z};
@@ -530,8 +530,9 @@ AOBasis AOBasis::load(const AtomList &atoms, const std::string &name) {
       for (const auto &s : element_basis.electron_shells) {
         // handle general contractions by splitting
         for (int i = 0; i < s.coefficients.size(); i++) {
+          int shell_l = s.angular_momentum[i % s.angular_momentum.size()];
           shells.push_back(
-              Shell(s.angular_momentum[i % s.angular_momentum.size()],
+              Shell(shell_l,
                     s.exponents, {s.coefficients[i]}, origin));
           shells[nsh].incorporate_shell_norm();
           nsh++;
@@ -565,6 +566,7 @@ AOBasis AOBasis::load(const AtomList &atoms, const std::string &name) {
       ecp_electrons[a] = element_basis.ecp_electrons;
     }
   }
+
   AOBasis result(atoms, shells, name, ecp_shells);
   result.set_ecp_electrons(ecp_electrons);
   return result;
