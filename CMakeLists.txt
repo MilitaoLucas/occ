@@ -128,7 +128,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 if(WIN32)
-    add_compile_definitions(NOMINMAX)
+    add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)
+    if(MSVC)
+        add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
+        add_compile_options(/bigobj)
+    endif()
 endif()
 
 if("${WITH_PYTHON_BINDINGS}")
