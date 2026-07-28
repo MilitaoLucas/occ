@@ -5,7 +5,7 @@ var searchData=
   ['scf_5fconvergence_5fsettings_2eh_2',['scf_convergence_settings.h',['../scf__convergence__settings_8h.html',1,'']]],
   ['scf_5fimpl_2eh_3',['scf_impl.h',['../scf__impl_8h.html',1,'']]],
   ['scf_5fmethod_2eh_4',['scf_method.h',['../scf__method_8h.html',1,'']]],
-  ['seminumerical_5fexchange_2eh_5',['seminumerical_exchange.h',['../dft_2seminumerical__exchange_8h.html',1,'(Global Namespace)'],['../qm_2seminumerical__exchange_8h.html',1,'(Global Namespace)']]],
+  ['seminumerical_5fexchange_2eh_5',['seminumerical_exchange.h',['../qm_2seminumerical__exchange_8h.html',1,'(Global Namespace)'],['../dft_2seminumerical__exchange_8h.html',1,'(Global Namespace)']]],
   ['sfunction_5fevaluator_2eh_6',['sfunction_evaluator.h',['../sfunction__evaluator_8h.html',1,'']]],
   ['sfunction_5fresult_2eh_7',['sfunction_result.h',['../sfunction__result_8h.html',1,'']]],
   ['sfunction_5fterm_2eh_8',['sfunction_term.h',['../sfunction__term_8h.html',1,'']]],
@@ -45,8 +45,9 @@ var searchData=
   ['stockholder_5fweight_2eh_42',['stockholder_weight.h',['../stockholder__weight_8h.html',1,'']]],
   ['strain_5fad_2eh_43',['strain_ad.h',['../strain__ad_8h.html',1,'']]],
   ['structure_5fformat_2eh_44',['structure_format.h',['../structure__format_8h.html',1,'']]],
-  ['surface_2eh_45',['surface.h',['../crystal_2surface_8h.html',1,'(Global Namespace)'],['../solvent_2surface_8h.html',1,'(Global Namespace)']]],
-  ['surface_5ftypes_2eh_46',['surface_types.h',['../surface__types_8h.html',1,'']]],
-  ['surfaces_2eh_47',['surfaces.h',['../surfaces_8h.html',1,'']]],
-  ['symmetryoperation_2eh_48',['symmetryoperation.h',['../symmetryoperation_8h.html',1,'']]]
+  ['subgroup_2eh_45',['subgroup.h',['../subgroup_8h.html',1,'']]],
+  ['surface_2eh_46',['surface.h',['../crystal_2surface_8h.html',1,'(Global Namespace)'],['../solvent_2surface_8h.html',1,'(Global Namespace)']]],
+  ['surface_5ftypes_2eh_47',['surface_types.h',['../surface__types_8h.html',1,'']]],
+  ['surfaces_2eh_48',['surfaces.h',['../surfaces_8h.html',1,'']]],
+  ['symmetryoperation_2eh_49',['symmetryoperation.h',['../symmetryoperation_8h.html',1,'']]]
 ];
