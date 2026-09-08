@@ -104,6 +104,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif()
     option(USE_SYSTEM_EIGEN "Use EIGEN installed on system" OFF)
     option(USE_SYSTEM_TBB "Use TBB installed on system" OFF)
+    option(
+        USE_FORTRAN
+        "Enable the use of Fortran in the libraries that can use it"
+        OFF
+    )
     option(USE_QCINT "Use SIMD optimised qcint rather than libcint" OFF)
     option(GG_NO_PRAGMA "Define the __GG_NO_PRAGMA macro" OFF)
     option(EMSCRIPTEN "Using emscripten" OFF)
@@ -128,7 +133,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 if(WIN32)
-    add_compile_definitions(NOMINMAX)
+    add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)
+    if(MSVC)
+        add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
+        add_compile_options(/bigobj)
+    endif()
 endif()
 
 if("${WITH_PYTHON_BINDINGS}")
