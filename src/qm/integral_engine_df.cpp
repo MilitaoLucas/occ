@@ -53,7 +53,6 @@ IntegralEngineDF::~IntegralEngineDF() {
   // Release Eigen-owned buffers before the libcint-backed engines are torn down.
   m_split_rij.reset();
   m_integral_store.resize(0, 0);
-  V_LLt = Eigen::LLT<Mat>();
 }
 
 void IntegralEngineDF::set_coulomb_method(CoulombMethod method) {

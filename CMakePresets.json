@@ -24,8 +24,8 @@
         "ENABLE_HOST_OPT": "OFF",
         "BUILD_DOCS": "OFF",
         "BUILD_TESTING": "OFF",
-        "CMAKE_CXX_FLAGS": "-O2 -march=skylake -static-libgcc -static-libstdc++",
-        "CMAKE_C_FLAGS": "-O2 -march=x86-64-v3 -static-libgcc"
+        "CMAKE_CXX_FLAGS": "-O2 -march=skylake ",
+        "CMAKE_C_FLAGS": "-O2 -march=x86-64-v3 "
       }
     },
 
