@@ -20,6 +20,10 @@ CPMAddPackage(
     VERSION "3.4.0"
 )
 if(NOT "${USE_SYSTEM_TBB}")
+    if (BUILD_SHARED_TBB AND NOT BUILD_SHARED_LIBS)
+        set(BUILD_SHARED_LIBS ON)
+        set(SWITCHED ON)
+    endif()
     set(TBB_OPTIONS "")
     list(APPEND TBB_OPTIONS "TBB_TEST OFF")
     list(APPEND TBB_OPTIONS "TBB_STRICT OFF")
@@ -44,6 +48,9 @@ if(NOT "${USE_SYSTEM_TBB}")
         VERSION "2022.2.0"
         OPTIONS ${TBB_OPTIONS}
     )
+    if (BUILD_SHARED_TBB AND SWITCHED)
+        set(BUILD_SHARED_LIBS OFF)
+    endif()
 endif()
 
 CPMAddPackage(
