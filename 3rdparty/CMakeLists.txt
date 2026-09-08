@@ -162,6 +162,11 @@ else()
     set(LIBCINT_REPOSITORY "peterspackman/libcint")
 endif()
 
+# qcint is unsupported under MSVC; fall back to the MSVC-patched libcint fork.
+if(MSVC AND NOT "${USE_QCINT}")
+    set(LIBCINT_REPOSITORY "MilitaoLucas/libcint")
+endif()
+
 if(
     "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
     AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux"
@@ -170,16 +175,20 @@ if(
 endif()
 if(NOT USE_SYSTEM_LIBCINT)
     # Add compiler flags to fix the implicit function declaration error
-    set(LIBCINT_C_FLAGS
-        "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE"
-    )
+    if(MSVC)
+        set(LIBCINT_C_FLAGS "/Tc /wd4024")
+    else()
+        set(LIBCINT_C_FLAGS
+            "-Wno-implicit-function-declaration -Wno-deprecated-non-prototype -D_GNU_SOURCE"
+        )
+    endif()
 
     CPMAddPackage(
         NAME libcint
         GITHUB_REPOSITORY "${LIBCINT_REPOSITORY}"
         GIT_TAG master
         OPTIONS
-            "WITH_FORTRAN OFF"
+            "WITH_FORTRAN ${USE_FORTRAN}"
             "WITH_CINT2_INTERFACE OFF"
             "ENABLE_STATIC ON"
             "BUILD_SHARED_LIBS OFF"
@@ -191,14 +200,27 @@ if(NOT USE_SYSTEM_LIBCINT)
         VERSION "6.1.2"
     )
 
+    # libcint ships a fragile FindQUADMATH.cmake (check_c_source_compiles based);
+    # replace it with a robust find_library/find_path version for static-linking
+    # quadmath on both Windows and Unix linkers.
+    if(libcint_ADDED)
+        file(
+            COPY_FILE
+                ${CMAKE_MODULE_PATH}/FindQUADMATH.cmake
+                ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake
+        )
+    endif()
+
     # Apply the flags to the target after it's created
     if(TARGET cint)
-        target_compile_options(
-            cint
-            PRIVATE
-                -Wno-implicit-function-declaration
-                -Wno-deprecated-non-prototype
-        )
+        if(NOT MSVC)
+            target_compile_options(
+                cint
+                PRIVATE
+                    -Wno-implicit-function-declaration
+                    -Wno-deprecated-non-prototype
+            )
+        endif()
     endif()
 
     add_library(libcint::libcint INTERFACE IMPORTED GLOBAL)
