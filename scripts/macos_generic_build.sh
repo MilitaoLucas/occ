@@ -16,6 +16,7 @@ cmake . -B"${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_BLAS=ON -DENABL
   -DCMAKE_OSX_ARCHITECTURES="${ARCH}" \
   -DCMAKE_CXX_FLAGS="-O2 -mmacosx-version-min=${MIN_VERSION}" \
   -DCMAKE_C_FLAGS="-O2 -mmacosx-version-min=${MIN_VERSION}" -DUSE_OPENMP=OFF \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DCPACK_SYSTEM_NAME="${NAME}"
 
 cmake --build "${BUILD_DIR}" --target occ
