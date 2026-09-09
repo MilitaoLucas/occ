@@ -210,7 +210,7 @@ public:
 
         std::array<double, N> nodes;
         for (int k = 0; k < N; ++k) {
-            nodes[k] = std::cos(((2 * k + 1) * M_PI) / (2.0 * N)) / 2.0;
+            nodes[k] = std::cos(((2 * k + 1) * BoysConstants<double>::pi) / (2.0 * N)) / 2.0;
         }
 
         std::array<std::array<double, N>, N> T_poly{};
