@@ -98,6 +98,10 @@ jobs:
         rm -f build/*.xz
         ./scripts/${{matrix.script}} "${{matrix.architecture}}" "${{matrix.name}}"
 
+    - name: Setup tmate session
+      if: ${{ failure() }} && runner.os != 'Windows'
+      uses: mxschmitt/action-tmate@v3
+
     - name: ccache stats
       if: runner.os != 'Windows'
       run: ccache -s
