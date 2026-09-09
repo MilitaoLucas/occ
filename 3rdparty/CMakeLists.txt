@@ -207,17 +207,6 @@ if(NOT USE_SYSTEM_LIBCINT)
         VERSION "6.1.2"
     )
 
-    # libcint ships a fragile FindQUADMATH.cmake (check_c_source_compiles based);
-    # replace it with a robust find_library/find_path version for static-linking
-    # quadmath on both Windows and Unix linkers.
-    if(libcint_ADDED)
-        file(
-            COPY_FILE
-                ${CMAKE_MODULE_PATH}/FindQUADMATH.cmake
-                ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake
-        )
-    endif()
-
     # Apply the flags to the target after it's created
     if(TARGET cint)
         if(NOT MSVC)
