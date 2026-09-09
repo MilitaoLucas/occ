@@ -15,7 +15,7 @@ Element::Element(const std::string &s, bool exact_match)
   for (size_t i = ELEMENT_MAX - 1; i > 0; i--) {
     const auto &dat = ELEMENTDATA_TABLE[i];
     const size_t N = std::char_traits<char>::length(dat.symbol);
-    if (symbol.compare(0, N, dat.symbol, 0, N) == 0) {
+    if (symbol.compare(0, N, dat.symbol, N) == 0) {
       if (exact_match && symbol != dat.symbol)
         continue;
       if (N > match_length) {
