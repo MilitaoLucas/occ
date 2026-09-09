@@ -79,7 +79,7 @@ if(WITH_UNITY_BUILD)
     set(CMAKE_UNITY_BUILD_BATCH_SIZE 8)
 endif()
 
-option(BUILD_SHARED_TBB "Build shared TBB" ON)
+option(BUILD_SHARED_TBB "Build shared TBB" OFF)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
     option(BUILD_FPIC "Build with position independent code" OFF)
