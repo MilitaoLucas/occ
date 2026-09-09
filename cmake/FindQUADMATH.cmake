@@ -17,7 +17,12 @@ find_package_handle_standard_args(QUADMATH DEFAULT_MSG QUADMATH_LIBRARY QUADMATH
 
 if(QUADMATH_FOUND)
   if(NOT TARGET quadmath)
-    add_library(quadmath UNKNOWN IMPORTED)
+    # GLOBAL is required: this module is consulted by libcint's own
+    # find_package(QUADMATH), and without GLOBAL the imported target is only
+    # visible inside libcint's directory. It then disappears from cint's
+    # re-exported link interface and the final occ link gets no -lquadmath,
+    # leaving undefined sqrtq/expq/erfq/erfcq/fabsq.
+    add_library(quadmath UNKNOWN IMPORTED GLOBAL)
     set_target_properties(quadmath PROPERTIES
       IMPORTED_LOCATION "${QUADMATH_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${QUADMATH_INCLUDE_DIR}")
