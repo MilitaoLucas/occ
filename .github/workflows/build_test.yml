@@ -52,6 +52,7 @@ jobs:
             name: "windows-x86_64"
             experimental: true
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
     continue-on-error: ${{ matrix.experimental == true }}
     steps:
     - uses: actions/checkout@v5
@@ -99,8 +100,18 @@ jobs:
         ./scripts/${{matrix.script}} "${{matrix.architecture}}" "${{matrix.name}}"
 
     - name: Setup tmate session
+      id: tmate
       if: ${{ failure() }} && runner.os != 'Windows'
       uses: mxschmitt/action-tmate@v3
+      with:
+        timeout-minutes: 15
+        limit-access-to-actor: true
+
+    - name: Print tmate connection
+      if: ${{ failure() }} && runner.os != 'Windows'
+      run: |
+        echo "::notice::SSH  ${{ steps.tmate.outputs.ssh-command }}"
+        echo "::notice::WEB  ${{ steps.tmate.outputs.web-url }}"
 
     - name: ccache stats
       if: runner.os != 'Windows'
