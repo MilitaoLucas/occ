@@ -62,7 +62,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y python3-numpy libpthread-stubs0-dev \
-            doxygen graphviz ninja-build ccache
+            doxygen graphviz ninja-build ccache cmake
 
     - name: Install Dependencies Mac
       if: startsWith(runner.os, 'macOS')
@@ -79,7 +79,6 @@ jobs:
       with:
         path: |
           ${{env.CPM_SOURCE_CACHE}}
-          ${{github.workspace}}/build
         key: ${{ matrix.name }}-occ-build-${{ hashFiles('**/CMakeLists.txt') }}
         restore-keys: |
           ${{ matrix.name }}-occ-build-
