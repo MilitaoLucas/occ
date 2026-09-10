@@ -98,20 +98,6 @@ jobs:
         rm -f build/*.xz
         ./scripts/${{matrix.script}} "${{matrix.architecture}}" "${{matrix.name}}"
 
-    - name: Setup tmate session
-      id: tmate
-      if: ${{ failure() && runner.os != 'Windows' }}
-      uses: mxschmitt/action-tmate@v3
-      with:
-        detached: true
-        limit-access-to-actor: true
-
-    - name: Print tmate connection
-      if: ${{ failure() }} && runner.os != 'Windows'
-      run: |
-        echo "::notice::SSH  ${{ steps.tmate.outputs.ssh-command }}"
-        echo "::notice::WEB  ${{ steps.tmate.outputs.web-url }}"
-
     - name: ccache stats
       if: runner.os != 'Windows'
       run: ccache -s
