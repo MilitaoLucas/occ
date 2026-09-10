@@ -78,7 +78,6 @@ jobs:
       with:
         path: |
           ${{env.CPM_SOURCE_CACHE}}
-          ${{github.workspace}}/build
         key: ${{ matrix.name }}-occ-build-${{ hashFiles('**/CMakeLists.txt') }}
         restore-keys: |
           ${{ matrix.name }}-occ-build-
