@@ -61,7 +61,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y python3-numpy libpthread-stubs0-dev \
-            doxygen graphviz ninja-build ccache
+            doxygen graphviz ninja-build ccache lld
 
     - name: Install Dependencies Mac
       if: startsWith(runner.os, 'macOS')
