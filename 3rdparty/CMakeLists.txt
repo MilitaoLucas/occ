@@ -206,9 +206,6 @@ if(NOT USE_SYSTEM_LIBCINT)
             ${LIBCINT_BUILD_TYPE}
         VERSION "6.1.2"
     )
-    if (libcint_ADDED)
-        file(COPY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindQUADMATH.cmake ${libcint_SOURCE_DIR}/cmake/FindQUADMATH.cmake)
-    endif () 
     # Apply the flags to the target after it's created
     if(TARGET cint)
         if(NOT MSVC)
