@@ -14,6 +14,12 @@ add_library(
     ${OCC_CC_INCLUDE_FILES}
 )
 
+# MSVC spends >25 min (or never finishes) optimising the dozens of distinct
+# Eigen tensor contractions in ccsd.cpp/uccsd.cpp at /O2; the CC code is not on
+# any hot path that matters for the downstream MSVC consumers, so skip it there.
+if(MSVC)
+    target_compile_options(occ_cc_obj PRIVATE /Od /Ob0)
+endif()
 add_library(occ_cc $<TARGET_OBJECTS:occ_cc_obj>)
 target_include_directories(occ_cc_obj PUBLIC ${OCC_INCLUDE_DIR} ${GEMMI_INCLUDE_DIR})
 target_link_libraries(occ_cc_obj PUBLIC occ_qm occ_correlation occ_numint occ_ints)

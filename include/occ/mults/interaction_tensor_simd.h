@@ -4,6 +4,12 @@
 #include <cmath>
 #include <cstring>
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#define MULTS_RESTRICT __restrict
+#else
+#define MULTS_RESTRICT __restrict__
+#endif
+
 // Platform detection (same pattern as sorted_k_distances.h)
 #if !defined(OCC_DISABLE_SIMD) && (defined(__ARM_NEON) || defined(__ARM_NEON__) || defined(__aarch64__) || defined(_M_ARM64))
 #include <arm_neon.h>
@@ -71,9 +77,9 @@ struct InteractionTensorBatch {
 
 template <int MaxL>
 void compute_interaction_tensor_batch_neon(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, 2> &T) {
 
     constexpr int B = 2;
@@ -185,9 +191,9 @@ void compute_interaction_tensor_batch_neon(
 
 template <int MaxL>
 void compute_interaction_tensor_batch_avx2(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, 4> &T) {
 
     constexpr int B = 4;
@@ -284,9 +290,9 @@ void compute_interaction_tensor_batch_avx2(
 
 template <int MaxL, int BatchSize>
 void compute_interaction_tensor_batch_scalar(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, BatchSize> &T) {
 
     constexpr int B = BatchSize;
@@ -378,9 +384,9 @@ void compute_interaction_tensor_batch_scalar(
 
 template <int MaxL>
 inline void compute_interaction_tensor_batch(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, 2> &T) {
     compute_interaction_tensor_batch_neon<MaxL>(Rx, Ry, Rz, T);
 }
@@ -389,9 +395,9 @@ inline void compute_interaction_tensor_batch(
 
 template <int MaxL>
 inline void compute_interaction_tensor_batch(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, 4> &T) {
     compute_interaction_tensor_batch_avx2<MaxL>(Rx, Ry, Rz, T);
 }
@@ -400,9 +406,9 @@ inline void compute_interaction_tensor_batch(
 
 template <int MaxL>
 inline void compute_interaction_tensor_batch(
-    const double *__restrict__ Rx,
-    const double *__restrict__ Ry,
-    const double *__restrict__ Rz,
+    const double *MULTS_RESTRICT Rx,
+    const double *MULTS_RESTRICT Ry,
+    const double *MULTS_RESTRICT Rz,
     InteractionTensorBatch<MaxL, simd_batch_size> &T) {
     compute_interaction_tensor_batch_scalar<MaxL, simd_batch_size>(Rx, Ry, Rz, T);
 }

@@ -1826,7 +1826,8 @@ inline auto ao_tensor_reconstruction_kernel(std::vector<Eigen::Tensor<double, 4>
             integral_value += eri_P(mu, nu) * x(P);
           }
           
-          tensor(mu, nu, rho, sigma) = integral_value;
+          tensor(static_cast<Eigen::Index>(mu), static_cast<Eigen::Index>(nu),
+                 static_cast<Eigen::Index>(rho), static_cast<Eigen::Index>(sigma)) = integral_value;
         }
       }
     }
@@ -1886,7 +1887,8 @@ inline auto ao_tensor_reconstruction_kernel_batched(std::vector<Eigen::Tensor<do
         for (size_t sigma = 0; sigma < nbf; ++sigma) {
           size_t rhosigma_idx = rho * nbf + sigma;
           double integral_value = munuP.dot(X_all.col(rhosigma_idx));
-          tensor(mu, nu, rho, sigma) = integral_value;
+          tensor(static_cast<Eigen::Index>(mu), static_cast<Eigen::Index>(nu),
+                 static_cast<Eigen::Index>(rho), static_cast<Eigen::Index>(sigma)) = integral_value;
         }
       }
     }
