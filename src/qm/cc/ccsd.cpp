@@ -3,7 +3,7 @@
 #include <occ/core/log.h>
 #include <occ/core/timings.h>
 #include <occ/qm/cc/ccsd.h>
-#include <occ/qm/cc/gemm.h> // pcon2 (parallel 2-index contraction)
+#include <occ/qm/cc/gemm.h> // pcon, pcon2, ppermute (parallel contractions and permutes)
 
 // Restricted closed-shell CCSD, a direct port of the thc_cct reference
 // rccsd.py (PySCF/Hirata RCCSD equations). The O(V^4) vvvv ladder term goes
@@ -66,157 +66,197 @@ double ccsd_energy(const T2 &t1, const T4 &t2, const CCIntegrals &eris) {
 
 namespace {
 
-// One CCSD amplitude update. Returns (t1new, t2new) already divided by the
-// orbital-energy denominators (matching rccsd.update_amps).
-std::pair<T2, T4> update_amps(const T2 &t1, const T4 &t2,
-                              const CCIntegrals &e) {
-  const int o = e.nocc, v = e.nvir;
-  const T4 &oooo = e.oooo, &ooov = e.ooov, &oovv = e.oovv, &ovoo = e.ovoo;
-  const T4 &ovov = e.ovov, &ovvo = e.ovvo, &ovvv = e.ovvv;
+// Parallel, out-of-line x.shuffle(perm) for 4-tensors (Odim[k] = dim[perm[k]],
+// the numpy transpose convention). Eigen's shuffle is serial, and inlined into
+// update_amps every one of them was one more expression template for the
+// optimiser: MSVC's /O2 never finished the old single-function update_amps
+// (killed after 4 h 18 min, 14 Sep 2026). Materialising the permutations and
+// splitting the update into the four stages below brought that under a minute.
+T4 perm4(const T4 &x, const Sh4 &perm) {
+  const Eigen::array<Eigen::Index, 4> dims{x.dimension(0), x.dimension(1),
+                                           x.dimension(2), x.dimension(3)};
+  T4 out(dims[perm[0]], dims[perm[1]], dims[perm[2]], dims[perm[3]]);
+  ppermute<4>(out.data(), x.data(), dims, perm);
+  return out;
+}
 
+// The F, L and W intermediates of one amplitude update (correlation parts
+// only; the reference is canonical, so there is no bare Fock in them).
+struct Intermediates {
+  T2 Fov, Foo, Fvv, Loo, Lvv;
+  T4 Woooo, Wvoov, Wvovo;
+};
 
-  const T4 tt = t1t1_outer(t1);    // t1(i,a) t1(j,b) -> (i,j,a,b)
-  const T4 tau = t2 + tt;          // make_tau
-  const T4 z4 = 0.5 * t2 + tt;     // 0.5 t2 + t1t1 (Wvoov/Wvovo)
+void f_and_l_intermediates(const T2 &t1, const T4 &tau, const CCIntegrals &e,
+                           Intermediates &w) {
+  const T4 &ovov = e.ovov, &ovoo = e.ovoo, &ovvv = e.ovvv;
 
-  // --- F intermediates (correlation parts; canonical -> no bare Fock) -----
   // Fov(k,c) = 2 (kc|ld) t1(ld) - (kd|lc) t1(ld)
-  T2 Fov = 2.0 * ovov.contract(t1, IA<2>{ip(2, 0), ip(3, 1)});
-  Fov -= ovov.contract(t1, IA<2>{ip(2, 0), ip(1, 1)});
+  w.Fov = 2.0 * ovov.contract(t1, IA<2>{ip(2, 0), ip(3, 1)});
+  w.Fov -= ovov.contract(t1, IA<2>{ip(2, 0), ip(1, 1)});
 
   // Foo(k,i) = 2 (kc|ld) tau(ilcd) - (kd|lc) tau(ilcd)
-  T2 Foo = 2.0 * ovov.contract(tau, IA<3>{ip(1, 2), ip(2, 1), ip(3, 3)});
-  Foo -= ovov.contract(tau, IA<3>{ip(1, 3), ip(2, 1), ip(3, 2)});
+  w.Foo = 2.0 * ovov.contract(tau, IA<3>{ip(1, 2), ip(2, 1), ip(3, 3)});
+  w.Foo -= ovov.contract(tau, IA<3>{ip(1, 3), ip(2, 1), ip(3, 2)});
 
   // Fvv(a,c) = -2 (kc|ld) tau(klad) + (kd|lc) tau(klad)
-  T2 Fvv = -2.0 * pcon<4, 4, 3>(tau, ovov, IA<3>{ip(0, 0), ip(1, 2), ip(3, 3)});
-  Fvv += pcon<4, 4, 3>(tau, ovov, IA<3>{ip(0, 0), ip(1, 2), ip(3, 1)});
+  w.Fvv =
+      -2.0 * pcon<4, 4, 3>(tau, ovov, IA<3>{ip(0, 0), ip(1, 2), ip(3, 3)});
+  w.Fvv += pcon<4, 4, 3>(tau, ovov, IA<3>{ip(0, 0), ip(1, 2), ip(3, 1)});
 
-  // --- L intermediates ----------------------------------------------------
   // Loo(k,i) = Foo + 2 (lc|ki) t1(lc) - (kc|li) t1(lc)
-  T2 Loo = Foo;
-  Loo += 2.0 * ovoo.contract(t1, IA<2>{ip(0, 0), ip(1, 1)});
-  Loo -= ovoo.contract(t1, IA<2>{ip(2, 0), ip(1, 1)});
+  w.Loo = w.Foo;
+  w.Loo += 2.0 * ovoo.contract(t1, IA<2>{ip(0, 0), ip(1, 1)});
+  w.Loo -= ovoo.contract(t1, IA<2>{ip(2, 0), ip(1, 1)});
 
   // Lvv(a,c) = Fvv + 2 (kd|ac) t1(kd) - (kc|ad) t1(kd)
-  T2 Lvv = Fvv;
-  Lvv += 2.0 * ovvv.contract(t1, IA<2>{ip(0, 0), ip(1, 1)});
-  Lvv -= ovvv.contract(t1, IA<2>{ip(0, 0), ip(3, 1)}).shuffle(Sh2{1, 0});
+  w.Lvv = w.Fvv;
+  w.Lvv += 2.0 * ovvv.contract(t1, IA<2>{ip(0, 0), ip(1, 1)});
+  w.Lvv -= ovvv.contract(t1, IA<2>{ip(0, 0), ip(3, 1)}).shuffle(Sh2{1, 0});
+}
 
-  // --- W intermediates ----------------------------------------------------
+void w_intermediates(const T2 &t1, const T4 &t2, const T4 &tau, const T4 &z4,
+                     const CCIntegrals &e, Intermediates &w) {
+  const T4 &oooo = e.oooo, &oovv = e.oovv, &ovoo = e.ovoo;
+  const T4 &ovov = e.ovov, &ovvo = e.ovvo, &ovvv = e.ovvv;
+
   // Woooo(k,l,i,j)
-  const T4 X_ovoo_t1 = ovoo.contract(t1, IA<1>{ip(1, 1)}); // (l/k, k/l, i/j, j/i)
-  T4 Woooo = X_ovoo_t1.shuffle(Sh4{1, 0, 2, 3});           // "lcki,jc"
-  Woooo += X_ovoo_t1.shuffle(Sh4{0, 1, 3, 2});             // "kclj,ic"
-  Woooo += pcon2(ovov, 1, 3, tau, 2, 3);                   // kcld,ijcd
-  Woooo += oooo.shuffle(Sh4{0, 2, 1, 3});                  // (ki|lj)
+  const T4 X_ovoo_t1 =
+      pcon<4, 2, 1>(ovoo, t1, IA<1>{ip(1, 1)}); // (l/k, k/l, i/j, j/i)
+  w.Woooo = perm4(X_ovoo_t1, Sh4{1, 0, 2, 3});  // "lcki,jc"
+  w.Woooo += perm4(X_ovoo_t1, Sh4{0, 1, 3, 2}); // "kclj,ic"
+  w.Woooo += pcon2(ovov, 1, 3, tau, 2, 3);      // kcld,ijcd
+  w.Woooo += perm4(oooo, Sh4{0, 2, 1, 3});      // (ki|lj)
 
   // Wvoov(a,k,i,c)
-  T4 Wvoov = pcon<4, 2, 1>(ovvv, t1, IA<1>{ip(3, 1)})
-                 .shuffle(Sh4{2, 0, 3, 1}); // kcad,id
-  Wvoov -= ovoo.contract(t1, IA<1>{ip(2, 0)}).shuffle(Sh4{3, 0, 2, 1});   // kcli,la
-  Wvoov += ovvo.shuffle(Sh4{2, 0, 3, 1});                                 // (kc|ai)
-  Wvoov -= pcon2(ovov, 0, 1, z4, 1, 2).shuffle(Sh4{3, 0, 2, 1});       // ldkc,ilda (0.5 t2 + t1t1)
-  Wvoov -= 0.5 * pcon2(ovov, 0, 3, t2, 1, 3).shuffle(Sh4{3, 1, 2, 0}); // lckd,ilad
-  Wvoov += pcon2(ovov, 0, 1, t2, 1, 3).shuffle(Sh4{3, 0, 2, 1});       // ldkc,ilad
+  w.Wvoov = perm4(pcon<4, 2, 1>(ovvv, t1, IA<1>{ip(3, 1)}),
+                  Sh4{2, 0, 3, 1}); // kcad,id
+  w.Wvoov -= perm4(pcon<4, 2, 1>(ovoo, t1, IA<1>{ip(2, 0)}),
+                   Sh4{3, 0, 2, 1});       // kcli,la
+  w.Wvoov += perm4(ovvo, Sh4{2, 0, 3, 1}); // (kc|ai)
+  w.Wvoov -= perm4(pcon2(ovov, 0, 1, z4, 1, 2),
+                   Sh4{3, 0, 2, 1}); // ldkc,ilda (0.5 t2 + t1t1)
+  w.Wvoov -= 0.5 * perm4(pcon2(ovov, 0, 3, t2, 1, 3),
+                         Sh4{3, 1, 2, 0}); // lckd,ilad
+  w.Wvoov += perm4(pcon2(ovov, 0, 1, t2, 1, 3),
+                   Sh4{3, 0, 2, 1}); // ldkc,ilad
 
   // Wvovo(a,k,c,i)
-  T4 Wvovo = pcon<4, 2, 1>(ovvv, t1, IA<1>{ip(1, 1)})
-                 .shuffle(Sh4{1, 0, 2, 3}); // kdac,id
-  Wvovo -= ovoo.contract(t1, IA<1>{ip(0, 0)}).shuffle(Sh4{3, 1, 0, 2});   // lcki,la
-  Wvovo += oovv.shuffle(Sh4{2, 0, 3, 1});                                 // (ki|ac)
-  Wvovo -= pcon2(ovov, 0, 3, z4, 1, 2).shuffle(Sh4{3, 1, 0, 2}); // lckd,ilda (0.5 t2 + t1t1)
+  w.Wvovo = perm4(pcon<4, 2, 1>(ovvv, t1, IA<1>{ip(1, 1)}),
+                  Sh4{1, 0, 2, 3}); // kdac,id
+  w.Wvovo -= perm4(pcon<4, 2, 1>(ovoo, t1, IA<1>{ip(0, 0)}),
+                   Sh4{3, 1, 0, 2});       // lcki,la
+  w.Wvovo += perm4(oovv, Sh4{2, 0, 3, 1}); // (ki|ac)
+  w.Wvovo -= perm4(pcon2(ovov, 0, 3, z4, 1, 2),
+                   Sh4{3, 1, 0, 2}); // lckd,ilda (0.5 t2 + t1t1)
+}
 
-  // --- T1 residual --------------------------------------------------------
-  T2 r1 = t1.contract(Fvv, IA<1>{ip(1, 1)});         // ac,ic
-  r1 -= Foo.contract(t1, IA<1>{ip(0, 0)});           // ki,ka
+// T1 residual (before the denominators)
+T2 t1_residual(const T2 &t1, const T4 &t2, const Intermediates &w,
+               const CCIntegrals &e) {
+  const T4 &ooov = e.ooov, &oovv = e.oovv, &ovvo = e.ovvo, &ovvv = e.ovvv;
+  const T2 &Fov = w.Fov, &Foo = w.Foo, &Fvv = w.Fvv;
+
+  T2 r1 = t1.contract(Fvv, IA<1>{ip(1, 1)});               // ac,ic
+  r1 -= Foo.contract(t1, IA<1>{ip(0, 0)});                 // ki,ka
   r1 += 2.0 * Fov.contract(t2, IA<2>{ip(0, 0), ip(1, 2)}); // kc,kica
   r1 -= Fov.contract(t2, IA<2>{ip(0, 1), ip(1, 2)});       // kc,ikca
   {
-    const T2 y = Fov.contract(t1, IA<1>{ip(0, 0)});  // (c,a)
-    r1 += t1.contract(y, IA<1>{ip(1, 0)});           // kc,ic,ka
+    const T2 y = Fov.contract(t1, IA<1>{ip(0, 0)}); // (c,a)
+    r1 += t1.contract(y, IA<1>{ip(1, 0)});          // kc,ic,ka
   }
-  r1 += 2.0 * ovvo.contract(t1, IA<2>{ip(0, 0), ip(1, 1)}).shuffle(Sh2{1, 0}); // kcai,kc
-  r1 -= oovv.contract(t1, IA<2>{ip(0, 0), ip(3, 1)});                          // kiac,kc
+  r1 += 2.0 * ovvo.contract(t1, IA<2>{ip(0, 0), ip(1, 1)})
+                  .shuffle(Sh2{1, 0});                // kcai,kc
+  r1 -= oovv.contract(t1, IA<2>{ip(0, 0), ip(3, 1)}); // kiac,kc
   r1 += 2.0 * pcon<4, 4, 3>(ovvv, t2, IA<3>{ip(0, 1), ip(1, 3), ip(3, 2)})
                   .shuffle(Sh2{1, 0}); // kdac,ikcd
   r1 -= pcon<4, 4, 3>(ovvv, t2, IA<3>{ip(0, 1), ip(1, 2), ip(3, 3)})
             .shuffle(Sh2{1, 0}); // kcad,ikcd
   {
-    const T2 y = ovvv.contract(t1, IA<2>{ip(0, 0), ip(1, 1)}); // (a,c)
-    r1 += 2.0 * t1.contract(y, IA<1>{ip(1, 1)});               // kdac,kd,ic
+    const T2 y = ovvv.contract(t1, IA<2>{ip(0, 0), ip(1, 1)});  // (a,c)
+    r1 += 2.0 * t1.contract(y, IA<1>{ip(1, 1)});                // kdac,kd,ic
     const T2 y2 = ovvv.contract(t1, IA<2>{ip(0, 0), ip(3, 1)}); // (c,a)
     r1 -= t1.contract(y2, IA<1>{ip(1, 0)});                     // kcad,kd,ic
   }
   r1 -= 2.0 * ooov.contract(t2, IA<3>{ip(0, 0), ip(2, 1), ip(3, 3)}); // kilc,klac
   r1 += ooov.contract(t2, IA<3>{ip(0, 1), ip(2, 0), ip(3, 3)});       // likc,klac
   {
-    const T2 y = ooov.contract(t1, IA<2>{ip(2, 0), ip(3, 1)}); // (k,i)
+    const T2 y = ooov.contract(t1, IA<2>{ip(2, 0), ip(3, 1)});      // (k,i)
     r1 -= 2.0 * t1.contract(y, IA<1>{ip(0, 0)}).shuffle(Sh2{1, 0}); // kilc,lc,ka
-    const T2 y2 = ooov.contract(t1, IA<2>{ip(0, 0), ip(3, 1)}); // (i,k)
-    r1 += y2.contract(t1, IA<1>{ip(1, 0)});                     // likc,lc,ka
+    const T2 y2 = ooov.contract(t1, IA<2>{ip(0, 0), ip(3, 1)});     // (i,k)
+    r1 += y2.contract(t1, IA<1>{ip(1, 0)});                         // likc,lc,ka
   }
+  return r1;
+}
 
+// T2 residual (before the denominators)
+T4 t2_residual(const T2 &t1, const T4 &t2, const T4 &tau,
+               const Intermediates &w, const CCIntegrals &e) {
+  const T4 &ooov = e.ooov, &oovv = e.oovv, &ovov = e.ovov, &ovvo = e.ovvo;
+  const T4 &ovvv = e.ovvv;
 
-  // --- T2 residual --------------------------------------------------------
-  T4 r2 = ovov.shuffle(Sh4{0, 2, 1, 3}); // (ia|jb) -> (i,j,a,b)
-  r2 += pcon2(Woooo, 0, 1, tau, 0, 1); // klij,klab
+  T4 r2 = perm4(ovov, Sh4{0, 2, 1, 3});  // (ia|jb) -> (i,j,a,b)
+  r2 += pcon2(w.Woooo, 0, 1, tau, 0, 1); // klij,klab
   occ::timing::start(occ::timing::category::ccsd_ladder);
   r2 += e.ladder(tau); // vvvv ladder
   occ::timing::stop(occ::timing::category::ccsd_ladder);
   {
-    const T4 b1 = pcon2(ovvv, 1, 3, tau, 3, 2)
-                      .shuffle(Sh4{2, 3, 1, 0}); // kdac,ijcd -> (i,j,a,k)
-    r2 -= b1.contract(t1, IA<1>{ip(3, 0)});      // ijak,kb
-    const T4 b2 = pcon2(ovvv, 1, 3, tau, 2, 3)
-                      .shuffle(Sh4{2, 3, 1, 0}); // kcbd,ijcd -> (i,j,b,k)
-    r2 -= b2.contract(t1, IA<1>{ip(3, 0)}).shuffle(Sh4{0, 1, 3, 2}); // ijbk,ka
+    const T4 b1 = perm4(pcon2(ovvv, 1, 3, tau, 3, 2),
+                        Sh4{2, 3, 1, 0});             // kdac,ijcd -> (i,j,a,k)
+    r2 -= pcon<4, 2, 1>(b1, t1, IA<1>{ip(3, 0)}); // ijak,kb
+    const T4 b2 = perm4(pcon2(ovvv, 1, 3, tau, 2, 3),
+                        Sh4{2, 3, 1, 0}); // kcbd,ijcd -> (i,j,b,k)
+    r2 -= perm4(pcon<4, 2, 1>(b2, t1, IA<1>{ip(3, 0)}),
+                Sh4{0, 1, 3, 2}); // ijbk,ka
   }
+  r2 += sym_ijab(perm4(pcon<2, 4, 1>(w.Lvv, t2, IA<1>{ip(1, 2)}),
+                       Sh4{1, 2, 0, 3}));                    // ac,ijcb
+  r2 -= sym_ijab(pcon<2, 4, 1>(w.Loo, t2, IA<1>{ip(0, 0)})); // ki,kjab
   {
-    const T4 tmp = pcon<2, 4, 1>(Lvv, t2, IA<1>{ip(1, 2)})
-                       .shuffle(Sh4{1, 2, 0, 3}); // ac,ijcb
+    T4 tmp = 2.0 * perm4(pcon2(w.Wvoov, 1, 3, t2, 0, 2),
+                         Sh4{1, 2, 0, 3}); // akic,kjcb
+    tmp -= perm4(pcon2(w.Wvovo, 1, 2, t2, 0, 2),
+                 Sh4{1, 2, 0, 3}); // akci,kjcb
     r2 += sym_ijab(tmp);
   }
-  {
-    const T4 tmp = pcon<2, 4, 1>(Loo, t2, IA<1>{ip(0, 0)}); // ki,kjab
-    r2 -= sym_ijab(tmp);
-  }
-  {
-    T4 tmp = 2.0 * pcon2(Wvoov, 1, 3, t2, 0, 2)
-                       .shuffle(Sh4{1, 2, 0, 3}); // akic,kjcb
-    tmp -= pcon2(Wvovo, 1, 2, t2, 0, 2)
-               .shuffle(Sh4{1, 2, 0, 3}); // akci,kjcb
-    r2 += sym_ijab(tmp);
-  }
-  {
-    const T4 tmp = pcon2(Wvoov, 1, 3, t2, 0, 3)
-                       .shuffle(Sh4{1, 2, 0, 3}); // akic,kjbc
-    r2 -= sym_ijab(tmp);
-  }
-  {
-    const T4 tmp = pcon2(Wvovo, 1, 2, t2, 0, 3)
-                       .shuffle(Sh4{1, 2, 3, 0}); // bkci,kjac
-    r2 -= sym_ijab(tmp);
-  }
+  r2 -= sym_ijab(perm4(pcon2(w.Wvoov, 1, 3, t2, 0, 3),
+                       Sh4{1, 2, 0, 3})); // akic,kjbc
+  r2 -= sym_ijab(perm4(pcon2(w.Wvovo, 1, 2, t2, 0, 3),
+                       Sh4{1, 2, 3, 0})); // bkci,kjac
   {
     // tmp2(a,b,i,c) = -(ki|bc) t1(ka) + (ia|cb form) ovvv[i,a,c,b]
-    T4 tmp2 =
-        -1.0 * pcon<4, 2, 1>(oovv, t1, IA<1>{ip(0, 0)}).shuffle(Sh4{3, 1, 0, 2});
-    tmp2 += ovvv.shuffle(Sh4{1, 3, 0, 2}); // ovvv.transpose(1,3,0,2)
-    const T4 tmp = pcon<4, 2, 1>(tmp2, t1, IA<1>{ip(3, 1)})
-                       .shuffle(Sh4{2, 3, 0, 1}); // abic,jc
-    r2 += sym_ijab(tmp);
+    T4 tmp2 = -1.0 * perm4(pcon<4, 2, 1>(oovv, t1, IA<1>{ip(0, 0)}),
+                           Sh4{3, 1, 0, 2});
+    tmp2 += perm4(ovvv, Sh4{1, 3, 0, 2}); // ovvv.transpose(1,3,0,2)
+    r2 += sym_ijab(perm4(pcon<4, 2, 1>(tmp2, t1, IA<1>{ip(3, 1)}),
+                         Sh4{2, 3, 0, 1})); // abic,jc
   }
   {
     // tmp2(a,k,i,j) = (kc|ai) t1(jc) + ooov.transpose(3,1,2,0)
-    T4 tmp2 =
-        pcon<4, 2, 1>(ovvo, t1, IA<1>{ip(1, 1)}).shuffle(Sh4{1, 0, 2, 3});
-    tmp2 += ooov.shuffle(Sh4{3, 1, 2, 0});
-    const T4 tmp = pcon<4, 2, 1>(tmp2, t1, IA<1>{ip(1, 0)})
-                       .shuffle(Sh4{1, 2, 0, 3}); // akij,kb
-    r2 -= sym_ijab(tmp);
+    T4 tmp2 = perm4(pcon<4, 2, 1>(ovvo, t1, IA<1>{ip(1, 1)}),
+                    Sh4{1, 0, 2, 3});
+    tmp2 += perm4(ooov, Sh4{3, 1, 2, 0});
+    r2 -= sym_ijab(perm4(pcon<4, 2, 1>(tmp2, t1, IA<1>{ip(1, 0)}),
+                         Sh4{1, 2, 0, 3})); // akij,kb
   }
+  return r2;
+}
 
+// One CCSD amplitude update. Returns (t1new, t2new) already divided by the
+// orbital-energy denominators (matching rccsd.update_amps).
+std::pair<T2, T4> update_amps(const T2 &t1, const T4 &t2,
+                              const CCIntegrals &e) {
+  const int o = e.nocc, v = e.nvir;
+
+  const T4 tt = t1t1_outer(t1); // t1(i,a) t1(j,b) -> (i,j,a,b)
+  const T4 tau = t2 + tt;       // make_tau
+  const T4 z4 = 0.5 * t2 + tt;  // 0.5 t2 + t1t1 (Wvoov/Wvovo)
+
+  Intermediates w;
+  f_and_l_intermediates(t1, tau, e, w);
+  w_intermediates(t1, t2, tau, z4, e, w);
+  const T2 r1 = t1_residual(t1, t2, w, e);
+  const T4 r2 = t2_residual(t1, t2, tau, w, e);
 
   // --- divide by denominators --------------------------------------------
   const Vec &mo_e = e.mo_energy;
