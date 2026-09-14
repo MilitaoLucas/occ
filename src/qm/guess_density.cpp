@@ -36,7 +36,7 @@ int minimal_basis_nao(int Z, bool spherical) {
     nao = 5;
   else if (Z <= 18) // Na - Ar
     nao = 9;
-  else if (Z < 20) // K, Ca
+  else if (Z <= 20) // K, Ca
     nao = 13;
   else if (Z <= 36) // Sc - Kr
     nao = spherical ? 18 : 19;
