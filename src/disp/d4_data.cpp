@@ -1,4 +1,5 @@
 #include "d4_data.h"
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <mutex>
@@ -6,6 +7,12 @@
 #include <occ/core/data_directory.h>
 #include <occ/core/log.h>
 #include <stdexcept>
+
+namespace occ::embedded {
+// Generated from share/dftd4/refdata.json, see src/disp/CMakeLists.txt.
+extern const unsigned char d4_refdata_json[];
+extern const std::size_t d4_refdata_json_size;
+} // namespace occ::embedded
 
 namespace occ::disp::d4_data {
 
@@ -19,7 +26,8 @@ std::string locate_refdata() {
   //   1. ${OCC_DATA_PATH}/dftd4/refdata.json
   //   2. ./dftd4/refdata.json
   //   3. ./refdata.json
-  // Mirrors the convention used by Gfn2Parameters::load_default.
+  // Mirrors the convention used by Gfn2Parameters::load_default. An empty
+  // result means "use the embedded copy".
   const char *base = occ::get_data_directory();
   if (base) {
     fs::path p = fs::path(base) / "dftd4" / "refdata.json";
@@ -27,20 +35,10 @@ std::string locate_refdata() {
   }
   if (fs::exists("dftd4/refdata.json")) return "dftd4/refdata.json";
   if (fs::exists("refdata.json")) return "refdata.json";
-  throw std::runtime_error(
-      "Cannot locate DFT-D4 reference data file (looked at "
-      "share/dftd4/refdata.json, dftd4/refdata.json, refdata.json). "
-      "Set OCC_DATA_PATH or run from a directory containing dftd4/refdata.json.");
+  return {};
 }
 
-ReferenceData load_from_json(const std::string &path) {
-  std::ifstream in(path);
-  if (!in) {
-    throw std::runtime_error("Cannot open D4 reference data: " + path);
-  }
-  json j;
-  in >> j;
-
+ReferenceData parse_refdata(const json &j) {
   ReferenceData out;
   // Casimir-Polder weights.
   const auto &cpw = j.at("casimir_polder_weights");
@@ -125,8 +123,20 @@ ReferenceData load_from_json(const std::string &path) {
 const ReferenceData &reference_data() {
   static const ReferenceData data = [] {
     const std::string path = locate_refdata();
+    if (path.empty()) {
+      occ::log::debug("Loading the embedded DFT-D4 reference data");
+      return parse_refdata(json::parse(
+          occ::embedded::d4_refdata_json,
+          occ::embedded::d4_refdata_json + occ::embedded::d4_refdata_json_size));
+    }
     occ::log::debug("Loading DFT-D4 reference data from {}", path);
-    return load_from_json(path);
+    std::ifstream in(path);
+    if (!in) {
+      throw std::runtime_error("Cannot open D4 reference data: " + path);
+    }
+    json j;
+    in >> j;
+    return parse_refdata(j);
   }();
   return data;
 }

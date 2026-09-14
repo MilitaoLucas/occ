@@ -58,8 +58,10 @@ struct ReferenceData {
   }
 };
 
-// Get the cached reference data, lazily loading it from share/dftd4/refdata.json
-// on first call. Throws std::runtime_error if the file cannot be located/parsed.
+// Get the cached reference data, lazily loading it on first call from
+// share/dftd4/refdata.json (OCC_DATA_PATH, then the working directory) or,
+// when no file is found, from the copy compiled into the library.
+// Throws std::runtime_error if the data cannot be parsed.
 const ReferenceData &reference_data();
 
 } // namespace occ::disp::d4_data

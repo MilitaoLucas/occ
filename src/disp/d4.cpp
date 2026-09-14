@@ -1,6 +1,7 @@
 #include <Eigen/Geometry>
 #include "d4_data.h"
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -12,6 +13,12 @@
 #include <stdexcept>
 #include <unordered_map>
 
+
+namespace occ::embedded {
+// Generated from share/dftd4/functionals.json, see src/disp/CMakeLists.txt.
+extern const unsigned char d4_functionals_json[];
+extern const std::size_t d4_functionals_json_size;
+} // namespace occ::embedded
 
 namespace occ::disp {
 
@@ -916,6 +923,8 @@ const std::unordered_map<std::string, D4Damping> &functional_table() {
   static const auto table = [] {
     std::unordered_map<std::string, D4Damping> m;
     namespace fs = std::filesystem;
+    // A file on disk wins; without one the copy compiled into the library
+    // is used, so no OCC_DATA_PATH is needed for D4.
     auto find_path = []() -> std::string {
       const char *base = occ::get_data_directory();
       if (base) {
@@ -924,15 +933,18 @@ const std::unordered_map<std::string, D4Damping> &functional_table() {
       }
       if (fs::exists("dftd4/functionals.json")) return "dftd4/functionals.json";
       if (fs::exists("functionals.json")) return "functionals.json";
-      throw std::runtime_error(
-          "Cannot locate DFT-D4 functional parameter file (looked at "
-          "share/dftd4/functionals.json, dftd4/functionals.json, "
-          "functionals.json). Set OCC_DATA_PATH or run from a directory "
-          "containing dftd4/functionals.json.");
+      return {};
     };
-    std::ifstream in(find_path());
     json j;
-    in >> j;
+    const std::string path = find_path();
+    if (path.empty()) {
+      j = json::parse(occ::embedded::d4_functionals_json,
+                      occ::embedded::d4_functionals_json +
+                          occ::embedded::d4_functionals_json_size);
+    } else {
+      std::ifstream in(path);
+      in >> j;
+    }
     for (const auto &[name, p] : j.at("functionals").items()) {
       D4Damping d{
           p.value("s6", 1.0), p.value("s8", 0.0), p.value("s9", 1.0),
