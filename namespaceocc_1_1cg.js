@@ -23,6 +23,7 @@ var namespaceocc_1_1cg =
     [ "EdgeMorphology", "structocc_1_1cg_1_1EdgeMorphology.html", "structocc_1_1cg_1_1EdgeMorphology" ],
     [ "EnergyTotal", "structocc_1_1cg_1_1EnergyTotal.html", "structocc_1_1cg_1_1EnergyTotal" ],
     [ "FacetMorphology", "structocc_1_1cg_1_1FacetMorphology.html", "structocc_1_1cg_1_1FacetMorphology" ],
+    [ "FreeEnergySummary", "structocc_1_1cg_1_1FreeEnergySummary.html", "structocc_1_1cg_1_1FreeEnergySummary" ],
     [ "InteractionMapper", "classocc_1_1cg_1_1InteractionMapper.html", "classocc_1_1cg_1_1InteractionMapper" ],
     [ "MoleculeResult", "structocc_1_1cg_1_1MoleculeResult.html", "structocc_1_1cg_1_1MoleculeResult" ],
     [ "MorphologyResult", "structocc_1_1cg_1_1MorphologyResult.html", "structocc_1_1cg_1_1MorphologyResult" ],

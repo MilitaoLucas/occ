@@ -22,6 +22,7 @@ var annotated_dup =
         [ "EdgeMorphology", "structocc_1_1cg_1_1EdgeMorphology.html", "structocc_1_1cg_1_1EdgeMorphology" ],
         [ "EnergyTotal", "structocc_1_1cg_1_1EnergyTotal.html", "structocc_1_1cg_1_1EnergyTotal" ],
         [ "FacetMorphology", "structocc_1_1cg_1_1FacetMorphology.html", "structocc_1_1cg_1_1FacetMorphology" ],
+        [ "FreeEnergySummary", "structocc_1_1cg_1_1FreeEnergySummary.html", "structocc_1_1cg_1_1FreeEnergySummary" ],
         [ "InteractionMapper", "classocc_1_1cg_1_1InteractionMapper.html", "classocc_1_1cg_1_1InteractionMapper" ],
         [ "MoleculeResult", "structocc_1_1cg_1_1MoleculeResult.html", "structocc_1_1cg_1_1MoleculeResult" ],
         [ "MorphologyResult", "structocc_1_1cg_1_1MorphologyResult.html", "structocc_1_1cg_1_1MorphologyResult" ],
@@ -185,6 +186,7 @@ var annotated_dup =
         [ "FacetEnergies", "structocc_1_1driver_1_1FacetEnergies.html", "structocc_1_1driver_1_1FacetEnergies" ],
         [ "MethodSpec", "structocc_1_1driver_1_1MethodSpec.html", "structocc_1_1driver_1_1MethodSpec" ],
         [ "MorphologyOptions", "structocc_1_1driver_1_1MorphologyOptions.html", "structocc_1_1driver_1_1MorphologyOptions" ],
+        [ "NamedShape", "structocc_1_1driver_1_1NamedShape.html", "structocc_1_1driver_1_1NamedShape" ],
         [ "SolventSpec", "structocc_1_1driver_1_1SolventSpec.html", "structocc_1_1driver_1_1SolventSpec" ],
         [ "VibrationalAnalysisConfig", "structocc_1_1driver_1_1VibrationalAnalysisConfig.html", "structocc_1_1driver_1_1VibrationalAnalysisConfig" ],
         [ "XTBCrystalGrowthCalculator", "classocc_1_1driver_1_1XTBCrystalGrowthCalculator.html", "classocc_1_1driver_1_1XTBCrystalGrowthCalculator" ]
@@ -609,7 +611,9 @@ var annotated_dup =
       ] ],
       [ "scrf", "namespaceocc_1_1scrf.html", [
         [ "detail", "namespaceocc_1_1scrf_1_1detail.html", [
-          [ "CosmoResponse", "structocc_1_1scrf_1_1detail_1_1CosmoResponse.html", "structocc_1_1scrf_1_1detail_1_1CosmoResponse" ]
+          [ "CosmoResponse", "structocc_1_1scrf_1_1detail_1_1CosmoResponse.html", "structocc_1_1scrf_1_1detail_1_1CosmoResponse" ],
+          [ "MultipoleDamping", "structocc_1_1scrf_1_1detail_1_1MultipoleDamping.html", "structocc_1_1scrf_1_1detail_1_1MultipoleDamping" ],
+          [ "MultipoleKernel", "structocc_1_1scrf_1_1detail_1_1MultipoleKernel.html", "structocc_1_1scrf_1_1detail_1_1MultipoleKernel" ]
         ] ],
         [ "Options", "structocc_1_1scrf_1_1Options.html", "structocc_1_1scrf_1_1Options" ],
         [ "ReactionFieldEngine", "classocc_1_1scrf_1_1ReactionFieldEngine.html", "classocc_1_1scrf_1_1ReactionFieldEngine" ],

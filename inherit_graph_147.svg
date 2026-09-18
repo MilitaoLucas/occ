@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="structocc_1_1driver_1_1CorrelationResult.html" target="_top" xlink:title="Result of a post&#45;HF correlation calculation.">
+<g id="a_Node000000"><a xlink:href="structocc_1_1driver_1_1CorrelationOptions.html" target="_top" xlink:title="Options for a post&#45;HF correlation calculation on a converged SCF wavefunction.">
 <polygon fill="white" stroke="#666666" points="128,-30 0,-30 0,0 128,0 128,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">occ::driver::Correlation</text>
-<text text-anchor="middle" x="64" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Result</text>
+<text text-anchor="middle" x="64" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Options</text>
 </a>
 </g>
 </g>
