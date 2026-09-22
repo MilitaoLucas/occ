@@ -71,6 +71,10 @@ OccInput read_occ_input_file(const std::string path) {
 
   result.method.orbital_smearing_sigma = scf["orbital_smearing_sigma"].value_or(result.method.orbital_smearing_sigma);
 
+  // Second-order SCF
+  result.method.scf_soscf = scf["soscf"].value_or(result.method.scf_soscf);
+  result.method.scf_soscf_rescue = scf["soscf_rescue"].value_or(result.method.scf_soscf_rescue);
+
   // point charges
   result.geometry.point_charge_filename = scf["point_charge_file"].value_or(result.geometry.point_charge_filename);
 

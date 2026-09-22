@@ -63,6 +63,13 @@ struct MethodInput {
   occ::numint::GridSettings dft_grid;
   double integral_precision{1e-12};
   int scf_maxiter{100}; // Maximum number of SCF iterations
+  // Second-order (trust-region augmented-Hessian) SCF, see
+  // <occ/qm/second_order_scf.h>. `scf_soscf` hands over as soon as DIIS
+  // reaches the quadratic region, which costs Fock builds on an easy system
+  // and saves a stalled one; `scf_soscf_rescue` is the fallback that takes
+  // over when DIIS stops making progress at all.
+  bool scf_soscf{false};
+  bool scf_soscf_rescue{true};
   // DFT XC integration: per-grid-batch shell screening tolerance (the |phi|
   // decay cutoff used to drop negligible basis functions over a spatial
   // batch). Larger = more aggressive screening / faster, less accurate. <=0

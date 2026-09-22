@@ -95,6 +95,15 @@ void print_configuration(const Molecule &m, const OccInput &config) {
             m.translational_free_energy(temperature));
 }
 
+// The second-order step belongs to the SCF driver rather than to the method,
+// so every SCF built here takes it from the same two input keys.
+template <typename S>
+void apply_second_order(S &scf, const OccInput &config) {
+  scf.second_order.settings.enabled =
+      config.method.scf_soscf || config.method.scf_soscf_rescue;
+  scf.second_order.settings.request_early = config.method.scf_soscf;
+}
+
 template <typename T, SpinorbitalKind SK>
 Wavefunction run_method(Molecule &m, const occ::gto::AOBasis &basis,
                         const OccInput &config) {
@@ -123,6 +132,7 @@ Wavefunction run_method(Molecule &m, const occ::gto::AOBasis &basis,
 
   SCF<T> scf(proc, SK);
   scf.maxiter = config.method.scf_maxiter;
+  apply_second_order(scf, config);
   scf.set_guess_kind(config.method.guess);
   occ::log::trace("Setting system charge: {}", config.electronic.charge);
   occ::log::trace("Setting system multiplicity: {}",
@@ -215,6 +225,7 @@ Wavefunction run_solvated_method(const Wavefunction &wfn,
                                                config.solvent.radii_scaling);
     SCF<SolvationCorrectedProcedure<DFT>> scf(proc_solv, SK);
     scf.maxiter = config.method.scf_maxiter;
+    apply_second_order(scf, config);
     scf.set_charge_multiplicity(config.electronic.charge,
                                 config.electronic.multiplicity);
     scf.set_initial_guess_from_wfn(wfn);
@@ -230,6 +241,7 @@ Wavefunction run_solvated_method(const Wavefunction &wfn,
                                              config.solvent.radii_scaling);
     SCF<SolvationCorrectedProcedure<T>> scf(proc_solv, SK);
     scf.maxiter = config.method.scf_maxiter;
+    apply_second_order(scf, config);
     scf.set_charge_multiplicity(config.electronic.charge,
                                 config.electronic.multiplicity);
     scf.set_initial_guess_from_wfn(wfn);

@@ -15,6 +15,7 @@
 #include <occ/qm/orthogonalizer.h>
 #include <occ/qm/scf_convergence_settings.h>
 #include <occ/qm/scf_method.h>
+#include <occ/qm/second_order_scf.h>
 #include <occ/gto/shell.h>
 #include <occ/qm/spinorbital.h>
 #include <occ/qm/wavefunction.h>
@@ -124,6 +125,10 @@ template <SCFMethod Procedure> struct SCF {
   double ediff_rel = 0.0;
   double total_time{0.0};
   occ::qm::ConvergenceAccelerator convergence_accelerator;
+  /// The second-order step DIIS hands over to; see
+  /// <occ/qm/second_order_scf.h>. Set `second_order.settings.enabled = false`
+  /// to keep the SCF first-order throughout.
+  occ::qm::SecondOrderSCF<Procedure> second_order;
   bool reset_incremental_fock_formation{false};
   bool incremental_Fbuild_started{false};
   /// Fock builds that accumulated F += G(ΔD) rather than rebuilding from H.

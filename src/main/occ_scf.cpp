@@ -158,6 +158,16 @@ CLI::App *add_scf_subcommand(CLI::App &app) {
                   "maximum number of SCF iterations")
       ->check(CLI::PositiveNumber);
 
+  scf->add_flag("--soscf,!--no-soscf", config->method.scf_soscf,
+                "take second-order (TRAH) steps as soon as the SCF reaches "
+                "the quadratic region, rather than only when DIIS stalls");
+
+  scf->add_flag("--soscf-rescue,!--no-soscf-rescue",
+                config->method.scf_soscf_rescue,
+                "let second-order steps take over when DIIS stops converging "
+                "(on by default)")
+      ->group(kHidden);
+
   scf->add_option("--guess", config->method.guess,
                   "SCF initial guess: auto (default; SOAD where the minimal "
                   "basis covers every element, converged atomic densities "

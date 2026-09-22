@@ -511,20 +511,36 @@ template <SCFMethod P> double SCF<P>::compute_scf_energy() {
     if (diis_error < next_reset_threshold || iter - last_reset_iteration >= 8)
       reset_incremental_fock_formation = true;
 
-    // Level shift the virtuals while the density is still far from converged.
-    //
-    // Adding b * (S - S P_occ S) raises every virtual orbital by b Hartree
-    // and leaves the occupied block alone, which widens the gap the next
-    // diagonalisation sees and stops occupied and virtual orbitals trading
-    // places between cycles. `effective_level_shift` returns zero once the
-    // commutator drops below its threshold, so the converged solution is the
-    // unshifted one and the energy is unaffected.
-    const double shift =
-        convergence_settings.effective_level_shift(diis_error);
-    if (shift != 0.0)
-      apply_level_shift(F_diis, shift);
+    // Hand over to the trust-region second-order step once DIIS stalls, or as
+    // soon as it reaches the quadratic region when that was asked for. The
+    // accelerator keeps being fed so max|FDS-SDF| stays the same convergence
+    // measure either way; only its extrapolated Fock matrix goes unused.
+    if (second_order.consider(*this)) {
+      // An accumulated F belongs to a sum of density differences, not to these
+      // orbitals, and the gradient and Hessian are read off F.
+      ctx.F = ctx.H + m_procedure.compute_fock(ctx.mo, ctx.K);
+      update_scf_energy(false);
+    }
+    if (second_order.active()) {
+      reset_incremental_fock_formation = true;
+      second_order.macro_step(*this, ctx.energy["total"]);
+    } else {
+      // Level shift the virtuals while the density is still far from
+      // converged.
+      //
+      // Adding b * (S - S P_occ S) raises every virtual orbital by b Hartree
+      // and leaves the occupied block alone, which widens the gap the next
+      // diagonalisation sees and stops occupied and virtual orbitals trading
+      // places between cycles. `effective_level_shift` returns zero once the
+      // commutator drops below its threshold, so the converged solution is
+      // the unshifted one and the energy is unaffected.
+      const double shift =
+          convergence_settings.effective_level_shift(diis_error);
+      if (shift != 0.0)
+        apply_level_shift(F_diis, shift);
 
-    ctx.orthogonalizer.orthogonalize_molecular_orbitals(ctx.mo, F_diis);
+      ctx.orthogonalizer.orthogonalize_molecular_orbitals(ctx.mo, F_diis);
+    }
     D_diff = ctx.mo.D - D_last;
 
     const auto tstop = std::chrono::high_resolution_clock::now();
@@ -542,6 +558,14 @@ template <SCFMethod P> double SCF<P>::compute_scf_energy() {
     ctx.converged = convergence_settings.energy_and_commutator_converged(
         ediff_rel, diis_error);
   } while (!ctx.converged && (iter < maxiter));
+
+  // A rotation leaves the occupied and virtual blocks unmixed among
+  // themselves, so second-order orbitals are not canonical and mo.energies is
+  // whatever the last diagonalisation left. F and D commute at convergence, so
+  // this reproduces the same density with canonical orbitals and their
+  // eigenvalues - which is what a wavefunction file wants.
+  if (second_order.active())
+    ctx.orthogonalizer.orthogonalize_molecular_orbitals(ctx.mo, ctx.F);
 
   if (ctx.converged) {
     log::info("{} spinorbital SCF energy converged after {:.5f} seconds",
