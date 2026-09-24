@@ -32,12 +32,75 @@ struct SecondOrderSettings {
   int micro_max{30};
   double trust_max{1.0};
   double trust_first{0.5};
+  /// Radius below which the step is no longer worth taking: a region this
+  /// small says the model is useless, not that the step should be smaller.
+  double trust_min{1e-4};
+  /// The share of the predicted decrease the next step's model error is aimed
+  /// at. Smaller is more cautious; the cube root makes the radius insensitive
+  /// to it, which is why one constant covers every system.
+  double model_error_share{0.1};
   /// Energy rise still attributable to the noise of a Fock build.
   double noise{1e-8};
   /// Largest element of the density perturbation used to difference a Fock
   /// build that is not linear in the density.
   double fd_step{1e-3};
 };
+
+/// The trust radius for the next step, from what the step just taken measured.
+///
+/// The step reports how far it went, what decrease the model promised, what
+/// decrease happened, and whether the radius is what stopped it. The
+/// disagreement between promised and actual is the part of the functional the
+/// quadratic model does not see, |T kappa^3|/6 to leading order, so the cube
+/// root of the factor that error has to change by is how much further the
+/// model is worth trusting, aiming it at `model_error_share` of the predicted
+/// decrease. That replaces a blind x2 after a good step and a blind halving
+/// after a poor one.
+///
+/// A step that stopped short of the boundary was decided by the model, not by
+/// the region, and its error says nothing about how much further the model
+/// would have held: unless it was poor, the radius stays where it is. Sizing
+/// the radius from every step instead collapsed it as the steps shrank towards
+/// convergence - P1 spent seven macro steps per lambda climbing back out of
+/// 1e-3 with level shifts of 3e2 before this line was here.
+///
+/// `taken` is |kappa|. A step that raised the functional (`actual` above the
+/// noise) always shrinks the radius below what it just tried, so the re-solve
+/// in the retained subspace cannot return the same step.
+inline double trust_radius_update(double trust, double taken, double predicted,
+                                  double actual, bool boundary,
+                                  const SecondOrderSettings &settings) {
+  const bool rejected = actual > settings.noise;
+  if (!(predicted < 0.0) || !(taken > 0.0) || !std::isfinite(actual))
+    return std::clamp(rejected ? 0.5 * std::min(trust, taken) : trust,
+                      settings.trust_min, settings.trust_max);
+  // A step the model got right has nothing to say against the region it ran
+  // in: grow if the region is what stopped it, leave it alone otherwise. Only
+  // a step that went badly - or one the energy refused - is sized from how
+  // wrong the model turned out to be, which is where the fixed halving of the
+  // textbook rule wastes Fock builds.
+  if (!rejected && actual / predicted > 0.75)
+    return boundary ? std::clamp(2.0 * trust, settings.trust_min,
+                                 settings.trust_max)
+                    : trust;
+  if (!rejected && actual / predicted > 0.25)
+    return trust;
+  const double error = std::abs(actual - predicted);
+  // A model that was right to rounding has nothing to say against a longer
+  // step; the cap below, not the cube root, is what limits growth there.
+  const double factor =
+      error <= std::abs(predicted) * 1e-8
+          ? 2.0
+          : std::cbrt(settings.model_error_share * std::abs(predicted) / error);
+  const double candidate = taken * factor;
+  if (rejected)
+    return std::clamp(std::min(candidate, 0.7 * std::min(trust, taken)),
+                      settings.trust_min, settings.trust_max);
+  // Bounded against the radius, not against the step: a step well inside a
+  // region that is right to keep must not drag the region down to its length.
+  return std::clamp(std::clamp(candidate, 0.1 * trust, 2.0 * trust),
+                    settings.trust_min, settings.trust_max);
+}
 
 /// Trust-region augmented-Hessian SCF: the second-order step an SCF falls back
 /// on when DIIS stalls, and the one it can be asked to take as soon as the
@@ -99,6 +162,8 @@ private:
   double m_energy{std::numeric_limits<double>::infinity()};
   double m_predicted{0.0};
   bool m_boundary{false};
+  /// Consecutive rejected steps taken at `trust_min`.
+  int m_floored{0};
   int m_micro_total{0};
   Vec m_kappa, m_gradient, m_diagonal_hessian;
   Mat m_C;
@@ -115,6 +180,7 @@ template <SCFMethod P> void SecondOrderSCF<P>::reset() {
   m_energy = std::numeric_limits<double>::infinity();
   m_predicted = 0.0;
   m_boundary = false;
+  m_floored = 0;
   m_micro_total = 0;
   m_kappa.resize(0);
   m_gradient.resize(0);
@@ -448,31 +514,47 @@ void SecondOrderSCF<P>::solve(SCF<P> &scf, const bool extend) {
 }
 
 // A step that raised the energy by more than the noise of a Fock build is
-// rejected: the trust radius halves and the step is re-solved in the subspace
-// the micro-iterations already built, from the orbitals it left. Otherwise the
-// radius follows the ratio of the actual to the predicted decrease (doubled
-// after a good step that reached the boundary, halved after a poor one) and a
+// rejected: the trust radius shrinks below what that step tried and the step is
+// re-solved in the subspace the micro-iterations already built, from the
+// orbitals it left. Otherwise the radius follows `trust_radius_update` and a
 // fresh gradient starts the next macro step.
 template <SCFMethod P>
 void SecondOrderSCF<P>::macro_step(SCF<P> &scf, const double energy) {
   const bool stepped = m_kappa.size() > 0;
+  if (stepped) {
+    const double actual = energy - m_energy;
+    log::info("TRAH: predicted {:.3e}, actual {:.3e} Eh, rho {:.2f}, model "
+              "error {:.1e}",
+              m_predicted, actual,
+              m_predicted < 0 ? actual / m_predicted : 0.0,
+              std::abs(actual - m_predicted));
+    m_trust = trust_radius_update(m_trust, m_kappa.norm(), m_predicted, actual,
+                                  m_boundary, settings);
+  }
   if (stepped && energy > m_energy + settings.noise &&
       m_kappa.cwiseAbs().maxCoeff() > 1e-6) {
-    m_trust = 0.5 * std::min(m_trust, m_kappa.norm());
+    // A region this small is the model saying it is worthless here, not that
+    // the step should be shorter again. Two of those in a row and DIIS gets
+    // the orbitals back rather than the loop grinding out its iteration limit
+    // on steps too short to move anything.
+    m_floored = m_trust <= settings.trust_min * 1.000001 ? m_floored + 1 : 0;
+    if (m_floored >= 2) {
+      log::warn("TRAH: still rising at the smallest trust radius {:.1e}, "
+                "handing the orbitals back to DIIS",
+                settings.trust_min);
+      rotate(scf, m_C, Vec::Zero(m_kappa.size()));
+      m_active = false;
+      settings.enabled = false;
+      return;
+    }
     log::info("TRAH: energy {:.1e} Eh above the orbitals the step left, trust "
-              "radius {:.3f}, step re-solved",
+              "radius {:.3e}, step re-solved",
               energy - m_energy, m_trust);
     solve(scf, false);
     rotate(scf, m_C, m_kappa);
     return;
   }
-  if (stepped && m_predicted < 0) {
-    const double rho = (energy - m_energy) / m_predicted;
-    if (rho > 0.75 && m_boundary)
-      m_trust = std::min(2.0 * m_trust, settings.trust_max);
-    else if (rho < 0.25)
-      m_trust *= 0.5;
-  }
+  m_floored = 0;
   m_energy = energy;
   m_gradient = gradient(scf, m_diagonal_hessian);
   m_B.clear();
