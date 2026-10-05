@@ -326,6 +326,10 @@ var hierarchy =
     [ "occ::qm::JKTriple", "structocc_1_1qm_1_1JKTriple.html", null ],
     [ "occ::gto::io::JsonBasis", "structocc_1_1gto_1_1io_1_1JsonBasis.html", null ],
     [ "occ::gto::io::JsonBasisReader", "structocc_1_1gto_1_1io_1_1JsonBasisReader.html", null ],
+    [ "occ::io::JsonCache", "classocc_1_1io_1_1JsonCache.html", [
+      [ "occ::io::FileJsonCache", "classocc_1_1io_1_1FileJsonCache.html", null ],
+      [ "occ::io::MemoryJsonCache", "classocc_1_1io_1_1MemoryJsonCache.html", null ]
+    ] ],
     [ "occ::io::JsonWavefunctionReader", "structocc_1_1io_1_1JsonWavefunctionReader.html", null ],
     [ "occ::io::JsonWavefunctionWriter", "structocc_1_1io_1_1JsonWavefunctionWriter.html", null ],
     [ "occ::core::KalmanEstimator", "structocc_1_1core_1_1KalmanEstimator.html", null ],
@@ -367,6 +371,7 @@ var hierarchy =
     [ "occ::driver::MethodSpec", "structocc_1_1driver_1_1MethodSpec.html", null ],
     [ "occ::geometry::MIndex", "structocc_1_1geometry_1_1MIndex.html", null ],
     [ "occ::geometry::MIndexHash", "structocc_1_1geometry_1_1MIndexHash.html", null ],
+    [ "occ::isosurface::pointwise::MOFunctor", "structocc_1_1isosurface_1_1pointwise_1_1MOFunctor.html", null ],
     [ "occ::qm::MOIntegralEngine", "classocc_1_1qm_1_1MOIntegralEngine.html", null ],
     [ "occ::io::MoldenReader", "classocc_1_1io_1_1MoldenReader.html", null ],
     [ "occ::core::MolecularAxisCalculator", "classocc_1_1core_1_1MolecularAxisCalculator.html", null ],
@@ -412,6 +417,7 @@ var hierarchy =
     [ "occ::driver::NamedShape", "structocc_1_1driver_1_1NamedShape.html", null ],
     [ "occ::cg::NeighborAtoms", "structocc_1_1cg_1_1NeighborAtoms.html", null ],
     [ "occ::mults::NeighborPair", "structocc_1_1mults_1_1NeighborPair.html", null ],
+    [ "occ::cg::NeighbourBond", "structocc_1_1cg_1_1NeighbourBond.html", null ],
     [ "occ::core::NeighcrysAxisInfo", "structocc_1_1core_1_1NeighcrysAxisInfo.html", null ],
     [ "nested_formatter", null, [
       [ "fmt::formatter< occ::crystal::DimerIndex >", "structfmt_1_1formatter_3_01occ_1_1crystal_1_1DimerIndex_01_4.html", null ],
@@ -549,6 +555,7 @@ var hierarchy =
     [ "occ::mults::SFunctionTerm", "structocc_1_1mults_1_1SFunctionTerm.html", null ],
     [ "occ::mults::SFunctionTermList", "structocc_1_1mults_1_1SFunctionTermList.html", null ],
     [ "occ::mults::SFunctionTermListBuilder", "classocc_1_1mults_1_1SFunctionTermListBuilder.html", null ],
+    [ "occ::cg::ShapeFace", "structocc_1_1cg_1_1ShapeFace.html", null ],
     [ "occ::isosurface::SharpRefineParams", "structocc_1_1isosurface_1_1SharpRefineParams.html", null ],
     [ "occ::gto::Shell", "structocc_1_1gto_1_1Shell.html", null ],
     [ "occ::slater::Shell", "classocc_1_1slater_1_1Shell.html", null ],
