@@ -1,26 +1,27 @@
 #include <CLI/App.hpp>
 #include <filesystem>
-#include <fmt/os.h>
 #include <fmt/format.h>
+#include <fmt/os.h>
 #include <occ/core/log.h>
 #include <occ/crystal/crystal.h>
 #include <occ/crystal/dimer_labeller.h>
 #include <occ/crystal/dimer_mapping_table.h>
+#include <occ/driver/monomer_wavefunctions.h>
+#include <occ/elastic_fit/elastic_fitting.h>
 #include <occ/interaction/ce_energy_model.h>
 #include <occ/interaction/external_energy_model.h>
+#include <occ/interaction/interaction_json.h>
 #include <occ/interaction/lattice_energy.h>
 #include <occ/interaction/pairinteraction.h>
-#include <occ/interaction/interaction_json.h>
 #include <occ/interaction/xtb_energy_model.h>
 #include <occ/io/cifparser.h>
 #include <occ/io/cifwriter.h>
 #include <occ/io/core_json.h>
 #include <occ/io/crystal_json.h>
 #include <occ/io/eigen_json.h>
-#include <occ/driver/monomer_wavefunctions.h>
 #include <occ/main/occ_elat.h>
 #include <occ/qm/wavefunction.h>
-#include <occ/elastic_fit/elastic_fitting.h>
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 using occ::crystal::Crystal;
@@ -190,7 +191,7 @@ void calculate_lattice_energy(const LatticeConvergenceSettings settings) {
 
   std::unique_ptr<occ::interaction::EnergyModelBase> energy_model;
 
-  if (settings.model_name == "xtb") {
+  if (occ::interaction::model_name_implies_xtb(settings.model_name)) {
     energy_model = std::make_unique<XTBEnergyModel>(c);
   } else if (settings.model_name == "external") {
     if (settings.external_command.empty()) {
@@ -200,9 +201,12 @@ void calculate_lattice_energy(const LatticeConvergenceSettings settings) {
     energy_model =
         std::make_unique<ExternalEnergyModel>(c, settings.external_command);
   } else {
+    occ::io::FileJsonCache cache;
     wfns = occ::driver::calculate_wavefunctions(
-        basename, molecules, settings.model_name, settings.spherical_basis);
-    occ::driver::compute_monomer_energies(basename, wfns, settings.model_name);
+        basename, molecules, settings.model_name, settings.spherical_basis,
+        cache);
+    occ::driver::compute_monomer_energies(basename, wfns, settings.model_name,
+                                          cache);
 
     auto ce_model = std::make_unique<CEEnergyModel>(c, wfns, wfns);
     ce_model->set_model_name(settings.model_name);
@@ -216,9 +220,8 @@ void calculate_lattice_energy(const LatticeConvergenceSettings settings) {
 
   const auto &dimers = lattice_energy_result.dimers.unique_dimers;
   if (dimers.size() < 1) {
-    occ::log::error("No dimers found using neighbour radius {:.3f}",
-                    settings.max_radius);
-    exit(0);
+    throw std::runtime_error(fmt::format(
+        "No dimers found using neighbour radius {:.3f}", settings.max_radius));
   }
   std::optional<occ::crystal::CrystalDimers> uc_dimers;
   if (settings.write_all_pairs || settings.run_elastic_fitting) {
@@ -277,7 +280,11 @@ void calculate_lattice_energy(const LatticeConvergenceSettings settings) {
     settings.model_name
   };
 
-  std::string json_filename = fmt::format("{}_elat_results.json", basename);
+  std::string json_filename =
+      settings.output_json_filename.empty()
+          ? fmt::format("{}_elat_results.json", basename)
+          : settings.output_json_filename;
+  occ::log::info("Writing lattice energy results to '{}'", json_filename);
   occ::interaction::write_elat_json(json_filename, elat_results);
 
   // Run elastic fitting if requested
@@ -324,9 +331,12 @@ CLI::App *add_elat_subcommand(CLI::App &app) {
   elat->add_option("crystal", config->crystal_filename,
                    "input crystal structure (CIF)")
       ->required();
-  elat->add_option("-m,--model", config->model_name, "Energy model");
-  elat->add_option("--json", config->output_json_filename,
-                   "JSON filename for output");
+  elat->add_option("-m,--model", config->model_name,
+                   "energy model: ce-b3lyp (default), ce-hf, ce-1p, ce-2p, "
+                   "ce-5p, or gfn2 (also gfn2-xtb, xtb) for tight binding");
+  elat->add_option(
+      "--json", config->output_json_filename,
+      "JSON filename for output (default: {basename}_elat_results.json)");
   elat->add_option("-r,--radius", config->max_radius,
                    "maximum radius (Angstroms) for neighbours");
   elat->add_option("--charges", config->charge_string, "system net charge");

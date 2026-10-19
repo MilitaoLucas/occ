@@ -1,3 +1,4 @@
+#include <numbers>
 #include <Eigen/Eigenvalues>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -693,6 +694,39 @@ inline occ::core::Molecule methane_molecule() {
 }
 } // namespace
 
+TEST_CASE("SMD-xtb: solvation free energy of water", "[xtb][solvation][smd]") {
+  // Characterisation, not a reference. The reaction field is driven by the
+  // full CAMM expansion, damped the way GFN2 damps its own anisotropic
+  // electrostatics, which puts water at -5.6 kcal/mol against -6.31 measured
+  // and -7.9 from DFT/SMD on the same cavity. Anything that changes the
+  // cavity potential moves this; update the number deliberately when it does.
+  using occ::core::Molecule;
+  using occ::xtb::SmdSolvationModel;
+  using occ::xtb::XtbCalculator;
+
+  auto atoms = water_atoms();
+  occ::IVec nums(atoms.size());
+  occ::Mat3N pos_ang(3, atoms.size());
+  for (size_t i = 0; i < atoms.size(); ++i) {
+    nums(i) = atoms[i].atomic_number;
+    pos_ang(0, i) = atoms[i].x / occ::units::ANGSTROM_TO_BOHR;
+    pos_ang(1, i) = atoms[i].y / occ::units::ANGSTROM_TO_BOHR;
+    pos_ang(2, i) = atoms[i].z / occ::units::ANGSTROM_TO_BOHR;
+  }
+  Molecule water(nums, pos_ang);
+
+  XtbCalculator gas(water);
+  const double e_gas = gas.single_point_energy();
+  XtbCalculator solvated(water);
+  solvated.set_solvation_model(std::make_shared<SmdSolvationModel>("water"));
+  const double e_solvated = solvated.single_point_energy();
+
+  const double dg = (e_solvated - e_gas) * occ::units::AU_TO_KJ_PER_MOL;
+  INFO("dG(solv) = " << dg << " kJ/mol");
+  REQUIRE(dg < 0.0);
+  REQUIRE(dg == Approx(-23.58).margin(0.5));
+}
+
 TEST_CASE("SMD-xtb: math invariants (water cavity)",
           "[xtb][solvation][smd]") {
   using occ::xtb::SmdSolvationModel;
@@ -748,6 +782,105 @@ TEST_CASE("SMD-xtb: math invariants (water cavity)",
 
   SECTION("per-element CDS sum matches scalar e_cds()") {
     REQUIRE(m.cds_energy_elements().sum() == Approx(m.e_cds()).margin(1e-12));
+  }
+
+  SECTION("zero multipoles reproduce the charge-only reaction field") {
+    occ::Vec q(3);
+    q << -0.6, 0.3, 0.3;
+    m.update(q);
+    const double e_charges = m.e_es();
+    const occ::Vec v_charges = m.atom_potential();
+
+    m.update(q, occ::Mat3N::Zero(3, 3), occ::Mat::Zero(6, 3));
+    INFO("E_es(charges) = " << e_charges << "  E_es(multipoles) = " << m.e_es());
+    REQUIRE(m.e_es() == Approx(e_charges).margin(1e-12));
+    REQUIRE((m.atom_potential() - v_charges).cwiseAbs().maxCoeff() < 1e-12);
+
+    // The conjugates do not vanish with the moments: ∂E/∂μ is the field the
+    // charge-driven σ exerts at each atom, which is what induces the atomic
+    // dipoles once the SCC is allowed to respond to it.
+    REQUIRE(m.dipole_potential().cwiseAbs().maxCoeff() > 1e-4);
+  }
+
+  SECTION("a quadrupole alone polarises the cavity") {
+    // The benzene case in miniature: no atomic charges and no atomic dipoles,
+    // so a charge-driven reaction field would find nothing to respond to.
+    occ::Mat qp = occ::Mat::Zero(6, 3);
+    qp(0, 0) = 0.5;   // xx
+    qp(2, 0) = 0.5;   // yy
+    qp(5, 0) = -1.0;  // zz — traceless
+    m.update(occ::Vec::Zero(3), occ::Mat3N::Zero(3, 3), qp);
+    INFO("E_es(quadrupole only) = " << m.e_es() * 627.5095 << " kcal/mol");
+    REQUIRE(m.e_es() < 0.0);
+    REQUIRE(std::abs(m.e_es() * 627.5095) > 0.1);
+  }
+
+  SECTION("variational consistency: V_dipole = ∂E_es/∂μ") {
+    // The conjugates the SCC folds into its anisotropic potentials, so an
+    // error here is an error in the Fock matrix.
+    occ::Vec q(3);
+    q << -0.6, 0.3, 0.3;
+    occ::Mat3N dipm(3, 3);
+    dipm << 0.10, 0.07, -0.01, 0.13, 0.01, 0.07, 0.02, -0.03, 0.04;
+    occ::Mat qp = occ::Mat::Zero(6, 3);
+    qp(0, 0) = 0.30;
+    qp(2, 0) = -0.10;
+    qp(5, 0) = -0.20;
+    qp(1, 1) = 0.05;
+
+    m.update(q, dipm, qp);
+    const occ::Mat3N v_analytical = m.dipole_potential();
+
+    const double h = 1e-5;
+    occ::Mat3N v_fd(3, 3);
+    for (Eigen::Index a = 0; a < 3; ++a) {
+      for (int k = 0; k < 3; ++k) {
+        occ::Mat3N dp = dipm, dm = dipm;
+        dp(k, a) += h;
+        dm(k, a) -= h;
+        m.update(q, dp, qp);
+        const double ep = m.e_es();
+        m.update(q, dm, qp);
+        const double em = m.e_es();
+        v_fd(k, a) = (ep - em) / (2 * h);
+      }
+    }
+    INFO("analytical:\n" << v_analytical);
+    INFO("finite-diff:\n" << v_fd);
+    REQUIRE((v_analytical - v_fd).cwiseAbs().maxCoeff() < 1e-9);
+  }
+
+  SECTION("variational consistency: V_quad = ∂E_es/∂Θ") {
+    occ::Vec q(3);
+    q << -0.6, 0.3, 0.3;
+    occ::Mat3N dipm(3, 3);
+    dipm << 0.10, 0.07, -0.01, 0.13, 0.01, 0.07, 0.02, -0.03, 0.04;
+    occ::Mat qp = occ::Mat::Zero(6, 3);
+    qp(0, 0) = 0.30;
+    qp(2, 0) = -0.10;
+    qp(5, 0) = -0.20;
+    qp(1, 1) = 0.05;
+
+    m.update(q, dipm, qp);
+    const occ::Mat v_analytical = m.quadrupole_potential();
+
+    const double h = 1e-5;
+    occ::Mat v_fd(6, 3);
+    for (Eigen::Index a = 0; a < 3; ++a) {
+      for (int p = 0; p < 6; ++p) {
+        occ::Mat qpp = qp, qpm = qp;
+        qpp(p, a) += h;
+        qpm(p, a) -= h;
+        m.update(q, dipm, qpp);
+        const double ep = m.e_es();
+        m.update(q, dipm, qpm);
+        const double em = m.e_es();
+        v_fd(p, a) = (ep - em) / (2 * h);
+      }
+    }
+    INFO("analytical:\n" << v_analytical);
+    INFO("finite-diff:\n" << v_fd);
+    REQUIRE((v_analytical - v_fd).cwiseAbs().maxCoeff() < 1e-9);
   }
 
   SECTION("variational consistency: V_solv = ∂E_es/∂q (CDS factors out)") {
@@ -2302,8 +2435,8 @@ TEST_CASE("XtbCalculator: analytical gradient self-consistency vs FD of the "
   auto g_an = calc.compute_gradient_analytical();
   const double e_an = calc.last_result().total_energy;
 
-  // FD of the SAME charge-only-SCC + native-D4 expression that produced
-  // g_an. (compute_gradient_analytical sets m_last_result to that energy.)
+  // FD of the same energy expression that produced g_an
+  // (compute_gradient_analytical sets m_last_result to that energy).
   // 5-point central differences in Bohr.
   occ::Mat3N g_fd = occ::Mat3N::Zero(3, atoms.size());
   const double h = 1e-3; // Bohr
@@ -2327,12 +2460,9 @@ TEST_CASE("XtbCalculator: analytical gradient self-consistency vs FD of the "
   calc.update_structure(original); // restore
   INFO("analytical:\n" << g_an);
   INFO("FD (same charge-only expr):\n" << g_fd);
-  // Tolerance loosened to ~10 µHa/Bohr: the missing piece is the chain
-  // ∂E_disp/∂q · ∂q_SCC/∂R (CPSCF-style). For SCC-coupled D4 (q from
-  // Mulliken populations of the SCC, not from EEQ) this term requires the
-  // coupled-perturbed SCF response — Phase 5d-equivalent for D4. xtb has
-  // the same gap and accepts it as part of the SCC-coupled-D4 convention.
-  REQUIRE((g_an - g_fd).cwiseAbs().maxCoeff() < 5e-5);
+  // D4 is self-consistent (its charge potential is in H), so there is no
+  // ∂q/∂R response term to miss.
+  REQUIRE((g_an - g_fd).cwiseAbs().maxCoeff() < 1e-5);
   // Translation invariance.
   REQUIRE(g_an.rowwise().sum().norm() < 1e-9);
   // Sanity: the energy is in the right ballpark.
@@ -3443,7 +3573,8 @@ TEST_CASE("Unrestricted GFN2: input validation", "[xtb][native][unrestricted]") 
   REQUIRE_THROWS(odd.single_point_energy());
 
   // The periodic SCC is restricted only and says so at configuration time.
-  occ::crystal::UnitCell cell(10.0, 10.0, 10.0, M_PI / 2, M_PI / 2, M_PI / 2);
+  occ::crystal::UnitCell cell(10.0, 10.0, 10.0, std::numbers::pi_v<double> / 2,
+                              std::numbers::pi_v<double> / 2, std::numbers::pi_v<double> / 2);
   occ::Mat3N frac(3, 1);
   frac << 0.0, 0.0, 0.0;
   occ::IVec nums(1);
@@ -3527,3 +3658,66 @@ TEST_CASE("AOBasis: overlap eigenvalues vs tblite (methane)",
 }
 #endif // OCC_HAVE_TBLITE
 
+
+namespace {
+occ::core::Molecule molecule_from_angstrom(const std::vector<int> &z,
+                                           const std::vector<double> &xyz) {
+  occ::Mat3N pos(3, z.size());
+  occ::IVec nums(z.size());
+  for (size_t i = 0; i < z.size(); ++i) {
+    nums(i) = z[i];
+    for (int k = 0; k < 3; ++k)
+      pos(k, i) = xyz[3 * i + k];
+  }
+  return occ::core::Molecule(nums, pos);
+}
+} // namespace
+
+// Issue #58: polar and charged molecules, where the D4 charge response and the
+// multipole switch both show up in the gradient.
+TEST_CASE("XtbCalculator: analytical gradient matches FD of the energy for "
+          "polar and charged molecules",
+          "[xtb][native][gradient][analytical]") {
+  using occ::xtb::XtbCalculator;
+  const auto methanol = molecule_from_angstrom(
+      {6, 8, 1, 1, 1, 1},
+      {0.710740386051, -0.032987127098, 0.000050626626,   //
+       -0.694980495325, 0.097758941003, 0.000191055761,   //
+       1.078901716537, -0.554107721792, 0.890997615956,   //
+       1.078699360227, -0.554229785921, -0.890911756010,  //
+       1.125163425663, 0.974429848833, -0.000055762213,   //
+       -1.085225432952, -0.776663621225, 0.000823548981});
+  const auto cyclopropenyl_anion = molecule_from_angstrom(
+      {6, 1, 6, 6, 1, 1},
+      {-0.38805807296094, -0.55379677203097, -0.00000516874794,  //
+       1.96428381555042, -0.33618719672166, 0.00000798989796,    //
+       -0.48171296253220, 0.79178857900362, -0.00000671254584,   //
+       0.90831673450787, -0.18163055167206, -0.00000886276546,   //
+       -1.01558024601627, -1.45147946730454, 0.00000575624305,   //
+       -0.98794926854887, 1.73130540872561, 0.00000699791823});
+
+  auto check = [](const occ::core::Molecule &mol, double charge,
+                  bool multipoles) {
+    XtbCalculator calc(mol);
+    calc.set_charge(charge);
+    calc.set_include_multipoles(multipoles);
+    const double e_sp = calc.single_point_energy();
+    const auto [e, g] = calc.compute_energy_and_gradient();
+    const occ::Mat3N g_fd = calc.gradient_numerical(1e-3);
+    const double max_err = (g - g_fd).cwiseAbs().maxCoeff();
+    INFO("charge = " << charge << ", multipoles = " << multipoles);
+    INFO("max |analytical - FD| = " << max_err);
+    // the gradient belongs to the same energy surface as single_point
+    REQUIRE(e == Approx(e_sp).margin(1e-8));
+    REQUIRE(max_err < 1e-5);
+  };
+
+  for (bool multipoles : {true, false}) {
+    SECTION(multipoles ? "methanol, multipoles on" : "methanol, multipoles off") {
+      check(methanol, 0.0, multipoles);
+    }
+    SECTION(multipoles ? "anion, multipoles on" : "anion, multipoles off") {
+      check(cyclopropenyl_anion, -1.0, multipoles);
+    }
+  }
+}

@@ -33,6 +33,7 @@ include(Catch)
 
 add_executable(core_tests "${CMAKE_CURRENT_SOURCE_DIR}/core_tests.cpp")
 target_link_libraries(core_tests PRIVATE occ_core Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(core_tests PRIVATE OCC_TEST_PROJECT_VERSION="${PROJECT_VERSION}")
 catch_discover_tests(core_tests)
 
 add_executable(crystal_tests "${CMAKE_CURRENT_SOURCE_DIR}/crystal_tests.cpp")
@@ -41,6 +42,7 @@ catch_discover_tests(crystal_tests)
 
 add_executable(dft_tests "${CMAKE_CURRENT_SOURCE_DIR}/dft_tests.cpp")
 target_link_libraries(dft_tests PRIVATE occ_dft occ_qm Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(dft_tests PRIVATE OCC_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 catch_discover_tests(dft_tests)
 
 add_executable(dft_gradient_tests "${CMAKE_CURRENT_SOURCE_DIR}/dft_gradient_tests.cpp")
@@ -57,6 +59,7 @@ catch_discover_tests(disp_tests)
 
 add_executable(geometry_tests "${CMAKE_CURRENT_SOURCE_DIR}/geometry_tests.cpp")
 target_link_libraries(geometry_tests PRIVATE occ_geometry occ_io occ_isosurface Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(geometry_tests PRIVATE OCC_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 catch_discover_tests(geometry_tests)
 
 add_executable(gto_tests "${CMAKE_CURRENT_SOURCE_DIR}/gto_tests.cpp")
@@ -77,6 +80,7 @@ catch_discover_tests(io_periodic_grid_tests)
 
 add_executable(wavefunction_io_tests "${CMAKE_CURRENT_SOURCE_DIR}/wavefunction_io_tests.cpp")
 target_link_libraries(wavefunction_io_tests PRIVATE occ_io occ_qm Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(wavefunction_io_tests PRIVATE OCC_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 catch_discover_tests(wavefunction_io_tests)
 
 add_executable(interaction_tests "${CMAKE_CURRENT_SOURCE_DIR}/interaction_tests.cpp")
@@ -149,7 +153,7 @@ target_compile_definitions(xtb_wavefunction_io_tests PRIVATE
 catch_discover_tests(xtb_wavefunction_io_tests)
 
 add_executable(cg_tests "${CMAKE_CURRENT_SOURCE_DIR}/cg_tests.cpp")
-target_link_libraries(cg_tests PRIVATE occ_cg Catch2::Catch2WithMain Threads::Threads)
+target_link_libraries(cg_tests PRIVATE occ_cg occ_driver Catch2::Catch2WithMain Threads::Threads)
 # Resolve the GFN2 parameter file from the source share/ tree at runtime —
 # matches the xtb / xtb_wavefunction_io test executables. Without this
 # the test's DataDirGuard falls back to the relative `"share"` default
@@ -160,10 +164,12 @@ catch_discover_tests(cg_tests)
 
 add_executable(dma_tests "${CMAKE_CURRENT_SOURCE_DIR}/dma_tests.cpp")
 target_link_libraries(dma_tests PRIVATE occ_dma occ_io occ_driver occ_mults Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(dma_tests PRIVATE OCC_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 catch_discover_tests(dma_tests)
 
 add_executable(volume_calculator_tests "${CMAKE_CURRENT_SOURCE_DIR}/volume_calculator_tests.cpp")
 target_link_libraries(volume_calculator_tests PRIVATE occ_isosurface occ_main occ_io occ_crystal Catch2::Catch2WithMain Threads::Threads)
+target_compile_definitions(volume_calculator_tests PRIVATE OCC_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 catch_discover_tests(volume_calculator_tests)
 
 add_executable(mesh_quality_tests "${CMAKE_CURRENT_SOURCE_DIR}/mesh_quality_tests.cpp")

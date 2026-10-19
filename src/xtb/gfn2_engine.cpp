@@ -165,6 +165,16 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
       atomic_numbers(a) = m_atoms[a].atomic_number;
     }
     m_solvation->initialize(positions, atomic_numbers);
+    if (include_multipoles) {
+      // GFN2 damps an atom pair on R_co = ½(R_mp,i + R_mp,j). A cavity point
+      // stands in for solvent sitting against the atom rather than for a bare
+      // point, so it inherits its parent atom's radius and R_co = R_mp(A).
+      // Independently of that reading, this is the strength that reproduces
+      // the DFT/SMD electrostatic term across the FreeSolv subset (mean ratio
+      // 0.99); halving it leaves the σ-framework over-polarised by ~40%.
+      const auto &g = m_params.globals();
+      m_solvation->set_multipole_damping(m_mp_radii, g.aesdmp3, g.aesdmp5);
+    }
   }
 
   // Build atom-centered Bra/Ket AO multipole matrices and the molecular
@@ -194,8 +204,8 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
                         : 0.0;
   const Mat W = unrestricted ? spin_coupling(opts.spin_polarization) : Mat();
 
-  // Re-evaluated each SCC iteration at the current charges, matching xtb's
-  // self-consistent D4 to within a few µHa.
+  // Self-consistent, as in xtb: its charge potential enters H each iteration
+  // and its energy is evaluated at the output charges.
   std::optional<occ::disp::D4Dispersion> native_d4;
   if (opts.include_dispersion) {
     native_d4.emplace(m_atoms);
@@ -265,7 +275,15 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
     const Vec &qsh = state.shell_charges;
     const Vec atom_q = shell_to_atom(qsh, m_shells.atom, n_atoms);
     if (m_solvation) {
-      m_solvation->update(atom_q);
+      // With multipoles on, the cavity is driven by the full atom-centred
+      // expansion — charges alone leave a molecule like benzene, whose atomic
+      // charges nearly vanish, barely polarising the continuum at all.
+      if (include_multipoles) {
+        m_solvation->update(atom_q, state.multipoles.dipm,
+                            state.multipoles.qp);
+      } else {
+        m_solvation->update(atom_q);
+      }
     }
 
     // Isotropic + third-order shell potential.
@@ -279,6 +297,16 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
       const Vec &v_solv = m_solvation->atom_potential();
       for (Eigen::Index s = 0; s < V.size(); ++s) {
         V(s) += v_solv(m_shells.atom[s]);
+      }
+    }
+    // D4 depends on the charges, so ∂E_disp/∂q shifts H like any other
+    // atom-resolved potential. Without it the density is not variational in
+    // the dispersion energy and the analytical gradient misses its response.
+    if (native_d4) {
+      native_d4->set_charges(atom_q);
+      const Vec v_disp = native_d4->charge_potential();
+      for (Eigen::Index s = 0; s < V.size(); ++s) {
+        V(s) += v_disp(m_shells.atom[s]);
       }
     }
 
@@ -295,6 +323,11 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
     if (include_multipoles) {
       auto pot = anisotropic_potentials_ewald(
           m_atoms, atom_q, state.multipoles, m_mp_tensors, m_params);
+      if (m_solvation) {
+        // The solvation vs is already in V above, via the shell loop.
+        add_multipole_potentials(pot, m_solvation->dipole_potential(),
+                                 m_solvation->quadrupole_potential());
+      }
       apply_anisotropic_h1_periodic(H, m_S, m_mp_ao.D_ket, m_mp_ao.D_bra,
                                      m_mp_ao.Q_ket, m_mp_ao.Q_bra,
                                      m_bf_to_atom, pot);
@@ -426,8 +459,13 @@ SccResult Gfn2Engine::single_point(const SccOptions &opts,
     // Snapshotted every cycle, so an unconverged return still carries a
     // coherent (energy, density, charges) triple from the last one.
     if (converged && m_solvation) {
-      // Report the per-element decomposition at the same q as the energy.
-      m_solvation->update(atom_q_new);
+      // Report the per-element decomposition at the same state as the energy.
+      if (include_multipoles) {
+        m_solvation->update(atom_q_new, fresh.multipoles.dipm,
+                            fresh.multipoles.qp);
+      } else {
+        m_solvation->update(atom_q_new);
+      }
     }
     result.scc_energy = scc_energy;
     result.repulsion_energy = m_e_rep;

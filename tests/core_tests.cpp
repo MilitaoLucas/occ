@@ -21,6 +21,7 @@
 #include <occ/core/table.h>
 #include <occ/core/timings.h>
 #include <occ/core/util.h>
+#include <occ/core/version.h>
 
 /* Dimer tests */
 using occ::core::Dimer;
@@ -106,6 +107,34 @@ TEST_CASE("Element constructor", "[element]") {
   REQUIRE(Element("Ne") > Element("H"));
   REQUIRE(Element("NA").symbol() == "N");
   REQUIRE(Element("Na").symbol() == "Na");
+}
+
+TEST_CASE("Element lookup covers the whole table", "[element]") {
+  using occ::core::Element;
+  REQUIRE(Element("Lr").atomic_number() == 103);
+  REQUIRE(Element(103).symbol() == "Lr");
+}
+
+TEST_CASE("Element exact match rejects labels", "[element]") {
+  using occ::core::Element;
+  REQUIRE(Element("He1", true).atomic_number() == 0);
+  REQUIRE(Element("He", true).atomic_number() == 2);
+}
+
+TEST_CASE("Element rejects out of range atomic numbers", "[element]") {
+  using occ::core::Element;
+  REQUIRE_THROWS_AS(Element(104), std::out_of_range);
+  REQUIRE_THROWS_AS(Element(-1), std::out_of_range);
+}
+
+TEST_CASE("Element dummy has zero polarizability", "[element]") {
+  using occ::core::Element;
+  REQUIRE(Element(0).polarizability(false) == 0.0);
+}
+
+TEST_CASE("Element unknown symbol gives dummy", "[element]") {
+  using occ::core::Element;
+  REQUIRE(Element("Q").symbol() == "Xx");
 }
 
 // Molecule
@@ -1050,4 +1079,13 @@ TEST_CASE("Coincident atoms are rejected up front", "[molecule][geometry]") {
     pinched(1, 2) = 0.4;
     REQUIRE_NOTHROW(validate_geometry(Molecule(water_numbers, pinched)));
   }
+}
+
+TEST_CASE("Build info identifies the version and commit", "[version]") {
+  // the project version, as set in CMakeLists.txt
+  REQUIRE(occ::version() == OCC_TEST_PROJECT_VERSION);
+  // a commit hash (optionally -dirty), or "unknown" outside a git checkout
+  REQUIRE_FALSE(occ::git_commit().empty());
+  REQUIRE(occ::version_string() ==
+          fmt::format("{} ({})", occ::version(), occ::git_commit()));
 }

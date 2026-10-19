@@ -1,16 +1,29 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <occ/cg/cg_json.h>
 #include <occ/cg/distance_partition.h>
 #include <occ/cg/neighbor_atoms.h>
 #include <occ/cg/result_types.h>
+#include <occ/cg/smd_solvation.h>
 #include <occ/cg/solvation_data.h>
 #include <occ/core/data_directory.h>
+#include <occ/core/molecule.h>
 #include <occ/core/units.h>
+#include <occ/driver/crystal_growth.h>
+#include <occ/driver/crystal_morphology.h>
+#include <occ/driver/monomer_wavefunctions.h>
+#include <occ/io/json_cache.h>
 #include <occ/solvent/surface.h>
 #include <occ/xtb/smd_xtb.h>
 #include <occ/xtb/xtb_calculator.h>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #ifndef OCC_GFN2_DATA_DIR
 #define OCC_GFN2_DATA_DIR "share"
@@ -676,6 +689,108 @@ TEST_CASE("CG: xtb SMD surfaces partition through acetic-acid crystal",
   CHECK(neighbours_with_assignment > 0);
 }
 
+namespace {
+
+occ::core::Molecule water_molecule() {
+  occ::IVec nums(3);
+  nums << 8, 1, 1;
+  occ::Mat3N pos(3, 3);
+  pos << 0.0, 0.0, 0.0,         // x
+      0.0, 0.7572, -0.7572,     // y
+      0.1173, -0.4692, -0.4692; // z
+  return occ::core::Molecule(nums, pos);
+}
+
+// A fresh directory per test case, so files cached by an earlier run cannot
+// satisfy a lookup the test expects to miss.
+std::filesystem::path fresh_directory(const std::string &name) {
+  const auto dir =
+      std::filesystem::temp_directory_path() / "occ_cg_tests" / name;
+  std::filesystem::remove_all(dir);
+  std::filesystem::create_directories(dir);
+  return dir;
+}
+
+} // namespace
+
+TEST_CASE("CG: wavefunction cache is recomputed at a different basis",
+          "[cg][cache]") {
+  occ::io::MemoryJsonCache cache;
+  const auto first = occ::driver::calculate_wavefunction(
+      water_molecule(), "water_0", "hf", "3-21g", false, cache);
+  const auto second = occ::driver::calculate_wavefunction(
+      water_molecule(), "water_0", "hf", "sto-3g", false, cache);
+  REQUIRE(first.basis.name() == "3-21g");
+  REQUIRE(second.basis.name() == "sto-3g");
+}
+
+TEST_CASE("CG: monomer energy cache is reused only for the model that wrote it",
+          "[cg][cache]") {
+  occ::io::MemoryJsonCache cache;
+  auto wavefunctions = occ::driver::calculate_wavefunctions(
+      "water", {water_molecule()}, "hf", "3-21g", false, cache);
+  const auto cached_model = [&cache]() {
+    return cache.load("water_0_monomer_energies.json")
+        ->value("model", std::string{});
+  };
+
+  occ::driver::compute_monomer_energies("water", wavefunctions, "ce-hf", cache);
+  REQUIRE(cached_model() == "CE-HF");
+  occ::driver::compute_monomer_energies("water", wavefunctions, "ce-b3lyp",
+                                        cache);
+  REQUIRE(cached_model() == "CE-B3LYP");
+}
+
+TEST_CASE("CG: solvated wavefunction cache is recomputed at a different basis",
+          "[cg][cache][solvation]") {
+  occ::io::MemoryJsonCache cache;
+  const std::vector<occ::core::Molecule> molecules{water_molecule()};
+
+  occ::cg::SMDSettings settings;
+  settings.basis = "3-21g";
+  const auto gas = occ::driver::calculate_wavefunctions(
+      "gas_321g", molecules, settings.method, settings.basis, false, cache);
+  occ::cg::SMDCalculator first("water", molecules, gas, "water", cache,
+                               settings);
+  REQUIRE(first.calculate().wavefunctions[0].basis.name() == "3-21g");
+
+  settings.basis = "sto-3g";
+  const auto gas_sto3g = occ::driver::calculate_wavefunctions(
+      "gas_sto3g", molecules, settings.method, settings.basis, false, cache);
+  occ::cg::SMDCalculator second("water", molecules, gas_sto3g, "water", cache,
+                                settings);
+  REQUIRE(second.calculate().wavefunctions[0].basis.name() == "sto-3g");
+}
+
+TEST_CASE("CG: SMD solvation runs at Hartree-Fock as well as DFT",
+          "[cg][solvation]") {
+  // CE-HF hands SMD the method "hf", which is not a DFT functional.
+  occ::io::MemoryJsonCache cache;
+  const std::vector<occ::core::Molecule> molecules{water_molecule()};
+  occ::cg::SMDSettings settings;
+  settings.basis = "sto-3g";
+
+  settings.method = "hf";
+  const auto gas_hf = occ::driver::calculate_wavefunctions(
+      "gas_hf", molecules, "hf", settings.basis, false, cache);
+  occ::cg::SMDCalculator hf("water_hf", molecules, gas_hf, "water", cache,
+                            settings);
+  const auto hf_result = hf.calculate();
+
+  settings.method = "b3lyp";
+  const auto gas_b3lyp = occ::driver::calculate_wavefunctions(
+      "gas_b3lyp", molecules, "b3lyp", settings.basis, false, cache);
+  occ::cg::SMDCalculator b3lyp("water_b3lyp", molecules, gas_b3lyp, "water",
+                               cache, settings);
+  const auto b3lyp_result = b3lyp.calculate();
+
+  const double e_hf = hf_result.surfaces[0].total_solvation_energy;
+  const double e_b3lyp = b3lyp_result.surfaces[0].total_solvation_energy;
+  REQUIRE(e_hf < 0.0);
+  REQUIRE(e_b3lyp < 0.0);
+  REQUIRE(e_hf != Approx(e_b3lyp).epsilon(1e-6));
+}
+
 TEST_CASE("CG: from_xtb_surfaces handles CPCM-X (no cds)",
           "[cg][xtb][solvation]") {
   // Synthesise an xtb SolvationSurfaces with only the coulomb branch and
@@ -696,4 +811,333 @@ TEST_CASE("CG: from_xtb_surfaces handles CPCM-X (no cds)",
   CHECK(cg_s.find("cds") == nullptr);
   CHECK(coulomb->total_energy() == Approx(-0.05).margin(1e-12));
   CHECK(cg_s.total_solvation_energy == Approx(-0.05).margin(1e-12));
+}
+
+TEST_CASE("CG: xtb growth calculator with no solvation stays in the gas phase",
+          "[cg][xtb][solvation]") {
+  occ::driver::CrystalGrowthCalculatorOptions opts;
+  opts.solvation_model = occ::driver::SolvationModelKind::None;
+  opts.cache = std::make_shared<occ::io::MemoryJsonCache>();
+  occ::driver::XTBCrystalGrowthCalculator calc(acetic_acid_crystal(), opts);
+  calc.init_monomer_energies();
+
+  REQUIRE_FALSE(calc.m_gas_phase_energies.empty());
+  REQUIRE(calc.m_solvated_energies == calc.m_gas_phase_energies);
+  for (auto &surfaces : calc.solvated_surface_properties())
+    REQUIRE(surfaces.total_energy() == 0.0);
+}
+
+TEST_CASE("CG: xtb monomers are reused from a shared in-memory cache",
+          "[cg][xtb][cache]") {
+  occ::driver::CrystalGrowthCalculatorOptions opts;
+  opts.solvation_model = occ::driver::SolvationModelKind::None;
+  auto cache = std::make_shared<occ::io::MemoryJsonCache>();
+  opts.cache = cache;
+
+  occ::driver::XTBCrystalGrowthCalculator first(acetic_acid_crystal(), opts);
+  first.init_monomer_energies();
+  REQUIRE(cache->size() == first.m_gas_phase_energies.size());
+
+  occ::driver::XTBCrystalGrowthCalculator second(acetic_acid_crystal(), opts);
+  second.init_monomer_energies();
+  REQUIRE(cache->size() == first.m_gas_phase_energies.size());
+  REQUIRE(second.m_gas_phase_energies == first.m_gas_phase_energies);
+  REQUIRE(second.m_solvated_energies == first.m_solvated_energies);
+}
+
+TEST_CASE("CG: without caching, a lattice energy leaves nothing on disk",
+          "[cg][xtb][cache]") {
+  const auto dir = fresh_directory("no_cache");
+  occ::driver::CrystalGrowthCalculatorOptions opts;
+  opts.solvation_model = occ::driver::SolvationModelKind::None;
+  opts.basename = (dir / "acetic_acid").string();
+  opts.cache = std::make_shared<occ::io::MemoryJsonCache>();
+  opts.cache_pair_energies = false;
+
+  occ::driver::XTBCrystalGrowthCalculator calc(acetic_acid_crystal(), opts);
+  calc.init_monomer_energies();
+  calc.converge_lattice_energy();
+
+  REQUIRE(std::filesystem::is_empty(dir));
+}
+
+TEST_CASE("CG: xtb growth calculator rejects cosmo-rs",
+          "[cg][xtb][solvation]") {
+  occ::driver::CrystalGrowthCalculatorOptions opts;
+  opts.solvation_model = occ::driver::SolvationModelKind::CosmoRS;
+  REQUIRE_THROWS_AS(
+      [&] {
+        occ::driver::XTBCrystalGrowthCalculator calc(acetic_acid_crystal(),
+                                                     opts);
+      }(),
+      std::invalid_argument);
+}
+
+TEST_CASE("CG: morphology shape files", "[cg][morphology]") {
+  using occ::driver::read_morphology_shape;
+
+  SECTION("faces, with comments and blank lines") {
+    std::istringstream input(
+        "# a needle along c\n1 0 0 1.0\n\n0 1 0 1.0  # sides\n0 0 1 6.5\n");
+    const auto shape = read_morphology_shape(input);
+    REQUIRE(shape.size() == 3);
+    REQUIRE(shape[2].first == occ::crystal::HKL{0, 0, 1});
+    REQUIRE(shape[2].second == 6.5);
+  }
+
+  SECTION("malformed or empty input is an error") {
+    for (const std::string text :
+         {"1 0 0\n", "1 0 0 -2.0\n", "1 0 0 1.0 extra\n", "a b c 1\n",
+          "# nothing\n"}) {
+      INFO(text);
+      std::istringstream input(text);
+      REQUIRE_THROWS_AS(read_morphology_shape(input), std::invalid_argument);
+    }
+  }
+
+  SECTION("many named shapes in one file") {
+    using occ::driver::read_morphology_shapes;
+    std::istringstream input("# two habits\n"
+                             "shape block\n"
+                             "1 0 0 1.0\n"
+                             "0 0 1 1.0\n"
+                             "shape  needle \n"
+                             "1 0 0 1.0\n"
+                             "0 0 1 8.0\n");
+    const auto shapes = read_morphology_shapes(input);
+    REQUIRE(shapes.size() == 2);
+    REQUIRE(shapes[0].name == "block");
+    REQUIRE(shapes[1].name == "needle");   // surrounding space trimmed
+    REQUIRE(shapes[0].shifts.size() == 2);
+    REQUIRE(shapes[1].shifts[1].second == 8.0);
+  }
+
+  SECTION("a file that names no shape is still one shape") {
+    using occ::driver::read_morphology_shapes;
+    std::istringstream input("1 0 0 1.0\n0 0 1 6.5\n");
+    const auto shapes = read_morphology_shapes(input);
+    REQUIRE(shapes.size() == 1);
+    REQUIRE(shapes[0].name.empty());
+    REQUIRE(shapes[0].shifts.size() == 2);
+  }
+
+  SECTION("a named shape with no faces, or a nameless 'shape', is an error") {
+    using occ::driver::read_morphology_shapes;
+    for (const std::string text : {"shape empty\nshape other\n1 0 0 1.0\n",
+                                   "shape\n1 0 0 1.0\n"}) {
+      INFO(text);
+      std::istringstream input(text);
+      REQUIRE_THROWS_AS(read_morphology_shapes(input), std::invalid_argument);
+    }
+  }
+
+  SECTION("the single-shape reader refuses a multi-shape file") {
+    std::istringstream input("shape a\n1 0 0 1.0\nshape b\n0 0 1 1.0\n");
+    REQUIRE_THROWS_AS(read_morphology_shape(input), std::invalid_argument);
+  }
+}
+
+TEST_CASE("CG: morphology bonds are emitted only on request",
+          "[cg][morphology]") {
+  using occ::driver::compute_crystal_morphology;
+  using occ::driver::MorphologyOptions;
+
+  const auto crystal = acetic_acid_crystal();
+  auto uc_dimers = crystal.unit_cell_dimers(7.0);
+  // Any energy that depends only on the pair geometry is symmetry-consistent,
+  // which is all the decomposition needs.
+  size_t n_neighbours = 0;
+  for (auto &neighbours : uc_dimers.molecule_neighbors) {
+    for (auto &srd : neighbours) {
+      const double r = srd.dimer.centroid_distance();
+      srd.dimer.set_interaction_energy(100.0 / (r * r));
+    }
+    n_neighbours += neighbours.size();
+  }
+
+  const auto dir = fresh_directory("morphology_bonds");
+  const auto surfaces = occ::driver::calculate_crystal_surface_energies(
+      (dir / "acetic").string(), crystal, uc_dimers, 0, 1, 3.0);
+
+  CrystalGrowthResult growth;
+  for (size_t i = 0; i < crystal.symmetry_unique_molecules().size(); ++i) {
+    MoleculeResult mr;
+    mr.total.crystal_energy = -50.0;
+    growth.molecule_results.push_back(mr);
+  }
+
+  MorphologyOptions options;
+  options.sizes = {200};
+  const auto plain =
+      compute_crystal_morphology(crystal, uc_dimers, surfaces, growth, options);
+  options.emit_bonds = true;
+  const auto emitted =
+      compute_crystal_morphology(crystal, uc_dimers, surfaces, growth, options);
+
+  REQUIRE_FALSE(plain.facets.empty());
+
+  SECTION("off by default, and absent from the JSON") {
+    REQUIRE(plain.bonds.empty());
+    REQUIRE(plain.uc_centroids.empty());
+    REQUIRE(plain.shape_faces.empty());
+    nlohmann::json j = plain;
+    REQUIRE_FALSE(j.contains("bonds"));
+  }
+
+  SECTION("one bond per stamped neighbour, indexed by unit-cell molecule") {
+    REQUIRE(emitted.bonds.size() == n_neighbours);
+    REQUIRE(emitted.uc_centroids.size() ==
+            crystal.unit_cell_molecules().size());
+    size_t k = 0;
+    for (size_t i = 0; i < uc_dimers.molecule_neighbors.size(); ++i) {
+      for (const auto &srd : uc_dimers.molecule_neighbors[i]) {
+        REQUIRE(emitted.bonds[k].source == static_cast<int>(i));
+        REQUIRE(emitted.bonds[k].energy ==
+                Approx(srd.dimer.interaction_energy("Total")));
+        ++k;
+      }
+    }
+  }
+
+  SECTION("shape faces are unit normals with a molecular termination") {
+    REQUIRE_FALSE(emitted.shape_faces.empty());
+    for (const auto &f : emitted.shape_faces) {
+      const double n2 = f.normal[0] * f.normal[0] + f.normal[1] * f.normal[1] +
+                        f.normal[2] * f.normal[2];
+      REQUIRE(n2 == Approx(1.0));
+      REQUIRE(f.distance > 0.0);
+      REQUIRE(f.d_spacing > 0.0);
+    }
+  }
+
+  SECTION("emitting bonds does not change the energies") {
+    REQUIRE(emitted.samples.size() == plain.samples.size());
+    for (size_t s = 0; s < plain.samples.size(); ++s)
+      REQUIRE(emitted.samples[s].e_excess == plain.samples[s].e_excess);
+  }
+
+  SECTION("the JSON carries all three blocks") {
+    nlohmann::json j = emitted;
+    REQUIRE(j["bonds"].size() == n_neighbours);
+    REQUIRE(j["uc_centroids"].size() == emitted.uc_centroids.size());
+    REQUIRE(j["shape_faces"].size() == emitted.shape_faces.size());
+  }
+}
+
+TEST_CASE("CG: morphology does not depend on last-bit noise in cut energies",
+          "[cg][morphology]") {
+  using occ::driver::compute_crystal_morphology;
+  using occ::driver::MorphologyOptions;
+
+  const auto crystal = acetic_acid_crystal();
+  auto uc_dimers = crystal.unit_cell_dimers(7.0);
+  for (auto &neighbours : uc_dimers.molecule_neighbors) {
+    for (auto &srd : neighbours) {
+      const double r = srd.dimer.centroid_distance();
+      srd.dimer.set_interaction_energy(100.0 / (r * r));
+    }
+  }
+
+  const auto dir = fresh_directory("morphology_ties");
+  const auto surfaces = occ::driver::calculate_crystal_surface_energies(
+      (dir / "acetic").string(), crystal, uc_dimers, 0, 1, 3.0);
+
+  CrystalGrowthResult growth;
+  for (size_t i = 0; i < crystal.symmetry_unique_molecules().size(); ++i) {
+    MoleculeResult mr;
+    mr.total.crystal_energy = -50.0;
+    growth.molecule_results.push_back(mr);
+  }
+
+  // Symmetry-equivalent terminations of a face have equal surface energies,
+  // so summation-order noise decides which is lowest. Tilt every tie one way,
+  // then the other: the particle must not follow.
+  auto nudged = [&](double sign) {
+    auto s = surfaces;
+    for (auto &f : s.facets)
+      f.energy *= 1.0 + sign * 1e-13 * f.offset;
+    return s;
+  };
+
+  MorphologyOptions options;
+  options.sizes = {200, 1000};
+  options.emit_bonds = true;
+  const auto up = compute_crystal_morphology(crystal, uc_dimers, nudged(1.0),
+                                             growth, options);
+  const auto down = compute_crystal_morphology(crystal, uc_dimers, nudged(-1.0),
+                                               growth, options);
+
+  REQUIRE(up.shape_faces.size() == down.shape_faces.size());
+  for (size_t f = 0; f < up.shape_faces.size(); ++f)
+    REQUIRE(up.shape_faces[f].offset == down.shape_faces[f].offset);
+  REQUIRE(up.samples.size() == down.samples.size());
+  for (size_t s = 0; s < up.samples.size(); ++s)
+    REQUIRE(up.samples[s].n_molecules == down.samples[s].n_molecules);
+}
+
+TEST_CASE("CG: free energy terms are kept per molecule", "[cg][xtb]") {
+  namespace fs = std::filesystem;
+  const auto dir = fs::temp_directory_path() / "occ_cg_tests_free_energy";
+  fs::remove_all(dir);
+  fs::create_directories(dir);
+
+  occ::driver::CrystalGrowthCalculatorOptions opts;
+  opts.solvation_model = occ::driver::SolvationModelKind::None;
+  opts.basename = (dir / "acetic_acid").string();
+  occ::driver::XTBCrystalGrowthCalculator calc(acetic_acid_crystal(), opts);
+  calc.init_monomer_energies();
+  calc.converge_lattice_energy();
+  const auto result = calc.evaluate_molecular_surroundings();
+
+  REQUIRE_FALSE(result.molecule_results.empty());
+  for (const auto &molecule : result.molecule_results) {
+    REQUIRE(molecule.free_energy.has_value());
+    REQUIRE(molecule.free_energy->lattice_energy ==
+            Approx(0.5 * molecule.total.crystal_energy));
+    REQUIRE(molecule.free_energy->solvation_free_energy == Approx(0.0));
+  }
+}
+
+// ============================================================================
+// Cached xTB monomers
+// ============================================================================
+
+TEST_CASE("SolvationData survives a JSON round trip", "[cg][solvation][cache]") {
+  // The xTB monomer cache stores these arrays so a repeat `occ cg` can skip the
+  // solvated SCC. A round-trip bug would not throw — it would quietly hand the
+  // partitioner the wrong per-element areas — so check the values, not just
+  // that it parses.
+  occ::cg::SolvationData data;
+  data.total_solvation_energy = -0.0421;
+  data.electronic_contribution = -0.0313;
+
+  occ::Mat3N positions(3, 4);
+  positions << 0.0, 1.5, -2.5, 3.25,
+               0.5, -1.0, 2.0, -0.75,
+               1.0, 2.5, 0.25, 4.0;
+  occ::Vec areas(4);
+  areas << 0.5, 1.25, 2.0, 0.125;
+  occ::Vec energies(4);
+  energies << -1e-3, 2e-4, -3.5e-5, 4e-6;
+  auto &cavity = occ::cg::add_cavity(data, "coulomb", positions, areas, energies);
+  cavity.descriptors.push_back({"sigma", areas});
+
+  const nlohmann::json j = data;
+  const auto restored = j.get<occ::cg::SolvationData>();
+
+  REQUIRE(restored.cavities.size() == data.cavities.size());
+  const auto &back = restored.cavities.front();
+  REQUIRE(back.name == "coulomb");
+  REQUIRE(back.positions.rows() == 3);
+  REQUIRE(back.positions.cols() == 4);
+  REQUIRE((back.positions - positions).cwiseAbs().maxCoeff() < 1e-12);
+  REQUIRE((back.areas - areas).cwiseAbs().maxCoeff() < 1e-12);
+  REQUIRE(back.energies.size() == 1);
+  REQUIRE((back.energies.front().values - energies).cwiseAbs().maxCoeff() < 1e-12);
+  REQUIRE(back.descriptors.size() == 1);
+  REQUIRE(back.descriptors.front().name == "sigma");
+  REQUIRE(restored.total_solvation_energy ==
+          Approx(data.total_solvation_energy).margin(1e-12));
+  REQUIRE(restored.electronic_contribution ==
+          Approx(data.electronic_contribution).margin(1e-12));
 }

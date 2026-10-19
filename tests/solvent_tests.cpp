@@ -18,6 +18,7 @@
 #include <occ/crystal/crystal.h>
 #include <occ/dft/dft.h>
 #include <occ/driver/cg_solvation_model.h>
+#include <occ/driver/geometry_optimization.h>
 #include <occ/driver/cosmors_driver.h>
 #include <occ/driver/cosmors_solvation.h>
 #include <occ/io/xyz.h>
@@ -419,6 +420,27 @@ TEST_CASE("Averaging a constant field is the identity", "[solvent][cosmors]") {
   occ::solvent::cosmors::average_sigma(s, 0.5);
   for (Eigen::Index i = 0; i < s.size(); i++)
     REQUIRE(s.sigma_averaged(i) == Catch::Approx(0.007).epsilon(1e-12));
+}
+
+TEST_CASE("Ideal-conductor COSMO profile at Hartree-Fock",
+          "[solvent][cosmors][conductor]") {
+  // cg hands the conductor calculation the energy model's method, and CE-HF's
+  // is "hf", which is not a DFT functional.
+  auto mol = occ::io::molecule_from_xyz_string(WATER);
+  occ::gto::AOBasis basis = occ::gto::AOBasis::load(mol.atoms(), "sto-3g");
+  basis.set_pure(true);
+  occ::qm::HartreeFock gas_hf(basis);
+  occ::qm::SCF<occ::qm::HartreeFock> gas_scf(gas_hf);
+  const double gas_energy = gas_scf.compute_scf_energy();
+
+  occ::driver::ConductorSettings settings;
+  settings.method = "hf";
+  settings.basis = "sto-3g";
+  const auto result =
+      occ::driver::conductor_profile(gas_scf.wavefunction(), settings);
+
+  REQUIRE(result.energy_conductor < gas_energy);
+  REQUIRE(result.segments.size() > 100);
 }
 
 TEST_CASE("Ideal-conductor COSMO profile for water",
@@ -1034,4 +1056,65 @@ TEST_CASE("Incremental Fock: solvation opts out on the core Hamiltonian",
   // ...and no caller can undo that by reaching into the settings.
   scf.convergence_settings.incremental_fock_threshold = 1.0;
   REQUIRE_FALSE(scf.incremental_fock_supported());
+}
+
+// ============================================================================
+// Solvated geometry optimization
+// ============================================================================
+
+TEST_CASE("Geometry optimization: GFN2 optimises in solvent, other methods "
+          "refuse", "[solvent][opt][gfn2]") {
+  // `occ tb --opt --solvent X` used to drop the solvent on the floor and
+  // optimise in the gas phase without saying so. GFN2 is the one method whose
+  // SMD implementation has a gradient, so it is the one method the optimizer
+  // accepts a solvent for.
+  using occ::core::Molecule;
+
+  occ::IVec nums(3);
+  occ::Mat3N pos(3, 3);
+  nums << 8, 1, 1;
+  pos.col(0) << 0.0, 0.0, 0.1173;
+  pos.col(1) << 0.0, 0.7572, -0.4692;
+  pos.col(2) << 0.0, -0.7572, -0.4692;
+  Molecule water(nums, pos);
+
+  auto input = [&](const std::string &method, const std::string &solvent) {
+    occ::io::OccInput config;
+    config.method.name = method;
+    config.basis.name = "sto-3g";
+    config.geometry.set_molecule(water);
+    config.solvent.solvent_name = solvent;
+    config.optimization.max_iterations = 30;
+    return config;
+  };
+
+  const auto bond_length = [](const occ::qm::Wavefunction &wfn) {
+    const auto &a = wfn.atoms;
+    return std::hypot(a[1].x - a[0].x, a[1].y - a[0].y, a[1].z - a[0].z) *
+           occ::units::BOHR_TO_ANGSTROM;
+  };
+
+  const double r_gas =
+      bond_length(occ::driver::geometry_optimization(input("gfn2", "")));
+  const double r_solv =
+      bond_length(occ::driver::geometry_optimization(input("gfn2", "water")));
+
+  INFO("r(OH) gas = " << r_gas << " A, in water = " << r_solv << " A");
+  REQUIRE(r_gas > 0.9);
+  REQUIRE(r_gas < 1.05);
+  // The reaction field stabilises the more polar structure, so the bond
+  // lengthens. The point of the test is that it moves at all: an ignored
+  // solvent gives exactly the gas-phase geometry back.
+  REQUIRE(r_solv > r_gas + 1e-3);
+
+  // Everything else still refuses rather than quietly optimising in vacuum.
+  REQUIRE_THROWS_WITH(occ::driver::geometry_optimization(input("hf", "water")),
+                      Catch::Matchers::ContainsSubstring("Solvated gradients"));
+
+  // The driver writes these into the working directory with fallback names
+  // when the input has no filename; don't leave them in the source tree.
+  for (const char *f : {"opt_traj.xyz", "occ_step_log.txt", "optimized.xyz"}) {
+    std::error_code ec;
+    std::filesystem::remove(f, ec);
+  }
 }

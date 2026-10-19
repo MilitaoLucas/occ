@@ -2,6 +2,7 @@
 #include <occ/cg/result_types.h>
 #include <occ/interaction/lattice_convergence_settings.h>
 #include <string>
+#include <vector>
 
 namespace occ::driver {
 
@@ -31,14 +32,22 @@ struct CGConfig {
   /// `max_facets`, and is the crystallographically meaningful cut.
   double min_interplanar_spacing{0.0};
   bool compute_morphology{false};
+  /// Particle sizes (molecules) sampled by the morphology; empty keeps the
+  /// default series.
+  std::vector<int> morphology_sizes{};
+  /// File of `h k l distance` faces to use instead of the Wulff shape.
+  std::string morphology_shape{};
+  bool morphology_emit_bonds{false};
   bool write_dump_files{false};
+  /// Keep monomer wavefunctions, monomer energies, solvation surfaces and
+  /// pair energies in memory only, rather than as reusable files.
+  bool no_cache{false};
   bool spherical{false};
   bool write_kmcpp_file{false};
   bool use_xtb{false};
   bool dry_run{false};
   bool asymmetric_solvent_contribution{false};
   bool gamma_point_molecules{true};
-  std::string xtb_solvation_model{"cpcmx"};
   bool list_solvents{false};
   bool crystal_is_atomic{false};
 };
