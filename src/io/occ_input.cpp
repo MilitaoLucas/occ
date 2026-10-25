@@ -57,6 +57,7 @@ OccInput read_occ_input_file(const std::string path) {
   result.method.integral_precision = scf["integral_precision"].value_or(result.method.integral_precision);
   result.method.use_direct_df_kernels = scf["use_direct_df_kernels"].value_or(result.method.use_direct_df_kernels);
   result.method.use_split_ri_j = scf["use_split_ri_j"].value_or(result.method.use_split_ri_j);
+  result.method.df_store_memory_mb = scf["df_store_memory_mb"].value_or(result.method.df_store_memory_mb);
 
   // DFT grid settings
   result.method.dft_grid.max_angular_points = scf["dft_grid_max_angular"].value_or(result.method.dft_grid.max_angular_points);
