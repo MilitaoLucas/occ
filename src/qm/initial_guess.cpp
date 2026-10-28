@@ -264,6 +264,11 @@ AtomicDensity converge_atom(const core::Atom &atom, const AOBasis &basis,
   // also what stops the atomic guess recursing into itself.
   atom_scf.set_guess_kind(GuessKind::Core);
   atom_scf.maxiter = 50;
+  // A starting density, which the molecular SCF reconverges anyway: open d and
+  // f shells (U: 5f3 6d1) leave the UHF commutator creeping at 1e-4 long after
+  // the energy has settled, so stop at the guess's precision, not the user's.
+  atom_scf.convergence_settings.energy_threshold = 1e-5;
+  atom_scf.convergence_settings.commutator_threshold = 1e-3;
 
   {
     // Quiet only for the nested SCF itself; what came of it is reported by

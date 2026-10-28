@@ -496,6 +496,26 @@ inline std::string data_path() {
   return basis_path;
 }
 
+/// One contraction of a general contraction as a shell of its own. Only the
+/// primitives it actually uses: the others carry a zero coefficient but would
+/// still cost a full primitive in every integral, nprim^4 times over in an ERI
+/// quartet -- an all-electron uranium set split this way spends ~10^5 times
+/// the work on its single-primitive shells.
+static Shell split_contraction(int l, const std::vector<double> &exponents,
+                               const std::vector<double> &coefficients,
+                               const std::array<double, 3> &origin) {
+  std::vector<double> e, c;
+  for (size_t i = 0; i < exponents.size(); i++) {
+    if (coefficients[i] == 0.0)
+      continue;
+    e.push_back(exponents[i]);
+    c.push_back(coefficients[i]);
+  }
+  if (e.empty())
+    return Shell(l, exponents, {coefficients}, origin);
+  return Shell(l, e, {c}, origin);
+}
+
 AOBasis AOBasis::load(const AtomList &atoms, const std::string &name) {
   std::string basis_lib_path = data_path();
 
@@ -532,8 +552,7 @@ AOBasis AOBasis::load(const AtomList &atoms, const std::string &name) {
         for (int i = 0; i < s.coefficients.size(); i++) {
           int shell_l = s.angular_momentum[i % s.angular_momentum.size()];
           shells.push_back(
-              Shell(shell_l,
-                    s.exponents, {s.coefficients[i]}, origin));
+              split_contraction(shell_l, s.exponents, s.coefficients[i], origin));
           shells[nsh].incorporate_shell_norm();
           nsh++;
         }
@@ -619,8 +638,8 @@ AOBasis AOBasis::load_sap_basis(const AtomList &atoms) {
         // handle general contractions by splitting
         for (int i = 0; i < s.coefficients.size(); i++) {
           shells.push_back(
-              Shell(s.angular_momentum[i % s.angular_momentum.size()],
-                    s.exponents, {s.coefficients[i]}, origin));
+              split_contraction(s.angular_momentum[i % s.angular_momentum.size()],
+                                s.exponents, s.coefficients[i], origin));
           // The coefficients multiply unit-*charge* Gaussians
           // (a/pi)^(3/2) exp(-a r^2), not unit-norm basis functions, and
           // libcint folds a 1/(2 sqrt(pi)) common factor into every l=0
